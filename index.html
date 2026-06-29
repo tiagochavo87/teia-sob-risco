@@ -1,0 +1,1209 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Aplicação educativa: simulador trófico-ecotoxicológico de um estuário de Santa Catarina. Recurso aberto, offline.">
+<title>Teia Sob Risco — laboratório trófico do estuário catarinense</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230a2c32'/%3E%3Cpath d='M6 50c8-3 14 3 22 0s14-6 22 0 14 0 14 0' fill='none' stroke='%232BB3A3' stroke-width='2' opacity='.45'/%3E%3Ccircle cx='17' cy='52' r='4' fill='%236E9A3C'/%3E%3Ccircle cx='30' cy='42' r='4' fill='%232E8C9B'/%3E%3Ccircle cx='44' cy='32' r='4' fill='%231C6470'/%3E%3Cpath d='M22 22c7-7 22-7 30 0-3 2-5 5-5 8 0-3-2-6-5-8-8-5-20-2-20 0z' fill='%23E0902F'/%3E%3Cpath d='M40 19l8-4-3 8z' fill='%23E0902F'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%230a2c32'/%3E%3Ccircle cx='17' cy='52' r='4' fill='%236E9A3C'/%3E%3Ccircle cx='30' cy='42' r='4' fill='%232E8C9B'/%3E%3Ccircle cx='44' cy='32' r='4' fill='%231C6470'/%3E%3Cpath d='M22 22c7-7 22-7 30 0-3 2-5 5-5 8 0-3-2-6-5-8-8-5-20-2-20 0z' fill='%23E0902F'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#0a2c32">
+<style>
+:root{
+  --paper:#EEF2EF; --panel:#FBFCFB; --panel2:#F2F6F3; --ink:#11201E; --muted:#56625E; --faint:#8B9692; --line:#D7E0DB;
+  --sky:#DCE7E0; --surf:#9FCFC8; --w1:#2F8D8E; --w2:#155A63; --w3:#0C3A44; --abyss:#082A31;
+  --leaf:#3F6B3A; --leaf2:#5C8A48; --wood:#7A5634; --mud:#4B3A28; --mud2:#5E4A34;
+  --org:#1E4248; --tide:#2BB3A3;
+  --tl1:#6E9A3C; --tl2:#2E8C9B; --tl3:#1C6470; --tl4:#2B5C86; --tl5:#6E3B7E;
+  --haz1:#E0902F; --haz2:#9C1F12; --warn:#9C1F12;
+  --sans:system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--paper);font-size:15px;line-height:1.55;-webkit-text-size-adjust:100%}
+h1,h2,h3{margin:0;letter-spacing:-.01em}
+.serif{font-family:var(--serif)}
+.sci{font-family:var(--serif);font-style:italic}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--w1)}
+a{color:var(--w2)}
+[hidden]{display:none!important}
+
+/* ===== App bar ===== */
+.appbar{position:sticky;top:0;z-index:40;background:rgba(8,42,49,.96);backdrop-filter:blur(8px);color:#DCEDE9;border-bottom:1px solid #06262c}
+.appbar-in{max-width:1320px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:9px 22px}
+.brand{display:flex;align-items:center;gap:11px;cursor:pointer}
+.brand .txt b{display:block;font-size:15px;font-weight:700;letter-spacing:.05em;font-family:var(--mono);white-space:nowrap}
+.brand .txt span{display:block;font-size:10.5px;color:#84B4B1;letter-spacing:.02em;white-space:nowrap}
+nav.tabs{display:flex;gap:1px;margin-left:auto}
+nav.tabs button{background:transparent;border:0;color:#9DC2BE;font:inherit;font-size:13px;font-weight:600;padding:8px 13px;border-radius:6px;cursor:pointer}
+nav.tabs button:hover{color:#fff;background:#0e454d}
+nav.tabs button[aria-current="true"]{color:#062227;background:var(--tide)}
+@media(max-width:680px){.brand .txt span{display:none}nav.tabs button{padding:8px 9px;font-size:12px}}
+@media(max-width:560px){.brand .txt{display:none}}
+
+main{max-width:1320px;margin:0 auto;padding:0 22px 60px}
+.view{display:none}
+.view.on{display:block}
+
+/* ===== Hero ===== */
+.hero{position:relative;margin:22px 0;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--w3)}
+.hero .scene{display:block;width:100%;height:auto}
+.hero .overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:32px 34px;
+  background:linear-gradient(90deg,rgba(6,30,35,.82) 0%,rgba(6,30,35,.5) 42%,rgba(6,30,35,0) 70%)}
+.hero h1{font-family:var(--serif);font-weight:600;color:#F4F8F4;font-size:clamp(28px,4.6vw,52px);line-height:1.02;max-width:16ch}
+.hero .q{font-family:var(--serif);font-style:italic;color:#CFE7E1;font-size:clamp(15px,2.2vw,21px);margin-top:14px;max-width:44ch;border-left:3px solid var(--tide);padding-left:14px}
+.hero .cta{display:inline-flex;align-items:center;gap:9px;margin-top:22px;background:var(--tide);color:#05242a;border:0;font:inherit;font-weight:700;font-size:14px;padding:12px 20px;border-radius:8px;cursor:pointer;width:fit-content}
+.hero .cta:hover{background:#3ec8b7}
+.hero .eyebrow{color:#7FCFC6;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 26px}
+@media(max-width:720px){.stats{grid-template-columns:1fr}.hero .overlay{position:static;background:var(--w3)}}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.stat .n{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--w2);line-height:1}
+.stat .l{font-size:13px;color:var(--muted);margin-top:7px}
+.lead{max-width:70ch;color:#2b3633;font-size:15.5px;margin:8px 0 26px}
+
+/* ===== Cards / workspace ===== */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:13px}
+.card>.hd{display:flex;align-items:center;gap:9px;padding:12px 15px;border-bottom:1px solid var(--line)}
+.card>.hd h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--w2);font-weight:700;font-family:var(--mono)}
+.card>.hd .pill{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:2px 9px}
+.card>.bd{padding:15px}
+
+.workspace{display:grid;grid-template-columns:1fr 360px;gap:16px}
+@media(max-width:1000px){.workspace{grid-template-columns:1fr}}
+
+/* ===== Scene ===== */
+figure.scene-fig{margin:0}
+.scene-host{position:relative;border-radius:0 0 13px 13px;overflow:hidden;background:#0b3a44}
+svg.scene{display:block;width:100%;height:auto}
+.org{cursor:pointer}
+.org .lab{font-size:11px;fill:#eaf6f3;font-weight:600;paint-order:stroke;stroke:rgba(6,34,39,.55);stroke-width:2.6px}
+.org .val{font-family:var(--mono);font-size:9.5px;fill:#fff;opacity:0;transition:opacity .4s}
+.org.dim{opacity:.26;transition:opacity .3s}
+.org:focus{outline:none}
+.org:focus .halo,.org.sel .halo{opacity:1}
+.halo{fill:none;stroke:var(--tide);stroke-width:2;opacity:0;transition:opacity .2s}
+.flow{fill:none;stroke:var(--haz1);stroke-width:2.4;stroke-linecap:round;opacity:0}
+.flow.on{opacity:.92}
+.plume{opacity:0;transition:opacity 1.2s}
+figcaption{font-size:11.5px;color:var(--muted);padding:10px 15px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:7px 16px;align-items:center}
+.legend{display:flex;flex-wrap:wrap;gap:7px 13px}
+.legend i{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.legend .sw{width:9px;height:9px;border-radius:2px}
+@media (prefers-reduced-motion:reduce){.org .val,.plume,.flow{transition:none}}
+
+/* ===== Inspector ===== */
+aside.inspector{display:flex;flex-direction:column;gap:16px;min-width:0}
+.field{margin-bottom:14px}
+.field>label{display:block;font-family:var(--mono);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:7px}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{flex:1;background:var(--panel);border:0;border-right:1px solid var(--line);padding:10px 6px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:7px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--w3);color:#eafaf8}
+.seg .g{width:15px;height:15px}
+select.src{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;background:var(--panel);color:var(--ink)}
+.slider{display:flex;align-items:center;gap:11px}
+.slider input{flex:1;accent-color:var(--w1)}
+.slider output{font-family:var(--mono);font-size:13px;min-width:44px;text-align:right}
+.ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--faint);font-family:var(--mono);margin-top:3px}
+.actions{display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:13px;font-weight:650;border-radius:8px;padding:10px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;justify-content:center}
+.btn:hover{border-color:var(--w1)}
+.btn.primary{flex:1;background:var(--w3);color:#eafaf8;border-color:var(--w3)}
+.btn.primary:hover{background:#0e454d}
+.btn .g{width:15px;height:15px}
+
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ro{background:var(--panel);padding:10px 12px}
+.ro .k{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.ro .v{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:3px}
+.ro .v small{font-size:11px;color:var(--muted);font-weight:400}
+.ro.alert .v{color:var(--warn)}
+
+#ficha .top{display:flex;align-items:center;gap:11px}
+#ficha .ill{width:42px;height:42px;flex:0 0 auto;color:var(--org)}
+#ficha .nm{font-size:15px;font-weight:700;line-height:1.1}
+#ficha .bn{font-size:12.5px;color:var(--muted)}
+#ficha dl{display:grid;grid-template-columns:auto 1fr;gap:4px 11px;margin:12px 0 0;font-size:12.5px}
+#ficha dt{color:var(--muted);font-weight:600}
+#ficha dd{margin:0}
+.empty{font-size:13px;color:var(--faint);text-align:center;padding:12px 6px;line-height:1.5}
+
+/* ===== charts row ===== */
+.charts{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:900px){.charts{grid-template-columns:1fr}}
+svg.chart{display:block;width:100%;height:auto}
+.chart .lbl{font-size:10.5px;fill:#36423f}
+.chart .lbl.human{fill:var(--tl5);font-weight:700}
+.chart .val{font-size:10px;fill:var(--muted);font-family:var(--mono)}
+.chart .val.inb{fill:#fff;font-weight:700}
+.chart .ax{stroke:var(--line)}
+.chart .axt{font-size:9.5px;fill:var(--faint);font-family:var(--mono)}
+.chart .anvisa{stroke:var(--warn);stroke-width:1.3;stroke-dasharray:3 3}
+.chart .anvisa-t{fill:var(--warn);font-size:9px;font-weight:700;font-family:var(--mono)}
+.chart .pt{stroke:#fff;stroke-width:1}
+.chart .trend{stroke:var(--haz2);stroke-width:1.6;stroke-dasharray:5 4;fill:none}
+.note{font-size:12.5px;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--w1);border-radius:8px;padding:11px 13px}
+.note.haz{border-left-color:var(--warn)}.note b{color:var(--ink)}
+.statusbar{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-top:16px}
+.statusbar .dot{width:7px;height:7px;border-radius:50%;background:var(--tide)}
+
+/* ===== Catálogo ===== */
+.sec-head{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin:24px 0 16px}
+.sec-head h2{font-family:var(--serif);font-size:28px}
+.sec-head p{margin:5px 0 0;color:var(--muted);font-size:14px;max-width:62ch}
+.cat-filter{display:flex;gap:6px;flex-wrap:wrap}
+.cat-filter button{border:1px solid var(--line);background:var(--panel);border-radius:20px;padding:7px 13px;font:inherit;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.cat-filter button[aria-pressed="true"]{background:var(--w3);color:#eafaf8;border-color:var(--w3)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:15px}
+.plate{background:var(--panel);border:1px solid var(--line);border-radius:13px;overflow:hidden;cursor:pointer;transition:.15s;display:flex;flex-direction:column;text-align:left;padding:0}
+.plate:hover{border-color:var(--w1);transform:translateY(-2px);box-shadow:0 10px 24px rgba(12,58,68,.10)}
+.plate .ph{height:120px;display:flex;align-items:center;justify-content:center;position:relative;border-bottom:1px solid var(--line);
+  background:radial-gradient(130% 100% at 50% 0%,#fff,var(--panel2))}
+.plate .ill{width:84px;height:84px}
+.plate .tlchip{position:absolute;top:9px;left:9px;font-family:var(--mono);font-size:9.5px;font-weight:700;color:#fff;border-radius:4px;padding:2px 7px}
+.plate .tag{position:absolute;top:9px;right:9px;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+.plate .bd2{padding:12px 13px 14px}
+.plate .nm{font-size:14.5px;font-weight:700;line-height:1.1}
+.plate .bn{font-size:12.5px;color:var(--muted);margin-top:2px}
+.plate .role{font-size:11.5px;color:var(--w2);font-weight:600;margin-top:8px}
+
+dialog.sheet{border:0;border-radius:16px;padding:0;max-width:540px;width:calc(100% - 32px);box-shadow:0 30px 70px rgba(7,40,46,.4)}
+dialog.sheet::backdrop{background:rgba(7,30,34,.55)}
+.sheet .sh-top{display:flex;gap:16px;padding:20px 20px 16px;border-bottom:1px solid var(--line);align-items:center;position:relative}
+.sheet .ill-lg{width:88px;height:88px;flex:0 0 auto;color:var(--org)}
+.sheet h3{font-size:21px}
+.sheet .bn{font-size:14px;color:var(--muted);margin-top:2px}
+.sheet .tlrow{display:flex;gap:8px;margin-top:8px;align-items:center}
+.sheet .pillc{font-family:var(--mono);font-size:11px;font-weight:700;color:#fff;border-radius:5px;padding:2px 8px}
+.sheet .sh-bd{padding:18px 20px}
+.sheet dl{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;margin:0;font-size:13.5px}
+.sheet dt{color:var(--muted);font-weight:600}.sheet dd{margin:0}
+.sheet .close{position:absolute;top:14px;right:14px;border:0;background:#fff;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:15px;color:var(--muted);box-shadow:0 1px 5px rgba(0,0,0,.14)}
+
+/* ===== Doc ===== */
+.doc{max-width:760px}
+.doc h2{font-family:var(--serif);font-size:27px;margin-bottom:6px}
+.doc h3{font-size:15px;margin:24px 0 6px;color:var(--w2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.05em}
+.doc p,.doc li{font-size:14.5px;color:#2a3431}
+.doc .eq{font-family:var(--mono);font-size:13px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:13px 15px;margin:11px 0;overflow-x:auto}
+.doc .callout{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--haz1);border-radius:8px;padding:13px 15px;font-size:13.5px;color:#33403c}
+.doc .refs{font-size:12.5px}.doc .refs li{margin-bottom:9px}
+
+footer{max-width:1320px;margin:10px auto 0;padding:18px 22px 40px;color:var(--faint);font-size:12px;line-height:1.6;border-top:1px solid var(--line)}
+
+/* tooltip da cena */
+.tooltip{position:fixed;z-index:60;pointer-events:none;background:#0a2c32;color:#eafaf8;border:1px solid #14505a;border-radius:8px;padding:7px 10px;font-size:12px;opacity:0;transition:opacity .12s;box-shadow:0 8px 22px rgba(6,30,34,.4);max-width:210px}
+.tooltip b{display:block;font-size:12.5px}.tooltip i{display:block;font-family:var(--serif);color:#9FD2CE;font-size:11.5px}.tooltip span{display:block;font-family:var(--mono);font-size:10px;color:#7ea8a4;margin-top:2px}
+/* barra de opções da cena */
+.opts{display:flex;gap:6px;margin-left:auto;align-items:center}
+.opts .chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:4px 9px;cursor:pointer}
+.opts .chip[aria-pressed="true"]{background:var(--w3);color:#eafaf8;border-color:var(--w3)}
+.opts .chip svg{width:12px;height:12px}
+/* esconder rótulos */
+.scene.nolabels .lab,.scene.nolabels .val{display:none}
+/* alto contraste */
+body.hc{--paper:#fff;--panel:#fff;--ink:#000;--muted:#333;--line:#9aa6a2}
+body.hc .org .lab{fill:#fff;stroke:#000;stroke-width:3.4px}
+body.hc .hero h1,body.hc .hero .q{color:#fff}
+/* fonte ampliada */
+body.bigfont{font-size:17px}
+body.bigfont .org .lab{font-size:13px}
+body.bigfont .chart .lbl{font-size:12px}
+/* comparador A/B */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cmp .slot{border:1px dashed var(--line);border-radius:9px;padding:9px 11px;font-size:12px}
+.cmp .slot.filled{border-style:solid;background:var(--panel2)}
+.cmp .slot .tag{font-family:var(--mono);font-size:10px;font-weight:700;color:#fff;border-radius:4px;padding:1px 6px;margin-right:6px}
+.cmp .slot .meta{color:var(--muted);font-size:11px;margin-top:4px}
+.cmp-actions{display:flex;gap:8px;margin-bottom:8px}
+.cmp-actions .btn{flex:1;font-size:12px;padding:8px}
+.cmp-empty{font-size:12.5px;color:var(--faint);text-align:center;padding:8px}
+@media print{.appbar,nav.tabs,.actions,.cat-filter,.hero .cta,.opts,.cmp-actions{display:none!important}.view{display:block!important}body{background:#fff}}
+</style>
+</head>
+<body>
+
+<!-- ===================== Ilustrações (defs) ===================== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-fish" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M6 50C24 30 60 28 78 44c5-5 12-9 18-10-2 6-4 11-3 16 1 5 3 10 5 16-6-1-13-5-18-10-18 16-54 14-72-6z"/>
+    <path d="M40 30c4-7 11-13 18-15-1 7-4 13-9 18z" opacity=".82"/>
+    <path d="M44 60c2 6 7 11 13 13-7 1-14-2-19-7z" opacity=".82"/>
+    <circle cx="20" cy="46" r="3.4" fill="#fff"/><circle cx="20" cy="46" r="1.5"/>
+    <path d="M31 38c-3 9-3 17 0 25" fill="none" stroke="currentColor" stroke-width="2" opacity=".5"/>
+  </g></symbol>
+  <symbol id="i-catfish" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M8 52C26 34 58 32 76 46c6-5 13-8 18-9-3 8-3 16 0 24-5-1-12-4-18-9-18 14-50 12-68-0z"/>
+    <path d="M44 34c3-6 9-11 15-13-1 7-5 13-10 17z" opacity=".8"/>
+    <circle cx="22" cy="49" r="3.2" fill="#fff"/><circle cx="22" cy="49" r="1.4"/>
+  </g><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".85">
+    <path d="M10 52c-4 1-7 4-8 8M10 54c-4 3-6 6-6 11"/></g></symbol>
+  <symbol id="i-dolphin" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M4 60c12-26 40-38 66-32 4-8 11-13 20-14-3 8-3 14-1 18 6 4 10 11 7 19-3-4-8-6-13-5 3 7-1 15-9 17 1-4-1-8-5-9 2 8-4 16-13 15-7-1-11-7-10-13C28 60 14 64 4 60z"/>
+    <circle cx="14" cy="54" r="3" fill="#fff"/><circle cx="14" cy="54" r="1.4"/>
+  </g></symbol>
+  <symbol id="i-bird" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M30 8c4 0 7 3 7 7 0 3-1 5-3 6 2 1 3 4 2 7 8 3 16 11 18 23 1 5-2 8-7 6-6-3-11-5-17-5-7 0-13 3-17-2-2-3 0-7 4-9-3-3-3-8 0-12 1-2 3-3 4-2-2-3-1-8 2-11 2-2 5-1 7 0-1-3 0-5 0-8z"/>
+    <path d="M34 13l8-5-4 9z" opacity=".8"/><circle cx="28" cy="13" r="1.6" fill="#fff"/>
+    <path d="M44 56c8 4 16 4 22 0" fill="none" stroke="currentColor" stroke-width="2" opacity=".5"/>
+  </g></symbol>
+  <symbol id="i-human" viewBox="0 0 100 100"><g fill="currentColor">
+    <circle cx="42" cy="22" r="11"/>
+    <path d="M22 78c0-14 9-24 20-24s20 10 20 24c0 3-2 4-4 4H26c-2 0-4-1-4-4z"/>
+  </g><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+    <path d="M60 30L92 70"/></g><g fill="none" stroke="currentColor" stroke-width="1.4"><path d="M92 70v9"/></g></symbol>
+  <symbol id="i-crab" viewBox="0 0 100 100"><g fill="currentColor">
+    <ellipse cx="50" cy="54" rx="28" ry="17"/>
+    <circle cx="40" cy="46" r="2.4" fill="#fff"/><circle cx="60" cy="46" r="2.4" fill="#fff"/>
+    <path d="M24 50c-10-2-16-9-16-18 8 1 14 6 18 14zM76 50c10-2 16-9 16-18-8 1-14 6-18 14z"/>
+    <path d="M14 36c-3-3-4-7-3-11 4 2 6 6 6 11zM86 36c3-3 4-7 3-11-4 2-6 6-6 11z"/>
+  </g><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+    <path d="M26 64l-12 9M30 68l-10 12M70 64l12 9M70 68l10 12M40 70l-6 14M60 70l6 14"/></g></symbol>
+  <symbol id="i-shrimp" viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round">
+    <path d="M14 30c24-4 46 2 56 20 5 9-2 22-14 22-14 0-22-12-16-22"/></g>
+    <g fill="currentColor"><circle cx="18" cy="30" r="3"/><path d="M70 70l16-6-4 14z"/></g>
+    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" opacity=".8">
+    <path d="M14 30C6 26 4 20 4 14M14 32C6 32 2 36 2 42M40 54l-4 12M50 56l-2 12M60 56l0 12"/></g></symbol>
+  <symbol id="i-oyster" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M50 14c20 0 36 16 38 34 1 5-3 9-8 9H20c-5 0-9-4-8-9 2-18 18-34 38-34z"/>
+    <path d="M50 14c2 16 12 31 30 41M50 14C48 30 38 45 20 55" fill="none" stroke="#fff" stroke-width="1.4" opacity=".5"/>
+    <path d="M50 14c0 16 0 31 0 43" fill="none" stroke="#fff" stroke-width="1.4" opacity=".4"/>
+  </g></symbol>
+  <symbol id="i-mussel" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M70 12c8 6 16 22 16 42s-12 34-30 34c-14 0-26-12-30-30-3-14 2-30 14-40 8-7 22-12 30-6z"/>
+    <path d="M70 16C58 30 48 52 46 84" fill="none" stroke="#fff" stroke-width="1.4" opacity=".45"/>
+  </g></symbol>
+  <symbol id="i-diatom" viewBox="0 0 100 100"><g fill="currentColor">
+    <rect x="16" y="40" width="20" height="20" rx="4" transform="rotate(-18 26 50)"/>
+    <rect x="40" y="46" width="22" height="22" rx="5" transform="rotate(10 51 57)"/>
+    <rect x="64" y="34" width="18" height="18" rx="4" transform="rotate(-8 73 43)"/>
+    <g fill="#fff" opacity=".55"><circle cx="26" cy="50" r="2"/><circle cx="51" cy="57" r="2.4"/><circle cx="73" cy="43" r="2"/></g>
+  </g></symbol>
+  <symbol id="i-copepod" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M36 24c14 0 24 10 24 24 0 10-6 18-6 28 0 4-4 6-7 3-7-6-13-15-13-30 0-8-4-14-10-16 5-6 12-9 12-9z"/>
+    <circle cx="38" cy="26" r="3" fill="#fff"/>
+  </g><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+    <path d="M48 18c12-4 24-2 34 6M48 22c10 0 20 4 28 12"/><path d="M52 78l-6 14M60 78l4 14"/></g></symbol>
+  <symbol id="i-mangrove" viewBox="0 0 100 100"><g fill="currentColor">
+    <ellipse cx="50" cy="26" rx="30" ry="18"/><ellipse cx="30" cy="34" rx="16" ry="11"/><ellipse cx="72" cy="34" rx="15" ry="10"/>
+    <rect x="46" y="36" width="8" height="22"/>
+  </g><g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round">
+    <path d="M50 56c-8 6-14 16-16 36M50 56c-2 10-2 24 0 36M50 56c8 6 14 16 16 36M40 60c-10 4-18 14-22 32M60 60c10 4 18 14 22 32"/></g></symbol>
+  <symbol id="i-detritus" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M14 54c10-14 26-14 33-7 5-12 20-15 28-5-6 7-17 10-23 5 1 10-13 17-22 12 5-4 5-12 0-15-8 5-16 15-16 15z" opacity=".92"/>
+    <path d="M20 72c12-7 22-3 27 2-7 5-22 5-27-2z" opacity=".6"/></g></symbol>
+  <symbol id="i-grass" viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round">
+    <path d="M50 92V40M50 56c-8-8-12-20-12-30M50 52c8-10 13-22 13-32M38 60c-8-6-14-14-18-22M62 60c8-6 14-14 18-22M30 70c-6-4-12-8-18-10M70 70c6-4 12-8 18-10"/></g></symbol>
+  <symbol id="i-alga" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M48 92c-2-18-10-30-10-44 0-10 4-18 12-22 8 4 12 12 12 22 0 14-8 26-10 44z"/>
+    <path d="M40 50c-10-2-18-10-22-22 12 2 20 8 24 18zM60 50c10-2 18-10 22-22-12 2-20 8-24 18z" opacity=".8"/>
+    <path d="M36 72c-8 0-16-4-22-12 10-2 18 2 24 8zM64 72c8 0 16-4 22-12-10-2-18 2-24 8z" opacity=".6"/></g></symbol>
+  <symbol id="i-clam" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M50 24c22 0 38 14 40 30 1 6-4 10-10 10H20c-6 0-11-4-10-10 2-16 18-30 40-30z"/>
+    <path d="M50 24c-6 14-18 26-38 36M50 24c6 14 18 26 38 36M50 24v40" fill="none" stroke="#fff" stroke-width="1.3" opacity=".4"/></g></symbol>
+  <symbol id="i-scallop" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M50 22c24 0 40 18 42 38 1 6-3 10-9 10H17c-6 0-10-4-9-10 2-20 18-38 42-38z"/>
+    <path d="M44 26h12l-2-10h-8zM50 30c-6 13-14 26-31 38M50 30c6 13 14 26 31 38M50 30v40M35 32L24 66M65 32l11 34" fill="none" stroke="#fff" stroke-width="1.3" opacity=".45"/></g></symbol>
+  <symbol id="i-fiddler" viewBox="0 0 100 100"><g fill="currentColor">
+    <ellipse cx="52" cy="56" rx="20" ry="13"/>
+    <circle cx="46" cy="50" r="2" fill="#fff"/><circle cx="58" cy="50" r="2" fill="#fff"/>
+    <path d="M30 52c-12-4-18-14-12-26 8 2 16 12 18 24zM72 54c8 0 14-2 18-6-4 4-10 8-18 8z"/>
+    <path d="M18 20c-4-2-7-6-7-11 5 1 9 5 11 11z"/></g>
+    <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+    <path d="M34 64l-10 9M40 68l-8 12M64 64l10 9M62 68l9 11M48 70l-4 13M58 70l4 13"/></g></symbol>
+  <symbol id="i-worm" viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round">
+    <path d="M12 72c10-16 22 4 34-10s22 6 36-10"/></g>
+    <g stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".55">
+    <path d="M20 60l-6-8M30 64l-4-9M44 56l-2-9M54 60l-1-9M68 52l2-9M78 56l4-8"/></g></symbol>
+  <symbol id="i-puffer" viewBox="0 0 100 100"><g fill="currentColor">
+    <circle cx="48" cy="52" r="30"/><path d="M76 40c10-4 16-2 20 4-6 2-10 6-12 12-4-6-8-12-8-16z"/>
+    <circle cx="36" cy="46" r="4" fill="#fff"/><circle cx="36" cy="46" r="2"/></g>
+    <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".7">
+    <path d="M30 70l-3 8M44 78l0 8M58 74l3 8M24 56l-9 2M26 40l-8-4M40 26l-2-8M56 26l3-8"/></g></symbol>
+  <symbol id="i-flatfish" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M8 56c20-22 64-22 84 0-20 14-64 14-84 0z"/>
+    <circle cx="30" cy="50" r="2.6" fill="#fff"/><circle cx="40" cy="50" r="2.6" fill="#fff"/>
+    <path d="M8 56c2 4 6 7 10 8M92 56c-2 4-6 7-10 8" fill="none" stroke="currentColor" stroke-width="2" opacity=".5"/>
+    <g fill="#fff" opacity=".3"><circle cx="55" cy="52" r="2.5"/><circle cx="68" cy="50" r="2.5"/><circle cx="62" cy="58" r="2.5"/></g></g></symbol>
+  <symbol id="i-otter" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M14 60c0-10 8-16 18-16 8 0 14 4 20 4 14 0 22-10 34-10 8 0 14 6 14 14 0 6-4 11-10 13-8 3-18 3-26 8-8 5-16 9-28 9-12 0-22-8-22-20z"/>
+    <circle cx="84" cy="40" r="2.6" fill="#fff"/>
+    <path d="M88 34c2-3 6-4 9-2-2 2-3 5-3 8-2-3-4-5-6-6z"/></g>
+    <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M30 80l-4 10M46 82l-2 10"/></g></symbol>
+  <symbol id="i-heron" viewBox="0 0 100 100"><g fill="currentColor">
+    <path d="M44 24c5 0 9 4 9 9 0 4-2 6-5 8 14 4 24 16 26 30 1 5-3 8-8 6-8-3-15-5-22-5-6 0-12 2-15-3-2-4 1-8 6-9-4-6-3-14 2-18 2-2 5-1 7 0-1-3-1-6 1-8 1-1 2-1 3-2z"/>
+    <path d="M50 22l16-7-6 12z"/><circle cx="42" cy="28" r="1.6" fill="#fff"/></g>
+    <g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M40 70l-3 22M52 72l2 22"/></g></symbol>
+</defs></svg>
+
+
+<header class="appbar">
+  <div class="appbar-in">
+    <div class="brand" onclick="go('home')">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+        <rect x="2" y="2" width="26" height="26" rx="7" fill="#0a2c32"/>
+        <path d="M5 22h20" stroke="#2BB3A3" stroke-width="1.2" opacity=".4"/>
+        <circle cx="15" cy="24" r="2.2" fill="#6E9A3C"/><circle cx="10" cy="17" r="2.2" fill="#2E8C9B"/>
+        <circle cx="20" cy="14" r="2.2" fill="#1C6470"/><circle cx="13" cy="8" r="2.6" fill="#E0902F"/>
+      </svg>
+      <div class="txt"><b>TEIA SOB RISCO</b><span>laboratório trófico do estuário catarinense</span></div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-view="home" aria-current="true">Início</button>
+      <button role="tab" data-view="sim">Simulador</button>
+      <button role="tab" data-view="cat">Catálogo</button>
+      <button role="tab" data-view="doc">Modelo</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== INÍCIO ===================== -->
+  <section class="view on" id="view-home">
+    <div class="hero">
+      <svg class="scene" id="heroScene" viewBox="0 0 1000 470" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+      <div class="overlay">
+        <div class="eyebrow">Cultura Oceânica · ODS 14 · Ensino Médio</div>
+        <h1 class="serif">Da raiz do mangue ao seu prato</h1>
+        <p class="q">"Por que um poluente lançado no mar hoje pode terminar concentrado no peixe que chega ao nosso prato?"</p>
+        <button class="cta" onclick="go('sim')">Abrir o simulador
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 8h8M8 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="lead">Um laboratório interativo que reconstrói a teia alimentar de um estuário de Santa Catarina e mostra, em tempo real, como um poluente sobe os níveis tróficos até chegar à maricultura, à pesca e à mesa. Pensado para a aula de Biologia, roda offline em qualquer dispositivo.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="n">~36×</div><div class="l">aumento do metilmercúrio do plâncton ao peixe de topo na Baía de Guanabara (Kehrig et al., 2011)</div></div>
+      <div class="stat"><div class="n">49%</div><div class="l">dos peixes de Garopaba com microplásticos; também detectados em ostras das baías de Florianópolis</div></div>
+      <div class="stat"><div class="n">0,5 mg/kg</div><div class="l">limite da legislação brasileira para mercúrio em pescado não predador</div></div>
+    </div>
+  </section>
+
+  <!-- ===================== SIMULADOR ===================== -->
+  <section class="view" id="view-sim">
+    <div class="sec-head"><div><div class="eyebrow">Corte transversal · estuário/manguezal SC</div><h2 class="serif">Simulador trófico-ecotoxicológico</h2></div></div>
+    <div class="workspace">
+      <figure class="card scene-fig">
+        <div class="hd"><h2>Estuário em corte</h2>
+          <div class="opts">
+            <button class="chip" id="optLabels" aria-pressed="true" title="Mostrar/ocultar rótulos">Rótulos</button>
+            <button class="chip" id="optHC" aria-pressed="false" title="Alto contraste">Contraste</button>
+            <button class="chip" id="optFont" aria-pressed="false" title="Fonte ampliada">A+</button>
+            <span class="pill" id="scenarioPill">cenário —</span>
+          </div>
+        </div>
+        <div class="scene-host"><svg class="scene" id="sim" viewBox="0 0 1120 760" role="img" aria-label="Corte transversal do estuário com a teia alimentar"></svg></div>
+        <figcaption><div class="legend" id="legend"></div></figcaption>
+      </figure>
+
+      <aside class="inspector">
+        <div class="card"><div class="hd"><h2>Parâmetros</h2></div><div class="bd">
+          <div class="field"><label>Poluente</label>
+            <div class="seg" id="poll" role="group" aria-label="Poluente">
+              <button data-poll="mercurio" aria-pressed="true"><svg class="g" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 2h6M8 2v5l-4 9a2 2 0 002 3h8a2 2 0 002-3l-4-9V2"/></svg>Mercúrio</button>
+              <button data-poll="microplastico" aria-pressed="false"><svg class="g" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6" y="8" width="8" height="10" rx="2"/><path d="M8 8V5a2 2 0 014 0v3"/></svg>Microplástico</button>
+            </div>
+          </div>
+          <div class="field"><label for="src">Cenário / fonte</label>
+            <select class="src" id="src">
+              <option value="custom">Personalizado</option>
+              <option value="industrial">Efluente industrial / garimpo (mercúrio, alta)</option>
+              <option value="esgoto">Esgoto urbano não tratado (mercúrio, média)</option>
+              <option value="plastico">Descarte de plástico (microplástico, alta)</option>
+              <option value="difuso">Poluição difusa costeira (microplástico, média)</option>
+            </select>
+          </div>
+          <div class="field"><label for="int">Intensidade de liberação</label>
+            <div class="slider"><input type="range" id="int" min="5" max="100" step="5" value="60"><output id="intOut">60%</output></div>
+            <div class="ticks"><span>baixa</span><span>média</span><span>alta</span></div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="run"><svg class="g" viewBox="0 0 20 20" fill="currentColor"><path d="M6 4l11 6-11 6z"/></svg>Liberar poluente</button>
+            <button class="btn" id="reset">Limpar</button>
+          </div>
+        </div></div>
+
+        <div class="card" id="roCard" hidden><div class="hd"><h2>Leituras</h2><span class="pill" id="unitPill"></span></div>
+          <div class="bd" style="padding:0"><div class="readouts" style="border:0;border-radius:0">
+            <div class="ro"><div class="k">Mais contaminado</div><div class="v" id="roTop" style="font-size:13px">—</div></div>
+            <div class="ro"><div class="k">Fator de biomagnif.</div><div class="v" id="roFbm">—<small>×</small></div></div>
+            <div class="ro"><div class="k">No ser humano</div><div class="v" id="roHuman">—</div></div>
+            <div class="ro" id="roOverWrap"><div class="k">Pescados &gt; limite</div><div class="v" id="roOver">—</div></div>
+          </div></div>
+        </div>
+
+        <div class="card"><div class="hd"><h2>Ficha do organismo</h2></div><div class="bd"><div id="ficha"><div class="empty">Toque em um organismo no estuário para ver sua ficha. Escolha o poluente e a intensidade, e libere a contaminação — ela sobe a teia em tempo real.</div></div></div></div>
+      </aside>
+    </div>
+
+    <div class="charts" id="chartsRow" hidden>
+      <div class="card"><div class="hd"><h2>Concentração por organismo</h2><span class="pill" id="unitPill2"></span></div>
+        <div class="bd"><svg class="chart" id="chartBar" viewBox="0 0 420 430"></svg></div></div>
+      <div class="card"><div class="hd"><h2>Concentração × nível trófico</h2><span class="pill">biomagnificação</span></div>
+        <div class="bd"><svg class="chart" id="chartScatter" viewBox="0 0 360 300"></svg>
+          <div class="note" id="insight" style="margin-top:12px"></div>
+          <div class="actions" style="margin-top:12px">
+            <button class="btn" id="csv"><svg class="g" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3v10m0 0l-4-4m4 4l4-4M4 17h12"/></svg>CSV</button>
+            <button class="btn" id="png"><svg class="g" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="12" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="M3 14l4-4 3 3 3-3 4 4"/></svg>PNG</button>
+            <button class="btn" id="print"><svg class="g" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 9V3h8v6M6 14h8v3H6zM4 9h12v5H4z"/></svg>Imprimir</button>
+          </div>
+        </div></div>
+    </div>
+
+    <div class="card" id="cmpCard" hidden style="margin-top:16px">
+      <div class="hd"><h2>Comparador de cenários</h2><span class="pill">Aula 4</span></div>
+      <div class="bd">
+        <div class="cmp-actions">
+          <button class="btn" id="pinA">Fixar como cenário A</button>
+          <button class="btn" id="pinB">Fixar como cenário B</button>
+          <button class="btn" id="cmpClear">Limpar</button>
+        </div>
+        <div class="cmp">
+          <div class="slot" id="slotA"><span class="cmp-empty">Cenário A vazio — rode uma simulação e fixe.</span></div>
+          <div class="slot" id="slotB"><span class="cmp-empty">Cenário B vazio.</span></div>
+        </div>
+        <svg class="chart" id="chartCmp" viewBox="0 0 720 260" hidden></svg>
+        <div class="cmp-empty" id="cmpHint">Fixe A e B para comparar a concentração nos mesmos organismos-chave.</div>
+      </div>
+    </div>
+
+    <div class="statusbar">
+      <span><span class="dot"></span>modelo trófico-ecotoxicológico v5.0</span>
+      <span id="stPoll">poluente: mercúrio</span><span id="stInt">intensidade: 60%</span>
+      <span id="stRun">última liberação: —</span>
+      <span style="margin-left:auto">32 táxons · estuário/manguezal SC</span>
+    </div>
+  </section>
+
+  <!-- ===================== CATÁLOGO ===================== -->
+  <section class="view" id="view-cat">
+    <div class="sec-head">
+      <div><div class="eyebrow">Guia de campo</div><h2 class="serif">Catálogo de espécies</h2>
+        <p>Fauna e flora representativas do estuário e do manguezal catarinense, com nomenclatura científica e papel ecológico. Toque numa ficha para abrir os detalhes.</p></div>
+      <div class="cat-filter" id="catFilter" role="group" aria-label="Filtrar">
+        <button data-f="all" aria-pressed="true">Todos</button><button data-f="1" aria-pressed="false">Produtores</button>
+        <button data-f="2" aria-pressed="false">Consumidores 1º</button><button data-f="3" aria-pressed="false">2º / 3º</button>
+        <button data-f="4" aria-pressed="false">Topo</button>
+      </div>
+    </div>
+    <div class="grid" id="catGrid"></div>
+  </section>
+
+  <!-- ===================== MODELO ===================== -->
+  <section class="view" id="view-doc">
+    <div class="doc">
+      <div class="eyebrow">Documentação</div>
+      <h2 class="serif">Como o modelo funciona</h2>
+      <p>O simulador estima a concentração de um poluente em cada organismo percorrendo a teia alimentar de baixo para cima, nível por nível. A regra é a mesma para todo consumidor:</p>
+      <div class="eq">C(organismo) = média[ C(presas) ] × fator de amplificação + ( água × filtragem direta )</div>
+      <p>Os <b>produtores</b> (fitoplâncton, folhiço do mangue) absorvem o poluente direto da água. Cada consumidor herda a concentração das presas e soma o que filtra da água.</p>
+      <h3>Mercúrio × microplástico</h3>
+      <p>O <b>mercúrio</b> (metilmercúrio) tem fator de amplificação maior que 1: <i>biomagnifica</i> e cresce a cada elo, ficando máximo nos predadores de topo e no ser humano — é o que produz a inclinação positiva no gráfico de concentração por nível trófico. O <b>microplástico</b> tem fator menor que 1 e entra sobretudo pela filtragem: acumula mais nos <i>filtradores</i> (ostra, mexilhão), sem biomagnificar — a nuvem de pontos fica achatada.</p>
+      <h3>Ancoragem nos dados</h3>
+      <p>Os valores são <b>relativos e ilustrativos</b>, com fins didáticos — não são medições. Mas reproduzem padrões reais: a razão topo/base do mercúrio na ordem do estudo da Baía de Guanabara (~36×); ostras e mexilhões na faixa de 12–16 partículas por grama observada em bivalves do litoral; e a linha de 0,5 mg/kg da legislação brasileira para mercúrio em pescado não predador.</p>
+      <div class="callout"><b>Uso em sala:</b> compare cenários (poluente, fonte, intensidade) e exporte os dados por organismo em CSV — produto previsto para a Aula 3 da Corrente de Aprendizagem.</div>
+      <h3>Referências</h3>
+      <ul class="refs">
+        <li>KEHRIG, H. A.; MALM, O.; PALERMO, E. F. A.; SEIXAS, T. G.; BAÊTA, A. P.; MOREIRA, I. Bioconcentração e biomagnificação de metilmercúrio na baía de Guanabara, Rio de Janeiro. <i>Química Nova</i>, v. 34, n. 3, p. 377–384, 2011.</li>
+        <li>SANTORO, F. et al. <i>Cultura oceânica para todos: kit pedagógico</i>. Paris/Veneza: COI-UNESCO, 2020.</li>
+        <li>ORGANIZAÇÃO DAS NAÇÕES UNIDAS. <i>Agenda 2030 para o Desenvolvimento Sustentável</i>. ONU, 2015.</li>
+        <li>BRASIL. Ministério da Educação. <i>Base Nacional Comum Curricular: Ensino Médio</i>. Brasília: MEC, 2018.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Teia Sob Risco · produto técnico-pedagógico da Corrente de Aprendizagem (TCC 1) — Pós-Graduação em Cultura Oceânica e Sustentabilidade na Educação Básica (UFSC/UAB).
+  Aplicação de arquivo único, sem servidor, funciona offline. Recurso educacional aberto para uso e adaptação por professores.
+</footer>
+
+<dialog class="sheet" id="sheet"></dialog>
+
+<script>
+"use strict";
+const NS="http://www.w3.org/2000/svg";
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function E(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;}
+function useSym(sym,x,y,sz,color){const u=E('use',{x:x-sz/2,y:y-sz/2,width:sz,height:sz});u.setAttributeNS('http://www.w3.org/1999/xlink','href','#'+sym);u.setAttribute('href','#'+sym);if(color)u.setAttribute('style','color:'+color);return u;}
+
+/* ===== Dados (fauna e flora do litoral catarinense) ===== */
+const S=[
+ // --- Produtores / flora ---
+ {id:'fito',pop:'Fitoplâncton',sci:'Bacillariophyta',aut:'(diatomáceas)',ill:'i-diatom',tl:1,band:0,auto:true,sz:40,papel:'Produtor primário',filter:0,diet:[],nota:'Microalgas fotossintetizantes da coluna d’água; base da produção do estuário.'},
+ {id:'mangue_v',pop:'Mangue-vermelho',sci:'Rhizophora mangle',aut:'L.',ill:'i-mangrove',tl:1,band:0,x:100,y:150,sz:118,papel:'Produtor (vegetação)',filter:0,diet:[],nota:'Mangue de raízes-escora aéreas, onde a ostra-do-mangue se fixa. Limite da maré.'},
+ {id:'mangue_p',pop:'Mangue-preto',sci:'Avicennia schaueriana',aut:'Stapf & Leechm.',ill:'i-mangrove',tl:1,band:0,x:54,y:210,sz:78,papel:'Produtor (vegetação)',filter:0,diet:[],nota:'Reconhecível pelos pneumatóforos — raízes que sobem do lodo para respirar.'},
+ {id:'mangue_b',pop:'Mangue-branco',sci:'Laguncularia racemosa',aut:'(L.) C.F.Gaertn.',ill:'i-mangrove',tl:1,band:0,x:205,y:165,sz:82,papel:'Produtor (vegetação)',filter:0,diet:[],nota:'Tem em Laguna/SC um dos limites sul de distribuição no Atlântico.'},
+ {id:'marisma',pop:'Marisma',sci:'Spartina alterniflora',aut:'Loisel.',ill:'i-grass',tl:1,band:0,x:262,y:135,sz:62,papel:'Produtor (gramínea)',filter:0,diet:[],nota:'Capim-do-brejo das planícies de maré; estabiliza o sedimento e alimenta a teia detritívora.'},
+ {id:'alga',pop:'Alface-do-mar',sci:'Ulva lactuca',aut:'L.',ill:'i-alga',tl:1,band:0,x:185,y:410,sz:46,papel:'Produtor (macroalga)',filter:0,diet:[],nota:'Macroalga verde comum em costões e raízes; cresce com o excesso de nutrientes.'},
+ {id:'detrito',pop:'Folhiço / detrito',sci:'matéria orgânica',aut:'(serapilheira)',ill:'i-detritus',tl:1,band:0,x:500,y:688,sz:50,papel:'Base detritívora',filter:0,diet:[],nota:'Folhas e restos em decomposição. Principal via de energia num manguezal.'},
+ // --- Consumidores primários ---
+ {id:'zoo',pop:'Zooplâncton',sci:'Copepoda',aut:'(copépodes)',ill:'i-copepod',tl:2,band:1,auto:true,sz:38,papel:'Consumidor primário',filter:.2,diet:['fito'],nota:'Pequenos crustáceos que pastam o fitoplâncton; elo entre produtores e peixes.'},
+ {id:'ostra',pop:'Ostra-do-mangue',sci:'Crassostrea rhizophorae',aut:'(Guilding, 1828)',ill:'i-oyster',tl:2,band:1,x:120,y:398,sz:46,papel:'Consumidor primário (filtrador)',filter:1,diet:['fito','detrito'],edible:true,nota:'Bivalve nativo fixado nas raízes do mangue-vermelho. Filtra a água o dia todo — ótimo bioindicador.'},
+ {id:'mexilhao',pop:'Mexilhão',sci:'Perna perna',aut:'(Linnaeus, 1758)',ill:'i-mussel',tl:2,band:1,x:885,y:360,sz:44,papel:'Consumidor primário (filtrador)',filter:1,diet:['fito','detrito'],edible:true,nota:'Mexilhão cultivado em long-lines; SC é o maior produtor do Brasil. Filtra e retém contaminantes.'},
+ {id:'vieira',pop:'Vieira',sci:'Nodipecten nodosus',aut:'(Linnaeus, 1758)',ill:'i-scallop',tl:2,band:1,x:950,y:412,sz:44,papel:'Consumidor primário (filtrador)',filter:.9,diet:['fito','detrito'],edible:true,nota:'Pectinídeo cultivado em Penha e Porto Belo; filtrador de água como ostra e mexilhão.'},
+ {id:'berbigao',pop:'Berbigão',sci:'Anomalocardia brasiliana',aut:'(Gmelin, 1791)',ill:'i-clam',tl:2,band:1,x:655,y:690,sz:36,papel:'Consumidor primário (filtrador)',filter:.8,diet:['fito','detrito'],edible:true,nota:'Molusco de areia explorado por marisqueiras; base da RESEX do Pirajubaé, em Florianópolis.'},
+ {id:'uca',pop:'Caranguejo-uçá',sci:'Ucides cordatus',aut:'(Linnaeus, 1763)',ill:'i-crab',tl:2,band:1,x:95,y:675,sz:50,papel:'Consumidor primário (detritívoro)',filter:.3,diet:['detrito'],edible:true,nota:'Caranguejo do mangue, recurso pesqueiro tradicional. Abundante no Manguezal do Itacorubi.'},
+ {id:'chamare',pop:'Chama-maré',sci:'Leptuca uruguayensis',aut:'(Nobili, 1901)',ill:'i-fiddler',tl:2,band:1,x:165,y:682,sz:32,papel:'Consumidor primário (detritívoro)',filter:.2,diet:['detrito'],nota:'Caranguejo de uma garça grande; revolve o sedimento e come microalgas e detrito.'},
+ {id:'poliqueta',pop:'Poliqueta',sci:'Polychaeta',aut:'(anelídeos)',ill:'i-worm',tl:2,band:1,x:320,y:692,sz:30,papel:'Consumidor primário (depositívoro)',filter:.2,diet:['detrito'],nota:'Vermes do sedimento; alimento-chave de peixes de fundo e aves limícolas.'},
+ {id:'camarao',pop:'Camarão-branco',sci:'Litopenaeus schmitti',aut:'(Burkenroad, 1936)',ill:'i-shrimp',tl:2.3,band:1,auto:true,sz:46,papel:'Consumidor primário (onívoro)',filter:.4,diet:['detrito','zoo'],edible:true,nota:'Camarão de importância econômica nas baías. Onívoro de fundo.'},
+ // --- Consumidores secundários ---
+ {id:'tainha',pop:'Tainha',sci:'Mugil liza',aut:'Valenciennes, 1836',ill:'i-fish',tl:2.5,band:2,auto:true,sz:52,papel:'Consumidor primário (iliófago)',filter:.2,diet:['detrito','fito','zoo'],edible:true,nota:'Peixe icônico da pesca de inverno em SC. Raspa detrito, microalgas e plâncton.'},
+ {id:'parati',pop:'Parati',sci:'Mugil curema',aut:'Valenciennes, 1836',ill:'i-fish',tl:2.5,band:2,auto:true,sz:46,papel:'Consumidor primário (iliófago)',filter:.2,diet:['detrito','fito','zoo'],edible:true,nota:'Tainha-menor, comum em estuários; mesmos hábitos da tainha.'},
+ {id:'sardinha',pop:'Sardinha',sci:'Sardinella brasiliensis',aut:'(Steindachner, 1879)',ill:'i-fish',tl:3,band:2,auto:true,sz:42,papel:'Consumidor secundário (planctívoro)',filter:.1,diet:['zoo','fito'],edible:true,nota:'Cardumes filtradores de zooplâncton; base alimentar de muitos predadores.'},
+ {id:'baiacu',pop:'Baiacu',sci:'Sphoeroides greeleyi',aut:'(Gilbert, 1900)',ill:'i-puffer',tl:3,band:2,auto:true,sz:44,papel:'Consumidor secundário (durófago)',filter:.05,diet:['berbigao','chamare','poliqueta'],nota:'Tetraodontídeo que tritura moluscos e crustáceos; tóxico, não consumido.'},
+ {id:'siri',pop:'Siri-azul',sci:'Callinectes sapidus',aut:'Rathbun, 1896',ill:'i-crab',tl:3,band:2,x:400,y:655,sz:46,papel:'Consumidor secundário (onívoro)',filter:.2,diet:['berbigao','camarao','poliqueta','detrito'],edible:true,nota:'Caranguejo nadador onívoro; predador e presa importante no estuário.'},
+ // --- Consumidores terciários ---
+ {id:'bagre',pop:'Bagre',sci:'Genidens genidens',aut:'(Cuvier, 1829)',ill:'i-catfish',tl:3.3,band:3,auto:true,sz:50,papel:'Consumidor terciário (onívoro)',filter:.1,diet:['camarao','poliqueta','sardinha'],edible:true,nota:'Bagre estuarino de fundo; entra na dieta do biguá em Laguna/SC.'},
+ {id:'robalo',pop:'Robalo-flecha',sci:'Centropomus undecimalis',aut:'(Bloch, 1792)',ill:'i-fish',tl:4,band:3,auto:true,sz:58,papel:'Consumidor terciário (piscívoro)',filter:.05,diet:['tainha','parati','sardinha','camarao'],edible:true,nota:'Predador apreciado na pesca; depende do manguezal como berçário.'},
+ {id:'corvina',pop:'Corvina',sci:'Micropogonias furnieri',aut:'(Desmarest, 1823)',ill:'i-fish',tl:3.8,band:3,auto:true,sz:52,papel:'Consumidor terciário (bentófago)',filter:.05,diet:['camarao','mexilhao','uca','poliqueta'],edible:true,nota:'Peixe de fundo que come invertebrados bentônicos; um dos pescados mais comuns no Sul.'},
+ {id:'linguado',pop:'Linguado',sci:'Paralichthys orbignyanus',aut:'(Valenciennes, 1839)',ill:'i-flatfish',tl:4,band:3,x:572,y:690,sz:52,papel:'Consumidor terciário (predador de fundo)',filter:.05,diet:['camarao','poliqueta','parati'],edible:true,nota:'Peixe achatado que embosca presas no fundo arenoso; pescado de alto valor.'},
+ {id:'anchova',pop:'Anchova',sci:'Pomatomus saltatrix',aut:'(Linnaeus, 1766)',ill:'i-fish',tl:4,band:3,auto:true,sz:50,papel:'Consumidor terciário (piscívoro)',filter:.05,diet:['sardinha','parati','tainha'],edible:true,nota:'Predador veloz e voraz; alvo clássico da pesca de arremesso no litoral.'},
+ // --- Predadores de topo ---
+ {id:'boto',pop:'Boto-cinza',sci:'Sotalia guianensis',aut:'(Van Bénéden, 1864)',ill:'i-dolphin',tl:5,band:4,x:470,y:285,sz:92,papel:'Predador de topo',filter:0,diet:['robalo','corvina','tainha','parati','anchova','sardinha'],protegido:true,nota:'Golfinho costeiro com população residente na Baía Norte de Florianópolis. Sentinela da saúde do estuário.'},
+ {id:'toninha',pop:'Toninha',sci:'Pontoporia blainvillei',aut:'(Gervais & d’Orbigny, 1844)',ill:'i-dolphin',tl:4.7,band:4,x:685,y:320,sz:68,papel:'Predador de topo (ameaçado)',filter:0,diet:['sardinha','parati','camarao','tainha'],protegido:true,nota:'Pequeno cetáceo de bico longo, criticamente ameaçado; foco de pesquisa na Baía da Babitonga.'},
+ {id:'lontra',pop:'Lontra-neotropical',sci:'Lontra longicaudis',aut:'(Olfers, 1818)',ill:'i-otter',tl:4.8,band:4,x:250,y:262,sz:58,papel:'Predador de topo (mamífero)',filter:0,diet:['tainha','parati','robalo','siri','camarao'],protegido:true,nota:'Mamífero semiaquático que caça peixes e crustáceos em estuários e rios costeiros de SC.'},
+ {id:'biguá',pop:'Biguá',sci:'Nannopterum brasilianus',aut:'(Gmelin, 1789)',ill:'i-bird',tl:4.5,band:4,x:842,y:84,sz:54,papel:'Predador de topo (ave)',filter:0,diet:['tainha','parati','sardinha','camarao'],protegido:true,nota:'Ave mergulhadora piscívora; dieta em Laguna inclui tainha, parati e bagre.'},
+ {id:'garca',pop:'Garça-branca-grande',sci:'Ardea alba',aut:'(Linnaeus, 1758)',ill:'i-heron',tl:4.2,band:4,x:108,y:500,sz:72,papel:'Predador de topo (ave limícola)',filter:0,diet:['parati','camarao','chamare','sardinha','baiacu'],protegido:true,nota:'Ave pernalta que captura peixes e crustáceos nas margens rasas do manguezal.'},
+ {id:'humano',pop:'Ser humano',sci:'Homo sapiens',aut:'Linnaeus, 1758',ill:'i-human',tl:5,band:4,x:1035,y:125,sz:56,papel:'Consumidor de topo',filter:0,diet:['ostra','mexilhao','vieira','berbigao','camarao','uca','siri','tainha','parati','robalo','corvina','linguado','anchova'],human:true,nota:'Pescador, maricultor e consumidor; recebe a soma da contaminação ao comer pescados e frutos do mar.'},
+];
+const byId=Object.fromEntries(S.map(s=>[s.id,s]));
+const TLV=['--tl1','--tl2','--tl3','--tl4','--tl5'];
+const tlc=s=>css(TLV[s.band]);
+
+/* ===== Modelo ===== */
+const POLL={
+ mercurio:{rotulo:'Mercúrio (metilmercúrio)',bcf:{fito:.9,detrito:.7,mangue_v:.2,mangue_p:.2,mangue_b:.2,marisma:.25,alga:.45},step:1.9,waterDirect:.35,scale:.42,unit:'mg/kg',anvisa:.5},
+ microplastico:{rotulo:'Microplástico',bcf:{fito:.3,detrito:.6,mangue_v:.15,mangue_p:.15,mangue_b:.15,marisma:.2,alga:.35},step:.8,waterDirect:1,scale:13,unit:'part./g',anvisa:null},
+};
+function simulate(pk,intensity){const P=POLL[pk],C={};
+ [...S].sort((a,b)=>a.band-b.band).forEach(s=>{
+   if(!s.diet.length)C[s.id]=intensity*(P.bcf[s.id]??.5);
+   else{const d=s.diet.reduce((a,p)=>a+(C[p]||0),0)/s.diet.length;C[s.id]=d*P.step+intensity*s.filter*P.waterDirect;}});
+ const o={};S.forEach(s=>o[s.id]=Math.max(0,C[s.id]*P.scale));return o;}
+
+const fmt=v=>v>=10?v.toFixed(0):v.toFixed(2);
+function contam(r){const a=[30,66,72],b=[156,31,18];const c=a.map((x,i)=>Math.round(x+(b[i]-x)*r));return`rgb(${c[0]},${c[1]},${c[2]})`;}
+
+/* ===== Cena ilustrada ===== */
+const SVB={w:1120,h:760,surf:110,mud:665};
+// posiciona os organismos "livres" (auto) por banda trófica, na água aberta
+function layoutScene(){
+  const bandY={0:200,1:560,2:470,3:375};
+  const groups={};
+  S.filter(s=>s.auto).forEach(s=>{(groups[s.band]=groups[s.band]||[]).push(s);});
+  for(const b in groups){const arr=groups[b],n=arr.length;
+    arr.forEach((s,i)=>{s.x=300+(810-300)*((i+0.5)/n)+(b%2?18:-18);s.y=bandY[b]+((i%2)?26:-26);});}
+}
+function buildSceneBackdrop(svg,vb,interactive){
+  svg.innerHTML='';
+  const defs=E('defs',{});
+  defs.innerHTML=
+    '<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6EFE7"/><stop offset="1" stop-color="#C7DDD6"/></linearGradient>'+
+    '<linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FC3BD"/><stop offset="0.3" stop-color="#2F8D8E"/><stop offset="0.7" stop-color="#155A63"/><stop offset="1" stop-color="#0C3A44"/></linearGradient>'+
+    '<linearGradient id="plumeG" x1="0" y1="1" x2="0.3" y2="0"><stop offset="0" stop-color="#9C1F12" stop-opacity="0.55"/><stop offset="1" stop-color="#E0902F" stop-opacity="0"/></linearGradient>'+
+    '<radialGradient id="sun" cx="0.82" cy="0.1" r="0.5"><stop offset="0" stop-color="#fff" stop-opacity="0.6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>';
+  svg.appendChild(defs);
+  const W=vb.w,H=vb.h,surf=vb.surf,mud=vb.mud;
+  svg.appendChild(E('rect',{x:0,y:0,width:W,height:surf+6,fill:'url(#sky)'}));
+  svg.appendChild(E('rect',{x:0,y:0,width:W,height:H,fill:'url(#sun)'}));
+  svg.appendChild(E('rect',{x:0,y:surf,width:W,height:H-surf,fill:'url(#water)'}));
+  // superfície ondulada
+  svg.appendChild(E('path',{d:`M0 ${surf} q 40 -8 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 V ${surf+8} H0 Z`,fill:'#Bfe0da',opacity:.5}));
+  // raios de luz
+  const rays=E('g',{opacity:.10,stroke:'#fff','stroke-width':16});
+  for(let i=0;i<6;i++)rays.appendChild(E('line',{x1:320+i*120,y1:surf,x2:240+i*120,y2:mud}));
+  svg.appendChild(rays);
+  // fundo lodoso
+  svg.appendChild(E('path',{d:`M0 ${mud} q 140 -24 280 -6 t 290 2 t 280 -8 T ${W} ${mud-4} V ${H} H0 Z`,fill:'#4B3A28'}));
+  svg.appendChild(E('path',{d:`M0 ${mud+16} q 160 -10 300 0 t 280 4 t 260 -4 T ${W} ${mud+10} V ${H} H0 Z`,fill:'#3a2c1d'}));
+  // pneumatóforos (Avicennia)
+  const pne=E('g',{stroke:'#5b4630','stroke-width':4,'stroke-linecap':'round'});
+  for(let i=0;i<8;i++){const x=36+i*16;pne.appendChild(E('line',{x1:x,y1:mud,x2:x+(i%2?3:-2),y2:mud-24-(i%3)*6}));}
+  svg.appendChild(pne);
+  // banco / margem do mangue (esquerda)
+  svg.appendChild(E('path',{d:`M0 ${surf} C 70 ${surf-4} 140 ${surf+40} 175 ${mud} L 0 ${mud} Z`,fill:'#3a2c1d',opacity:.5}));
+  // raízes-escora do mangue (Rhizophora) entrando na água
+  const roots=E('g',{stroke:'#6E4A2E','stroke-width':6,fill:'none','stroke-linecap':'round'});
+  [[120,surf-2,70,430],[160,surf+6,120,470],[95,surf-6,45,400],[195,surf+10,160,500]].forEach(([x1,y1,x2,y2])=>{
+    roots.appendChild(E('path',{d:`M${x1} ${y1} C ${x1-32} ${(y1+y2)/2} ${x2+34} ${(y1+y2)/2-34} ${x2} ${y2}`}));});
+  svg.appendChild(roots);
+  // long-line de maricultura (direita)
+  const ll=E('g',{stroke:'#cfe6e0','stroke-width':3,opacity:.85});
+  ll.appendChild(E('line',{x1:840,y1:surf-2,x2:980,y2:surf-2}));
+  for(const x of [860,900,945]){ll.appendChild(E('line',{x1:x,y1:surf-2,x2:x,y2:surf+330}));
+    ll.appendChild(E('ellipse',{cx:x,cy:surf-8,rx:8,ry:5,fill:'#d8b24a',stroke:'none'}));}
+  svg.appendChild(ll);
+  // barco simples (humano)
+  svg.appendChild(E('path',{d:`M998 ${surf+14} h86 l-11 18 h-64 z`,fill:'#7a5634'}));
+  // emissário (direita, descarga) — origem da pluma
+  svg.appendChild(E('path',{d:`M${W} 210 h-50 a11 11 0 00-11 11 v13 a11 11 0 0011 11 H${W} Z`,fill:'#6b6f6e'}));
+  svg.appendChild(E('rect',{class:'plume',id:interactive?'plume':'plumeH',x:600,y:210,width:W-600,height:H-210,fill:'url(#plumeG)'}));
+  // rótulos de zona
+  if(interactive){
+    const z1=E('text',{x:14,y:surf-10,class:'',style:'font-family:var(--mono);font-size:10px;fill:#5b6e4f;letter-spacing:.1em'});z1.textContent='AR / SUPERFÍCIE';svg.appendChild(z1);
+    const z2=E('text',{x:14,y:mud+30,style:'font-family:var(--mono);font-size:10px;fill:#cdbfa6;letter-spacing:.1em'});z2.textContent='SEDIMENTO / MANGUEZAL';svg.appendChild(z2);
+  }
+}
+
+const sim=document.getElementById('sim');
+let lastRes=null,currentPoll='mercurio',selId=null;
+
+function drawSim(){
+  layoutScene();
+  buildSceneBackdrop(sim,SVB,true);
+  // grupo de fluxo (links) — desenhado por cima da água, abaixo dos organismos
+  const flowG=E('g',{id:'flowG'});sim.appendChild(flowG);
+  S.forEach(s=>s.diet.forEach(p=>{const a=byId[p],b=s;
+    flowG.appendChild(E('path',{class:'flow','data-a':p,'data-b':s.id,d:`M${a.x} ${a.y} C ${(a.x+b.x)/2} ${a.y} ${(a.x+b.x)/2} ${b.y} ${b.x} ${b.y}`}));}));
+  // organismos
+  S.forEach(s=>{
+    const g=E('g',{class:'org',tabindex:0,role:'button','data-id':s.id,'aria-label':`${s.pop} (${s.sci}), ${s.papel}`});
+    g.appendChild(E('circle',{class:'halo',cx:s.x,cy:s.y,r:s.sz*0.62}));
+    g.appendChild(useSym(s.ill,s.x,s.y,s.sz,css('--org')));
+    const r=s.sz*0.56;
+    const nm=E('text',{class:'lab',x:s.x,y:s.y+r+12,'text-anchor':'middle'});nm.textContent=s.pop;g.appendChild(nm);
+    const val=E('text',{class:'val','data-val':s.id,x:s.x,y:s.y+r+24,'text-anchor':'middle'});g.appendChild(val);
+    const bg=E('g',{class:'badge','data-badge':s.id,style:'display:none'});
+    bg.appendChild(E('circle',{cx:s.x+r-2,cy:s.y-r+2,r:9,fill:css('--warn')}));
+    const bt=E('text',{x:s.x+r-2,y:s.y-r+2,'text-anchor':'middle','dominant-baseline':'central',fill:'#fff','font-weight':'800','font-size':'11'});bt.textContent='!';bg.appendChild(bt);
+    g.appendChild(bg);
+    g.addEventListener('click',()=>select(s.id));
+    g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(s.id);}});
+    g.addEventListener('mouseenter',e=>{hl(s.id);showTip(s,e);});
+    g.addEventListener('mousemove',e=>moveTip(e));
+    g.addEventListener('mouseleave',()=>{hideTip();if(!selId)clearHl();});
+    g.addEventListener('focus',()=>hl(s.id));
+    g.addEventListener('blur',()=>{if(!selId)clearHl();});
+    sim.appendChild(g);
+  });
+}
+/* tooltip */
+let tipEl=null;
+function showTip(s,e){if(!tipEl){tipEl=document.createElement('div');tipEl.className='tooltip';document.body.appendChild(tipEl);}
+  tipEl.innerHTML=`<b>${s.pop}</b><i>${s.sci.split(' · ')[0]}</i><span>NT ${s.tl} · ${s.papel}</span>`;tipEl.style.opacity='1';moveTip(e);}
+function moveTip(e){if(!tipEl)return;const pad=14;tipEl.style.left=Math.min(e.clientX+pad,innerWidth-220)+'px';tipEl.style.top=(e.clientY+pad)+'px';}
+function hideTip(){if(tipEl)tipEl.style.opacity='0';}
+function hl(id){const rel=new Set([id]);byId[id].diet.forEach(p=>rel.add(p));S.forEach(s=>{if(s.diet.includes(id))rel.add(s.id);});
+  sim.querySelectorAll('.org').forEach(n=>n.classList.toggle('dim',!rel.has(n.dataset.id)));
+  sim.querySelectorAll('.flow').forEach(l=>l.classList.toggle('on',l.dataset.a===id||l.dataset.b===id));}
+function clearHl(){sim.querySelectorAll('.org').forEach(n=>n.classList.remove('dim'));sim.querySelectorAll('.flow').forEach(l=>l.classList.remove('on'));}
+function select(id){sim.querySelectorAll('.org').forEach(n=>n.classList.toggle('sel',n.dataset.id===id&&selId!==id));
+  if(selId===id){selId=null;clearHl();renderFicha(null);return;}selId=id;hl(id);renderFicha(id);}
+
+/* ===== Rodar ===== */
+function runSim(){
+  const intensity=+document.getElementById('int').value/100;
+  const res=simulate(currentPoll,intensity);lastRes=res;
+  const P=POLL[currentPoll],max=Math.max(...Object.values(res),1e-6);
+  // pluma
+  const plume=document.getElementById('plume');plume.style.opacity='1';
+  setTimeout(()=>{plume.style.opacity='.6';},1300);
+  // colorir organismos por contaminação (escalonado por nível)
+  S.forEach(s=>{const ratio=Math.min(1,res[s.id]/max),delay=(4-s.band)*200;
+    const u=sim.querySelector(`.org[data-id="${s.id}"] use`);
+    setTimeout(()=>{u.style.transition='color .6s';u.style.color=contam(ratio);},delay);
+    const val=sim.querySelector(`[data-val="${s.id}"]`);val.textContent=fmt(res[s.id]);
+    setTimeout(()=>val.style.opacity='1',delay+200);
+    const over=(P.anvisa&&s.edible&&res[s.id]>P.anvisa);
+    sim.querySelector(`[data-badge="${s.id}"]`).style.display=over?'':'none';
+  });
+  document.getElementById('roCard').hidden=false;
+  document.getElementById('chartsRow').hidden=false;
+  document.getElementById('cmpCard').hidden=false;
+  document.getElementById('unitPill').textContent=P.unit;
+  document.getElementById('unitPill2').textContent=P.unit;
+  renderReadouts(res,P);drawBar(res,P);drawScatter(res,P);renderInsight(res,P);
+  if(selId)renderFicha(selId);
+  document.getElementById('stRun').textContent='última liberação: '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('scenarioPill').textContent='cenário '+document.getElementById('src').selectedOptions[0].text.split(' (')[0].toLowerCase();
+}
+function renderReadouts(res,P){
+  const sorted=S.map(s=>({s,v:res[s.id]})).sort((a,b)=>b.v-a.v);
+  document.getElementById('roTop').innerHTML=sorted[0].s.pop+'<br><span style="font-size:11px;color:var(--muted)">'+fmt(sorted[0].v)+' '+P.unit+'</span>';
+  const base=res['fito']||1e-6;
+  document.getElementById('roFbm').innerHTML=(sorted[0].v/base).toFixed(1)+'<small>×</small>';
+  document.getElementById('roHuman').innerHTML=fmt(res['humano'])+' <small>'+P.unit+'</small>';
+  const w=document.getElementById('roOverWrap');
+  if(P.anvisa){const o=S.filter(s=>s.edible&&res[s.id]>P.anvisa);document.getElementById('roOver').textContent=o.length+'/'+S.filter(s=>s.edible).length;w.classList.toggle('alert',o.length>0);}
+  else{document.getElementById('roOver').textContent='—';w.classList.remove('alert');}
+}
+
+/* ===== Gráfico de barras ===== */
+function drawBar(res,P){
+  const c=document.getElementById('chartBar');const data=S.map(s=>({s,v:res[s.id]})).sort((a,b)=>b.v-a.v);
+  const W=420,L=140,R=34,T=8,rh=24,H=T+data.length*rh+6;c.setAttribute('viewBox',`0 0 ${W} ${H}`);c.innerHTML='';
+  const max=Math.max(...data.map(d=>d.v),P.anvisa||0,1e-6),bw=W-L-R;
+  data.forEach((d,i)=>{const y=T+i*rh,bh=14,ratio=d.v/max;
+    const lab=E('text',{class:'lbl'+(d.s.human?' human':''),x:L-7,y:y+bh/2+3.5,'text-anchor':'end'});lab.textContent=(d.s.edible?'▸ ':'')+d.s.pop;c.appendChild(lab);
+    c.appendChild(E('rect',{x:L,y:y,width:Math.max(1.5,bw*ratio),height:bh,rx:2.5,fill:contam(Math.min(1,ratio))}));
+    let vt;if(ratio>.8)vt=E('text',{class:'val inb',x:L+bw*ratio-5,y:y+bh/2+3.5,'text-anchor':'end'});else vt=E('text',{class:'val',x:L+bw*ratio+5,y:y+bh/2+3.5});
+    vt.textContent=fmt(d.v);c.appendChild(vt);});
+  if(P.anvisa){const x=L+bw*(P.anvisa/max);c.appendChild(E('line',{class:'anvisa',x1:x,y1:T-2,x2:x,y2:H-8}));
+    const t=E('text',{class:'anvisa-t',x:x,y:H-1,'text-anchor':'middle'});t.textContent='0,5 mg/kg';c.appendChild(t);}
+}
+
+/* ===== Gráfico concentração × nível trófico ===== */
+function drawScatter(res,P){
+  const c=document.getElementById('chartScatter');const W=360,H=300,L=46,Rg=14,T=14,B=40;c.setAttribute('viewBox',`0 0 ${W} ${H}`);c.innerHTML='';
+  const max=Math.max(...Object.values(res),P.anvisa||0,1e-6),plotW=W-L-Rg,plotH=H-T-B;
+  const xOf=tl=>L+plotW*((tl-1)/4), yOf=v=>T+plotH*(1-v/max);
+  // eixos
+  c.appendChild(E('line',{class:'ax',x1:L,y1:T,x2:L,y2:T+plotH}));
+  c.appendChild(E('line',{class:'ax',x1:L,y1:T+plotH,x2:L+plotW,y2:T+plotH}));
+  for(let t=1;t<=5;t++){const x=xOf(t);c.appendChild(E('line',{class:'ax',x1:x,y1:T+plotH,x2:x,y2:T+plotH+4}));
+    const tx=E('text',{class:'axt',x:x,y:T+plotH+16,'text-anchor':'middle'});tx.textContent='NT'+t;c.appendChild(tx);}
+  const yl=E('text',{class:'axt',x:8,y:T+plotH/2,transform:`rotate(-90 8 ${T+plotH/2})`,'text-anchor':'middle'});yl.textContent='concentração ('+P.unit+')';c.appendChild(yl);
+  const xl=E('text',{class:'axt',x:L+plotW/2,y:H-6,'text-anchor':'middle'});xl.textContent='nível trófico';c.appendChild(xl);
+  // anvisa
+  if(P.anvisa){const y=yOf(P.anvisa);c.appendChild(E('line',{class:'anvisa',x1:L,y1:y,x2:L+plotW,y2:y}));
+    const t=E('text',{class:'anvisa-t',x:L+plotW,y:y-3,'text-anchor':'end'});t.textContent='0,5';c.appendChild(t);}
+  // linha de tendência (regressão linear simples)
+  const pts=S.map(s=>({x:s.tl,y:res[s.id]}));const n=pts.length;
+  const sx=pts.reduce((a,p)=>a+p.x,0),sy=pts.reduce((a,p)=>a+p.y,0),sxy=pts.reduce((a,p)=>a+p.x*p.y,0),sxx=pts.reduce((a,p)=>a+p.x*p.x,0);
+  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx),inter=(sy-slope*sx)/n;
+  c.appendChild(E('line',{class:'trend',x1:xOf(1),y1:yOf(Math.max(0,inter+slope*1)),x2:xOf(5),y2:yOf(Math.max(0,inter+slope*5))}));
+  // pontos
+  S.forEach(s=>{const x=xOf(s.tl)+(Math.random()*10-5),y=yOf(res[s.id]),ratio=Math.min(1,res[s.id]/max);
+    c.appendChild(E('circle',{class:'pt',cx:x,cy:y,r:s.human?6:5,fill:s.human?css('--tl5'):contam(ratio)}));});
+}
+
+function renderInsight(res,P){
+  const top=S.map(s=>({s,v:res[s.id]})).sort((a,b)=>b.v-a.v)[0];let t;
+  if(currentPoll==='mercurio'){const overs=S.filter(s=>s.edible&&res[s.id]>P.anvisa).map(s=>s.pop);
+    t=`O <b>${top.s.pop}</b> acumulou o máximo: o mercúrio <b>biomagnifica</b> e a nuvem de pontos sobe com o nível trófico. `;
+    t+=overs.length?`Entre os pescados, ${overs.join(', ')} passaram de 0,5 mg/kg.`:`Nenhum pescado passou de 0,5 mg/kg nesta intensidade — aumente a liberação.`;
+    document.getElementById('insight').className='note haz';
+  }else{t=`As maiores concentrações ficaram nos <b>filtradores</b> (ostra, mexilhão), não no topo: o microplástico <b>acumula, mas não biomagnifica</b> — a nuvem de pontos fica achatada.`;document.getElementById('insight').className='note';}
+  document.getElementById('insight').innerHTML=t;
+}
+
+function renderFicha(id){const f=document.getElementById('ficha');
+  if(!id){f.innerHTML='<div class="empty">Toque em um organismo no estuário para ver sua ficha. Escolha o poluente e a intensidade, e libere a contaminação — ela sobe a teia em tempo real.</div>';return;}
+  const s=byId[id];const presas=s.diet.map(d=>byId[d].pop).join(', ')||'— produtor';
+  const preds=S.filter(x=>x.diet.includes(id)).map(x=>x.pop).join(', ')||'— topo da teia';let conc='';
+  if(lastRes){const v=lastRes[id],P=POLL[currentPoll],over=(P.anvisa&&s.edible&&v>P.anvisa);
+    conc=`<dt>Concentração</dt><dd class="mono">${fmt(v)} ${P.unit} ${over?'<span style="color:var(--warn);font-weight:700">· acima do limite</span>':''}</dd>`;}
+  f.innerHTML=`<div class="top"><svg class="ill" viewBox="0 0 100 100"><use href="#${s.ill}"/></svg>
+    <div><div class="nm">${s.pop}</div><div class="bn"><span class="sci">${s.sci.split(' · ')[0]}</span> ${s.aut}</div></div></div>
+    <dl><dt>Papel</dt><dd>${s.papel}</dd><dt>Come</dt><dd>${presas}</dd><dt>É comido por</dt><dd>${preds}</dd>${conc}</dl>`;
+}
+function resetSim(){lastRes=null;buildSceneReset();
+  document.getElementById('roCard').hidden=true;document.getElementById('chartsRow').hidden=true;document.getElementById('cmpCard').hidden=true;
+  renderFicha(selId);document.getElementById('scenarioPill').textContent='cenário —';}
+function buildSceneReset(){
+  document.getElementById('plume').style.opacity='0';
+  S.forEach(s=>{const u=sim.querySelector(`.org[data-id="${s.id}"] use`);u.style.color=css('--org');
+    sim.querySelector(`[data-val="${s.id}"]`).style.opacity='0';sim.querySelector(`[data-badge="${s.id}"]`).style.display='none';});
+}
+
+/* ===== Export ===== */
+function exportCSV(){if(!lastRes)return;const P=POLL[currentPoll],i=document.getElementById('int').value;
+  let csv='Organismo;Nome cientifico;Autoridade;Papel;Nivel trofico;Concentracao ('+P.unit+')\n';
+  S.map(s=>({s,v:lastRes[s.id]})).sort((a,b)=>b.v-a.v).forEach(d=>{csv+=`${d.s.pop};${d.s.sci};${d.s.aut};${d.s.papel};${d.s.tl};${d.v.toFixed(3).replace('.',',')}\n`;});
+  dl(new Blob([csv],{type:'text/csv;charset=utf-8'}),`teia_${currentPoll}_int${i}.csv`);}
+function exportPNG(){const svg=document.getElementById('chartBar').cloneNode(true);svg.setAttribute('xmlns',NS);
+  const vb=document.getElementById('chartBar').viewBox.baseVal,sc=2;const data=new XMLSerializer().serializeToString(svg);const img=new Image();
+  img.onload=()=>{const cv=document.createElement('canvas');cv.width=vb.width*sc;cv.height=vb.height*sc;const ctx=cv.getContext('2d');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);ctx.drawImage(img,0,0,cv.width,cv.height);cv.toBlob(b=>dl(b,'grafico_'+currentPoll+'.png'));};
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(data);}
+function dl(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();URL.revokeObjectURL(a.href);}
+
+/* ===== Catálogo ===== */
+function buildCatalog(){const g=document.getElementById('catGrid');g.innerHTML='';
+  S.forEach(s=>{const card=document.createElement('button');card.className='plate';card.dataset.band=s.band;
+    card.innerHTML=`<div class="ph"><span class="tlchip" style="background:${tlc(s)}">NT ${s.tl}</span>
+      <span class="tag">${s.human?'consumidor':s.id==='baiacu'?'tóxico':s.edible?'pescado':s.protegido?'protegido':s.band===0?'produtor':'fauna'}</span>
+      <svg class="ill" viewBox="0 0 100 100" style="color:${tlc(s)}"><use href="#${s.ill}"/></svg></div>
+      <div class="bd2"><div class="nm">${s.pop}</div><div class="bn sci">${s.sci.split(' · ')[0]}</div><div class="role">${s.papel}</div></div>`;
+    card.addEventListener('click',()=>openSheet(s.id));g.appendChild(card);});}
+function filterCat(f){document.querySelectorAll('#catGrid .plate').forEach(p=>{const b=+p.dataset.band;let sh=true;
+  if(f==='1')sh=b===0;else if(f==='2')sh=b===1;else if(f==='3')sh=b===2||b===3;else if(f==='4')sh=b===4;p.style.display=sh?'':'none';});}
+const sheet=document.getElementById('sheet');
+function openSheet(id){const s=byId[id];const presas=s.diet.map(d=>byId[d].pop).join(', ')||'— produtor (não predador)';
+  const preds=S.filter(x=>x.diet.includes(id)).map(x=>x.pop).join(', ')||'— topo desta teia';
+  sheet.innerHTML=`<button class="close" aria-label="Fechar" onclick="document.getElementById('sheet').close()">✕</button>
+    <div class="sh-top"><svg class="ill-lg" viewBox="0 0 100 100" style="color:${tlc(s)}"><use href="#${s.ill}"/></svg>
+      <div><h3>${s.pop}</h3><div class="bn"><span class="sci">${s.sci}</span> ${s.aut}</div>
+      <div class="tlrow"><span class="pillc" style="background:${tlc(s)}">NT ${s.tl}</span><span style="font-size:12.5px;color:var(--muted)">${s.papel}</span></div></div></div>
+    <div class="sh-bd"><p style="margin:0 0 13px;font-size:13.5px;color:#33403c">${s.nota}</p>
+      <dl><dt>Come</dt><dd>${presas}</dd><dt>É comido por</dt><dd>${preds}</dd></dl></div>`;
+  if(sheet.showModal)sheet.showModal();}
+sheet.addEventListener('click',e=>{if(e.target===sheet)sheet.close();});
+
+/* ===== Navegação / eventos ===== */
+function go(v){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.view===v));
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='view-'+v));window.scrollTo({top:0,behavior:'smooth'});}
+window.go=go;
+document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.view)));
+document.querySelectorAll('#poll button').forEach(b=>b.addEventListener('click',()=>{currentPoll=b.dataset.poll;
+  document.querySelectorAll('#poll button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  document.getElementById('stPoll').textContent='poluente: '+(currentPoll==='mercurio'?'mercúrio':'microplástico');if(lastRes)runSim();}));
+const SRC={industrial:['mercurio',100],esgoto:['mercurio',55],plastico:['microplastico',100],difuso:['microplastico',55]};
+document.getElementById('src').addEventListener('change',e=>{const v=e.target.value;if(SRC[v]){const[p,i]=SRC[v];currentPoll=p;
+  document.querySelectorAll('#poll button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.poll===p));
+  document.getElementById('int').value=i;updInt();document.getElementById('stPoll').textContent='poluente: '+(p==='mercurio'?'mercúrio':'microplástico');}});
+function updInt(){const v=+document.getElementById('int').value;document.getElementById('intOut').textContent=v+'%';document.getElementById('stInt').textContent='intensidade: '+v+'%';}
+document.getElementById('int').addEventListener('input',()=>{updInt();document.getElementById('src').value='custom';});
+document.getElementById('run').addEventListener('click',runSim);
+document.getElementById('reset').addEventListener('click',resetSim);
+document.getElementById('csv').addEventListener('click',exportCSV);
+document.getElementById('png').addEventListener('click',exportPNG);
+document.getElementById('print').addEventListener('click',()=>window.print());
+document.getElementById('catFilter').addEventListener('click',e=>{if(e.target.dataset.f){
+  document.querySelectorAll('#catFilter button').forEach(b=>b.setAttribute('aria-pressed',b===e.target));filterCat(e.target.dataset.f);}});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
+  if(e.key==='1')document.querySelector('#poll [data-poll=mercurio]').click();
+  if(e.key==='2')document.querySelector('#poll [data-poll=microplastico]').click();
+  if(e.key.toLowerCase()==='r')runSim();});
+
+/* ===== Opções (rótulos / contraste / fonte) ===== */
+function toggleChip(btn){const on=btn.getAttribute('aria-pressed')==='true';btn.setAttribute('aria-pressed',!on);return !on;}
+document.getElementById('optLabels').addEventListener('click',e=>{const on=toggleChip(e.currentTarget);sim.classList.toggle('nolabels',!on);});
+document.getElementById('optHC').addEventListener('click',e=>{document.body.classList.toggle('hc',toggleChip(e.currentTarget));});
+document.getElementById('optFont').addEventListener('click',e=>{document.body.classList.toggle('bigfont',toggleChip(e.currentTarget));});
+
+/* ===== Comparador de cenários A/B ===== */
+const CMP={A:null,B:null};
+const CMP_KEYS=['ostra','mexilhao','tainha','robalo','boto','humano'];
+function scenarioLabel(){const p=currentPoll==='mercurio'?'Mercúrio':'Microplástico';return p+' · '+document.getElementById('int').value+'%';}
+function pin(slot){if(!lastRes){return;}
+  CMP[slot]={res:{...lastRes},poll:currentPoll,unit:POLL[currentPoll].unit,label:scenarioLabel()};
+  const el=document.getElementById('slot'+slot);el.className='slot filled';
+  el.innerHTML=`<span class="tag" style="background:${slot==='A'?'#155A63':'#9C1F12'}">${slot}</span><b>${CMP[slot].label}</b><div class="meta">topo: ${fmt(Math.max(...Object.values(CMP[slot].res)))} ${CMP[slot].unit} · humano: ${fmt(CMP[slot].res.humano)} ${CMP[slot].unit}</div>`;
+  drawCmp();}
+function drawCmp(){const c=document.getElementById('chartCmp');const hint=document.getElementById('cmpHint');
+  if(!CMP.A||!CMP.B){c.setAttribute('hidden','');hint.style.display='';return;}
+  c.removeAttribute('hidden');hint.style.display='none';
+  // unidades podem diferir -> normaliza cada cenário pelo seu próprio máximo (comparação de padrão)
+  const W=720,H=260,L=40,T=16,B=54,gap=22;c.innerHTML='';
+  const maxA=Math.max(...Object.values(CMP.A.res),1e-6),maxB=Math.max(...Object.values(CMP.B.res),1e-6);
+  const n=CMP_KEYS.length,plotW=W-L-14,plotH=H-T-B,cw=plotW/n;
+  c.appendChild(E('text',{class:'axt',x:L,y:T-2,'font-size':'10'}));
+  CMP_KEYS.forEach((id,i)=>{const s=byId[id],x0=L+i*cw;
+    const va=CMP.A.res[id]/maxA, vb=CMP.B.res[id]/maxB;
+    const bw=cw/2-gap/2;
+    c.appendChild(E('rect',{x:x0+gap/2,y:T+plotH*(1-va),width:bw,height:plotH*va,rx:3,fill:'#155A63'}));
+    c.appendChild(E('rect',{x:x0+gap/2+bw,y:T+plotH*(1-vb),width:bw,height:plotH*vb,rx:3,fill:'#9C1F12'}));
+    const tA=E('text',{class:'val',x:x0+gap/2+bw/2,y:T+plotH*(1-va)-3,'text-anchor':'middle','font-size':'8.5'});tA.textContent=fmt(CMP.A.res[id]);c.appendChild(tA);
+    const tB=E('text',{class:'val',x:x0+gap/2+bw*1.5,y:T+plotH*(1-vb)-3,'text-anchor':'middle','font-size':'8.5'});tB.textContent=fmt(CMP.B.res[id]);c.appendChild(tB);
+    const lab=E('text',{class:'axt',x:x0+cw/2,y:H-34,'text-anchor':'middle','font-size':'10'});lab.textContent=s.pop;c.appendChild(lab);
+  });
+  c.appendChild(E('line',{class:'ax',x1:L,y1:T+plotH,x2:W-14,y2:T+plotH}));
+  // legenda
+  c.appendChild(E('rect',{x:L,y:H-20,width:11,height:11,rx:2,fill:'#155A63'}));
+  const la=E('text',{class:'axt',x:L+16,y:H-11,'font-size':'10'});la.textContent='A · '+CMP.A.label;c.appendChild(la);
+  c.appendChild(E('rect',{x:L+220,y:H-20,width:11,height:11,rx:2,fill:'#9C1F12'}));
+  const lb=E('text',{class:'axt',x:L+236,y:H-11,'font-size':'10'});lb.textContent='B · '+CMP.B.label;c.appendChild(lb);
+  const note=E('text',{class:'axt',x:W-14,y:H-11,'text-anchor':'end','font-size':'9'});note.textContent='(barras normalizadas por cenário)';c.appendChild(note);
+}
+document.getElementById('pinA').addEventListener('click',()=>pin('A'));
+document.getElementById('pinB').addEventListener('click',()=>pin('B'));
+document.getElementById('cmpClear').addEventListener('click',()=>{CMP.A=CMP.B=null;
+  ['A','B'].forEach(s=>{const el=document.getElementById('slot'+s);el.className='slot';el.innerHTML=`<span class="cmp-empty">Cenário ${s} vazio${s==='A'?' — rode uma simulação e fixe.':'.'}</span>`;});
+  document.getElementById('chartCmp').setAttribute('hidden','');document.getElementById('cmpHint').style.display='';});
+
+[['Produtores','--tl1'],['Consumidores 1º','--tl2'],['Consumidores 2º','--tl3'],['Consumidores 3º','--tl4'],['Topo','--tl5']]
+ .forEach(([t,v])=>{const i=document.createElement('i');i.innerHTML=`<span class="sw" style="background:${css(v)}"></span>${t}`;document.getElementById('legend').appendChild(i);});
+
+/* init */
+buildSceneBackdrop(document.getElementById('heroScene'),{w:1000,h:470,surf:80,mud:410},false);
+drawSim();buildCatalog();updInt();
+</script>
+<style>
+/* ===== v5 ===== */
+:root{--ok:#2f9e6f}
+svg.g{width:16px;height:16px;flex:none}
+.subc .t svg{width:15px;height:15px;flex:none}
+.modebar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.modebar button{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:var(--panel);border-radius:10px;padding:10px 15px;font:inherit;font-size:13.5px;font-weight:700;color:var(--muted);cursor:pointer}
+.modebar button .g{width:16px;height:16px}
+.modebar button[aria-current="true"]{background:var(--w3);color:#eafaf8;border-color:var(--w3)}
+.subc{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line)}
+.subc>.t{font-family:var(--mono);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.playrow{display:flex;align-items:center;gap:10px}
+.playrow .btn{padding:8px 12px}
+.bigv{font-family:var(--mono);font-size:13px;min-width:54px;text-align:right}
+.miniact{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.miniact .btn{flex:1;font-size:12.5px;padding:8px;min-width:90px}
+/* build mode */
+body.buildmode .flow{opacity:0}
+body.buildmode .flow.found{opacity:1;stroke:var(--ok);stroke-width:3}
+body.buildmode.reveal .flow{opacity:.28}
+.org.pick .halo{opacity:1;stroke:var(--haz1)}
+.buildbanner{position:absolute;left:12px;top:12px;background:rgba(8,42,49,.92);color:#eafaf8;border:1px solid #14505a;border-radius:9px;padding:8px 12px;font-size:12.5px;max-width:62%;z-index:5}
+.buildbanner b{color:#7FCFC6}
+.flash{animation:fl .5s}@keyframes fl{0%{filter:none}30%{filter:drop-shadow(0 0 8px #9C1F12)}100%{filter:none}}
+.flashok{animation:flok .6s}@keyframes flok{0%{filter:none}30%{filter:drop-shadow(0 0 9px #2f9e6f)}100%{filter:none}}
+/* quiz */
+.qz{margin-bottom:14px}
+.qz .qn{font-weight:700;font-size:14px;margin-bottom:8px}.qz .qn span{color:var(--w2)}
+.qz .opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 12px;font:inherit;font-size:13px;cursor:pointer;margin-bottom:6px}
+.qz .opt:hover{border-color:var(--w1)}
+.qz .opt.sel{border-color:var(--w3);background:#EAF6F6}
+.qz .opt.ok{border-color:var(--ok);background:#eaf7f1}
+.qz .opt.no{border-color:var(--warn);background:#fbecea}
+.scorebig{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--w2)}
+/* dados reais */
+.drrow{display:grid;grid-template-columns:1.2fr .8fr;gap:8px;align-items:center;margin-bottom:8px}
+.drrow label{font-size:13px}.drrow input{width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;font:inherit;font-size:13px}
+/* teacher log */
+.tlog{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+.tlog th,.tlog td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}.tlog th{color:var(--muted)}
+.hint2{font-size:12px;color:var(--faint);margin-top:8px;line-height:1.5}
+.vlibras-note{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+<script>
+"use strict";
+(function(){
+ const viewSim=document.getElementById('view-sim');
+ const inspector=document.querySelector('aside.inspector');
+ const paramsBd=inspector.querySelector('.card .bd');
+ const cmpCard=document.getElementById('cmpCard');
+ const secHead=viewSim.querySelector('.sec-head');
+ const cards=[...inspector.querySelectorAll('.card')];
+ const fichaCard=cards.find(c=>/Ficha do organismo/.test((c.querySelector('.hd h2')||{}).textContent||''));
+ const roCard=document.getElementById('roCard');
+ const tlc=s=>css(['--tl1','--tl2','--tl3','--tl4','--tl5'][s.band]);
+ const ic=(p)=>`<svg class="g" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">${p}</svg>`;
+
+ /* ---------- MODE BAR ---------- */
+ const modebar=document.createElement('div');modebar.className='modebar';
+ modebar.innerHTML=
+  `<button data-mode="explorar" aria-current="true">${ic('<circle cx="10" cy="10" r="7"/><path d="M10 7v6M7 10h6"/>')}Explorar</button>`+
+  `<button data-mode="montar">${ic('<circle cx="5" cy="15" r="2"/><circle cx="15" cy="5" r="2"/><path d="M6.5 13.5l7-7"/>')}Montar a teia</button>`+
+  `<button data-mode="quiz">${ic('<circle cx="10" cy="10" r="7.5"/><path d="M8 8a2 2 0 113 1.7c-.6.4-1 .8-1 1.6M10 14h.01"/>')}Quiz</button>`;
+ secHead.after(modebar);
+ let mode='explorar';
+
+ /* ---------- REMEDIAÇÃO + EXPOSIÇÃO (no card de Parâmetros) ---------- */
+ let REMED=0;
+ const _simulate=simulate; // eslint-disable-line
+ simulate=function(pk,intensity){return _simulate(pk,intensity*(1-REMED));};
+ const extra=document.createElement('div');
+ extra.innerHTML=
+  `<div class="subc"><div class="t">${ic('<path d="M10 2s6 5 6 10a6 6 0 11-12 0c0-5 6-10 6-10z"/>')}Remediação da fonte</div>`+
+   `<div class="slider"><input type="range" id="remed" min="0" max="100" step="5" value="0"><output id="remedOut" class="bigv">0%</output></div>`+
+   `<div class="hint2">Simula o tratamento do efluente: reduz a carga que entra na água e recalcula a teia.</div></div>`+
+  `<div class="subc"><div class="t">${ic('<circle cx="10" cy="10" r="7.5"/><path d="M10 6v4l3 2"/>')}Exposição ao longo do tempo</div>`+
+   `<div class="playrow"><button class="btn" id="tPlay">${ic('<path d="M6 4l11 6-11 6z" fill="currentColor" stroke="none"/>')}<span>Reproduzir</span></button>`+
+   `<input type="range" id="tExp" min="0" max="100" step="1" value="100" style="flex:1;accent-color:var(--w1)"><output id="tOut" class="bigv">100%</output></div>`+
+   `<div class="hint2">Mostra a contaminação se acumulando: produtores primeiro, predadores de topo por último.</div></div>`;
+ paramsBd.appendChild(extra);
+ document.getElementById('remed').addEventListener('input',e=>{REMED=+e.target.value/100;document.getElementById('remedOut').textContent=e.target.value+'%';
+   if(lastRes)document.getElementById('run').click();});
+
+ /* exposição cinética */
+ const K={0:6,1:4,2:3,3:2.2,4:1.6};
+ function timeFactor(band,tn){const k=K[band];return tn<=0?0:(1-Math.exp(-k*3*tn))/(1-Math.exp(-k*3));}
+ function applyTime(tn){
+   if(!lastRes)return;const max=Math.max(...Object.values(lastRes),1e-6),P=POLL[currentPoll];
+   S.forEach(s=>{const ct=lastRes[s.id]*timeFactor(s.band,tn);const u=sim.querySelector(`.org[data-id="${s.id}"] use`);
+     if(u){u.style.transition='color .15s';u.style.color=contam(Math.min(1,ct/max));}
+     const v=sim.querySelector(`[data-val="${s.id}"]`);if(v){v.textContent=fmt(ct);v.style.opacity='1';}
+     const over=(P.anvisa&&s.edible&&ct>P.anvisa);const bd=sim.querySelector(`[data-badge="${s.id}"]`);if(bd)bd.style.display=over?'':'none';});
+ }
+ const tExp=document.getElementById('tExp'),tOut=document.getElementById('tOut');
+ tExp.addEventListener('input',()=>{tOut.textContent=tExp.value+'%';playing=false;setPlayIcon();applyTime(+tExp.value/100);});
+ let playing=false,rafId=null;
+ function setPlayIcon(){document.querySelector('#tPlay span').textContent=playing?'Pausar':'Reproduzir';}
+ document.getElementById('tPlay').addEventListener('click',()=>{
+   if(!lastRes){document.getElementById('run').click();}
+   playing=!playing;setPlayIcon();
+   if(playing){let t=(+tExp.value>=100)?0:+tExp.value/100;const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+     const step=()=>{t+=reduce?1:0.012;if(t>=1){t=1;playing=false;setPlayIcon();}tExp.value=Math.round(t*100);tOut.textContent=tExp.value+'%';applyTime(t);if(playing)rafId=requestAnimationFrame(step);};step();}
+   else if(rafId)cancelAnimationFrame(rafId);
+ });
+
+ /* ---------- ÁUDIO (TTS) na ficha ---------- */
+ const ttsOK=('speechSynthesis'in window);
+ function speak(txt){if(!ttsOK)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='pt-BR';u.rate=.98;
+   const v=speechSynthesis.getVoices().find(v=>/pt-BR|pt_BR|Portug/i.test(v.lang+v.name));if(v)u.voice=v;speechSynthesis.speak(u);}
+ if(fichaCard){const hd=fichaCard.querySelector('.hd');const ab=document.createElement('button');
+   ab.className='chip';ab.style.cssText='margin-left:auto;border:1px solid var(--line);background:var(--panel2);border-radius:20px;padding:4px 10px;cursor:pointer;font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--muted);display:inline-flex;gap:5px;align-items:center';
+   ab.innerHTML=ic('<path d="M4 8v4h3l4 3V5L7 8H4z"/><path d="M14 7a4 4 0 010 6"/>')+'Ouvir';
+   ab.title=ttsOK?'Narrar a ficha':'Narração indisponível neste navegador';if(!ttsOK)ab.style.opacity=.5;
+   ab.addEventListener('click',()=>{if(!selId){speak('Toque em um organismo do estuário para ouvir a ficha.');return;}
+     const s=byId[selId];let t=`${s.pop}. Nome científico ${s.sci.split(' · ')[0]}. ${s.papel}. ${s.nota}`;
+     if(lastRes)t+=` Concentração simulada: ${fmt(lastRes[selId])} ${POLL[currentPoll].unit}.`;speak(t);});
+   hd.appendChild(ab);}
+
+ /* ---------- CARDS extras após o comparador ---------- */
+ function card(id,title,pill){const c=document.createElement('div');c.className='card';c.id=id;c.style.marginTop='16px';
+   c.innerHTML=`<div class="hd"><h2>${title}</h2>${pill?`<span class="pill">${pill}</span>`:''}</div><div class="bd"></div>`;return c;}
+
+ /* MONTAR A TEIA */
+ const buildCard=card('v5Build','Montar a teia — descobertas','jogo');buildCard.hidden=true;
+ buildCard.querySelector('.bd').innerHTML=
+  `<div class="playrow"><div class="scorebig" id="buildScore">0</div><div style="color:var(--muted);font-size:13px">ligações de <b id="buildTotal">0</b> descobertas</div>
+   <button class="btn" id="buildReveal" style="margin-left:auto">Revelar restantes</button><button class="btn" id="buildReset">Recomeçar</button></div>
+   <div class="hint2">Clique em dois organismos para testar se um come o outro. Acertou? A ligação acende em verde.</div>`;
+ cmpCard.after(buildCard);
+
+ /* QUIZ */
+ const quizCard=card('v5Quiz','Quiz da teia','gamificação');quizCard.hidden=true;
+ quizCard.querySelector('.bd').innerHTML=`<div id="quizBody"></div>
+   <div class="miniact"><button class="btn primary" id="quizCheck" style="flex:1">Corrigir</button><button class="btn" id="quizNew">Novas perguntas</button></div>
+   <div id="quizResult" style="margin-top:12px"></div>`;
+ buildCard.after(quizCard);
+
+ /* DADOS REAIS */
+ const dataCard=card('v5Data','Dados reais — validar o modelo','medido × simulado');dataCard.hidden=false;
+ const dKeys=['ostra','tainha','robalo','boto','humano'];
+ dataCard.querySelector('.bd').innerHTML=
+  `<div class="hint2" style="margin-top:0">Digite valores medidos (de artigos ou de coleta local) para comparar com a simulação. Unidade conforme o poluente ativo.</div>`+
+  `<div style="margin:12px 0">${dKeys.map(k=>`<div class="drrow"><label>${byId[k].pop}</label><input type="number" min="0" step="0.01" data-dr="${k}" placeholder="medido"></div>`).join('')}</div>`+
+  `<div class="miniact"><button class="btn primary" id="dataCompare" style="flex:1">Comparar</button><button class="btn" id="dataClear">Limpar</button></div>`+
+  `<svg class="chart" id="chartData" viewBox="0 0 620 230" hidden style="margin-top:12px"></svg>`;
+ quizCard.after(dataCard);
+
+ /* PAINEL DO PROFESSOR */
+ const teacher=card('v5Teacher','Painel do professor (local)','sessão');
+ teacher.querySelector('.bd').innerHTML=
+  `<div class="drrow"><label>Turma / atividade</label><input type="text" id="turma" placeholder="ex.: 2º A — manhã"></div>`+
+  `<div class="miniact"><button class="btn primary" id="recReg" style="flex:1">Registrar resultado atual</button><button class="btn" id="recCSV">Exportar CSV</button></div>`+
+  `<table class="tlog" id="recTable"><thead><tr><th>Hora</th><th>Turma</th><th>Atividade</th><th>Pontuação</th></tr></thead><tbody></tbody></table>`+
+  `<div class="hint2">Registra os resultados desta sessão neste aparelho. A consolidação entre vários dispositivos em tempo real exige um servidor — aqui você exporta o CSV de cada estação e junta depois.</div>`;
+ dataCard.after(teacher);
+
+ /* ACESSIBILIDADE: áudio + Libras */
+ const a11y=card('v5A11y','Acessibilidade','inclusão');
+ a11y.querySelector('.bd').innerHTML=
+  `<div class="miniact"><button class="btn" id="aRead" ${ttsOK?'':'disabled'}>${ic('<path d="M4 8v4h3l4 3V5L7 8H4z"/><path d="M14 7a4 4 0 010 6"/>')}Narrar seleção</button>`+
+   `<button class="btn" id="aStop">Parar áudio</button>`+
+   `<button class="btn" id="aLibras">Ativar Libras (VLibras)</button></div>`+
+   `<div class="vlibras-note" id="librasNote">Narração ${ttsOK?'disponível':'indisponível neste navegador'}. O intérprete de Libras usa o widget oficial VLibras e requer conexão com a internet.</div>`;
+ teacher.after(a11y);
+
+ /* ====================== LÓGICA ====================== */
+ // troca de modo
+ function setMode(m){mode=m;modebar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.mode===m));
+   document.body.classList.toggle('buildmode',m==='montar');
+   buildCard.hidden=m!=='montar';quizCard.hidden=m!=='quiz';
+   pickA=null;sim.querySelectorAll('.org').forEach(o=>o.classList.remove('pick'));
+   removeBanner();
+   if(m==='montar'){resetSim();startBuild();}
+   if(m==='quiz'){newQuiz();}
+ }
+ modebar.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+
+ // ---- MONTAR A TEIA ----
+ let pickA=null,found=new Set();
+ const allEdges=[];S.forEach(s=>s.diet.forEach(p=>allEdges.push(p+'>'+s.id)));
+ function startBuild(){found=new Set();document.body.classList.remove('reveal');
+   sim.querySelectorAll('.flow').forEach(f=>f.classList.remove('found'));
+   document.getElementById('buildTotal').textContent=allEdges.length;document.getElementById('buildScore').textContent='0';
+   banner('Modo montar a teia: clique em <b>dois organismos</b> para testar se um come o outro.');}
+ function buildPick(id){
+   const g=sim.querySelector(`.org[data-id="${id}"]`);
+   if(!pickA){pickA=id;g.classList.add('pick');return;}
+   if(pickA===id){g.classList.remove('pick');pickA=null;return;}
+   const a=pickA,b=id;sim.querySelector(`.org[data-id="${a}"]`).classList.remove('pick');pickA=null;
+   let prey=null,pred=null;
+   if(byId[a].diet.includes(b)){pred=a;prey=b;}else if(byId[b].diet.includes(a)){pred=b;prey=a;}
+   if(prey){const key=prey+'>'+pred;const path=sim.querySelector(`.flow[data-a="${prey}"][data-b="${pred}"]`);
+     if(!found.has(key)){found.add(key);if(path)path.classList.add('found');
+       document.getElementById('buildScore').textContent=found.size;
+       g.classList.add('flashok');setTimeout(()=>g.classList.remove('flashok'),600);
+       banner(`Correto! <b>${byId[pred].pop}</b> come <b>${byId[prey].pop}</b>. (${found.size}/${allEdges.length})`);
+       if(found.size===allEdges.length)banner('🎉 Você reconstruiu toda a teia alimentar! Pontuação máxima.');}
+     else banner('Essa ligação você já tinha descoberto.');
+   }else{g.classList.add('flash');setTimeout(()=>g.classList.remove('flash'),500);
+     banner(`Não há ligação direta entre <b>${byId[a].pop}</b> e <b>${byId[b].pop}</b>.`);}
+ }
+ document.getElementById('buildReveal').addEventListener('click',()=>{document.body.classList.toggle('reveal');});
+ document.getElementById('buildReset').addEventListener('click',startBuild);
+ // captura cliques no modo montar (impede o explorar)
+ sim.addEventListener('click',e=>{if(mode!=='montar')return;const g=e.target.closest('.org');if(!g)return;
+   e.stopPropagation();e.preventDefault();buildPick(g.dataset.id);},true);
+ // banner
+ let bn=null;function banner(html){removeBanner();bn=document.createElement('div');bn.className='buildbanner';bn.innerHTML=html;
+   document.querySelector('.scene-host').appendChild(bn);}
+ function removeBanner(){if(bn){bn.remove();bn=null;}}
+
+ // ---- QUIZ ----
+ let Q=[],qSel={},qScore=0;
+ const rnd=a=>a[Math.floor(Math.random()*a.length)];
+ function distract(correctPop,pool,n){const out=[];const c=[...new Set(pool.map(s=>s.pop))].filter(p=>p!==correctPop);
+   while(out.length<n&&c.length){const i=Math.floor(Math.random()*c.length);out.push(c.splice(i,1)[0]);}return out;}
+ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+ function newQuiz(){
+   const hg=simulate('mercurio',1),mp=simulate('microplastico',1);
+   const maxHg=S.slice().sort((a,b)=>hg[b.id]-hg[a.id])[0];
+   const maxMp=S.slice().sort((a,b)=>mp[b.id]-mp[a.id])[0];
+   const prod=S.filter(s=>s.band===0),topo=S.filter(s=>s.band===4&&!s.human),tn=byId['tainha'];
+   const pTopo=rnd(topo),pProd=rnd(prod),preyT=byId[rnd(tn.diet)];
+   Q=[
+    {q:'Qual organismo acumula <span>mais mercúrio</span> na simulação?',c:maxHg.pop,o:[maxHg.pop,...distract(maxHg.pop,S.filter(s=>s.band<=2),3)]},
+    {q:'No cenário de <span>microplástico</span>, onde a concentração fica maior?',c:maxMp.pop,o:[maxMp.pop,...distract(maxMp.pop,S.filter(s=>s.band>=3),3)]},
+    {q:'Qual destes é um <span>produtor</span> (base da teia)?',c:pProd.pop,o:[pProd.pop,...distract(pProd.pop,S.filter(s=>s.band>=2),3)]},
+    {q:'Qual destes é um <span>predador de topo</span>?',c:pTopo.pop,o:[pTopo.pop,...distract(pTopo.pop,S.filter(s=>s.band<=1),3)]},
+    {q:'O que a <span>tainha</span> come?',c:preyT.pop,o:[preyT.pop,...distract(preyT.pop,S.filter(s=>!tn.diet.includes(s.id)&&s.id!=='tainha'),3)]},
+   ].map(x=>({...x,o:shuffle(x.o)}));
+   qSel={};qScore=0;document.getElementById('quizResult').innerHTML='';renderQuiz();
+ }
+ function renderQuiz(){document.getElementById('quizBody').innerHTML=Q.map((x,i)=>
+   `<div class="qz" data-qi="${i}"><div class="qn">${i+1}. ${x.q}</div>${x.o.map(o=>`<button class="opt" data-o="${o}">${o}</button>`).join('')}</div>`).join('');
+   document.querySelectorAll('#quizBody .opt').forEach(b=>b.addEventListener('click',()=>{const qi=b.closest('.qz').dataset.qi;
+     qSel[qi]=b.dataset.o;b.closest('.qz').querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));b.classList.add('sel');}));}
+ document.getElementById('quizCheck').addEventListener('click',()=>{qScore=0;
+   Q.forEach((x,i)=>{const qz=document.querySelector(`.qz[data-qi="${i}"]`);qz.querySelectorAll('.opt').forEach(o=>{o.classList.remove('ok','no');
+     if(o.dataset.o===x.c)o.classList.add('ok');else if(o.dataset.o===qSel[i])o.classList.add('no');});if(qSel[i]===x.c)qScore++;});
+   document.getElementById('quizResult').innerHTML=`<div class="playrow"><div class="scorebig">${qScore}/${Q.length}</div><div style="color:var(--muted)">${qScore===Q.length?'Perfeito! Você dominou a teia.':qScore>=3?'Bom! Reveja as que errou.':'Explore mais a teia e tente de novo.'}</div></div>`;
+   lastQuiz=qScore+'/'+Q.length;});
+ document.getElementById('quizNew').addEventListener('click',newQuiz);
+
+ // ---- DADOS REAIS ----
+ document.getElementById('dataClear').addEventListener('click',()=>{dataCard.querySelectorAll('[data-dr]').forEach(i=>i.value='');
+   document.getElementById('chartData').setAttribute('hidden','');});
+ document.getElementById('dataCompare').addEventListener('click',()=>{
+   if(!lastRes){document.getElementById('run').click();}
+   const rows=dKeys.map(k=>({s:byId[k],sim:lastRes?lastRes[k]:0,med:parseFloat((dataCard.querySelector(`[data-dr="${k}"]`).value||'').replace(',','.'))}))
+     .filter(r=>!isNaN(r.med));
+   const c=document.getElementById('chartData');if(!rows.length){c.setAttribute('hidden','');return;}c.removeAttribute('hidden');
+   const W=620,H=230,L=40,T=14,B=46,gap=24,P=POLL[currentPoll];c.innerHTML='';
+   const max=Math.max(...rows.flatMap(r=>[r.sim,r.med]),1e-6),n=rows.length,plotW=W-L-14,plotH=H-T-B,cw=plotW/n;
+   rows.forEach((r,i)=>{const x0=L+i*cw,bw=cw/2-gap/2,vs=r.sim/max,vm=r.med/max;
+     c.appendChild(E('rect',{x:x0+gap/2,y:T+plotH*(1-vs),width:bw,height:plotH*vs,rx:3,fill:'#155A63'}));
+     c.appendChild(E('rect',{x:x0+gap/2+bw,y:T+plotH*(1-vm),width:bw,height:plotH*vm,rx:3,fill:'#E0902F'}));
+     const t1=E('text',{x:x0+gap/2+bw/2,y:T+plotH*(1-vs)-3,'text-anchor':'middle','font-size':'9','fill':'#555','font-family':'var(--mono)'});t1.textContent=fmt(r.sim);c.appendChild(t1);
+     const t2=E('text',{x:x0+gap/2+bw*1.5,y:T+plotH*(1-vm)-3,'text-anchor':'middle','font-size':'9','fill':'#555','font-family':'var(--mono)'});t2.textContent=fmt(r.med);c.appendChild(t2);
+     const lab=E('text',{x:x0+cw/2,y:H-30,'text-anchor':'middle','font-size':'10','fill':'#36423f'});lab.textContent=r.s.pop;c.appendChild(lab);});
+   c.appendChild(E('line',{x1:L,y1:T+plotH,x2:W-14,y2:T+plotH,stroke:css('--line')}));
+   c.appendChild(E('rect',{x:L,y:H-18,width:11,height:11,rx:2,fill:'#155A63'}));const la=E('text',{x:L+16,y:H-9,'font-size':'10','fill':css('--muted')});la.textContent='simulado';c.appendChild(la);
+   c.appendChild(E('rect',{x:L+110,y:H-18,width:11,height:11,rx:2,fill:'#E0902F'}));const lb=E('text',{x:L+126,y:H-9,'font-size':'10','fill':css('--muted')});lb.textContent='medido ('+P.unit+')';c.appendChild(lb);
+ });
+
+ // ---- PAINEL DO PROFESSOR ----
+ let lastQuiz='—';const recs=[];
+ document.getElementById('recReg').addEventListener('click',()=>{const turma=(document.getElementById('turma').value||'—');
+   const atividade=mode==='quiz'?'Quiz':mode==='montar'?'Montar a teia':'Exploração';
+   const pont=mode==='quiz'?lastQuiz:mode==='montar'?(found.size+'/'+allEdges.length):'—';
+   recs.push({h:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),turma,atividade,pont});
+   document.querySelector('#recTable tbody').innerHTML=recs.map(r=>`<tr><td>${r.h}</td><td>${r.turma}</td><td>${r.atividade}</td><td>${r.pont}</td></tr>`).join('');});
+ document.getElementById('recCSV').addEventListener('click',()=>{if(!recs.length)return;
+   let csv='Hora;Turma;Atividade;Pontuacao\n'+recs.map(r=>`${r.h};${r.turma};${r.atividade};${r.pont}`).join('\n');
+   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='relatorio_turma.csv';a.click();URL.revokeObjectURL(a.href);});
+
+ // ---- ACESSIBILIDADE ----
+ document.getElementById('aRead').addEventListener('click',()=>{if(!selId){speak('Selecione um organismo no estuário.');return;}
+   const s=byId[selId];speak(`${s.pop}. ${s.papel}. ${s.nota}`);});
+ document.getElementById('aStop').addEventListener('click',()=>{if(ttsOK)speechSynthesis.cancel();});
+ document.getElementById('aLibras').addEventListener('click',function(){const note=document.getElementById('librasNote');
+   if(window.VLibras){note.textContent='VLibras já está ativo.';return;}note.textContent='Carregando VLibras…';
+   const sc=document.createElement('script');sc.src='https://vlibras.gov.br/app/vlibras-plugin.js';
+   sc.onload=()=>{try{new window.VLibras.Widget('https://vlibras.gov.br/app');note.textContent='Intérprete de Libras ativado (canto da tela).';}catch(e){note.textContent='Não foi possível iniciar o VLibras.';}};
+   sc.onerror=()=>{note.textContent='Sem conexão: o intérprete de Libras (VLibras) precisa de internet. A narração em áudio funciona offline.';};
+   document.body.appendChild(sc);});
+ })();
+</script>
+</body>
+</html>
