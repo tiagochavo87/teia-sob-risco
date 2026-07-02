@@ -186,7 +186,7 @@ dialog.sheet::backdrop{background:rgba(7,30,34,.55)}
 .sheet .sh-bd{padding:18px 20px}
 .sheet dl{display:grid;grid-template-columns:auto 1fr;gap:7px 14px;margin:0;font-size:13.5px}
 .sheet dt{color:var(--muted);font-weight:600}.sheet dd{margin:0}
-.sheet .close{position:absolute;top:14px;right:14px;border:0;background:#fff;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:15px;color:var(--muted);box-shadow:0 1px 5px rgba(0,0,0,.14)}
+.sheet .close{position:absolute;top:14px;right:14px;z-index:3;border:0;background:#fff;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:15px;color:var(--muted);box-shadow:0 1px 5px rgba(0,0,0,.14)}
 
 /* ===== Doc ===== */
 .doc{max-width:760px}
@@ -885,14 +885,15 @@ function filterCat(f){document.querySelectorAll('#catGrid .plate').forEach(p=>{c
 const sheet=document.getElementById('sheet');
 function openSheet(id){const s=byId[id];const presas=s.diet.map(d=>byId[d].pop).join(', ')||'— produtor (não predador)';
   const preds=S.filter(x=>x.diet.includes(id)).map(x=>x.pop).join(', ')||'— topo desta teia';
-  sheet.innerHTML=`<button class="close" aria-label="Fechar" onclick="document.getElementById('sheet').close()">✕</button>
+  sheet.innerHTML=`<button class="close" aria-label="Fechar">✕</button>
     <div class="sh-top"><svg class="ill-lg" viewBox="0 0 100 100" style="color:${tlc(s)}"><use href="#${s.ill}"/></svg>
       <div><h3>${s.pop}</h3><div class="bn"><span class="sci">${s.sci}</span> ${s.aut}</div>
       <div class="tlrow"><span class="pillc" style="background:${tlc(s)}">NT ${s.tl}</span><span style="font-size:12.5px;color:var(--muted)">${s.papel}</span></div></div></div>
     <div class="sh-bd"><p style="margin:0 0 13px;font-size:13.5px;color:#33403c">${s.nota}</p>
       <dl><dt>Come</dt><dd>${presas}</dd><dt>É comido por</dt><dd>${preds}</dd></dl></div>`;
   if(sheet.showModal)sheet.showModal();}
-sheet.addEventListener('click',e=>{if(e.target===sheet)sheet.close();});
+sheet.addEventListener('click',e=>{if(e.target===sheet||e.target.closest('.close'))sheet.close();});
+sheet.addEventListener('cancel',e=>{/* Esc fecha nativamente */});
 
 /* ===== Navegação / eventos ===== */
 function go(v){document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.view===v));
