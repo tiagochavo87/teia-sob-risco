@@ -30,6 +30,10 @@ h1,h2,h3{margin:0;letter-spacing:-.01em}
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--w1)}
 a{color:var(--w2)}
 [hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+details>summary::-webkit-details-marker{display:none}
+details.card>summary.hd::after{content:"▸";margin-left:8px;color:var(--muted);display:inline-block;transition:transform .15s}
+details.card[open]>summary.hd::after{transform:rotate(90deg)}
 
 /* ===== App bar ===== */
 .appbar{position:sticky;top:0;z-index:40;background:rgba(8,42,49,.96);backdrop-filter:blur(8px);color:#DCEDE9;border-bottom:1px solid #06262c}
@@ -433,7 +437,7 @@ body.bigfont .chart .lbl{font-size:12px}
         <div class="card" id="roCard" hidden><div class="hd"><h2>Leituras</h2><span class="pill" id="unitPill"></span></div>
           <div class="bd" style="padding:0"><div class="readouts" style="border:0;border-radius:0">
             <div class="ro"><div class="k">Mais contaminado</div><div class="v" id="roTop" style="font-size:13px">—</div></div>
-            <div class="ro"><div class="k">Fator de biomagnif.</div><div class="v" id="roFbm">—<small>×</small></div></div>
+            <div class="ro" title="Fator de magnificação trófica: inclinação de log10(C) por nível trófico (>1 biomagnifica)"><div class="k">Magnificação trófica</div><div class="v" id="roFbm">—<small>×/NT</small></div></div>
             <div class="ro"><div class="k">No ser humano</div><div class="v" id="roHuman">—</div></div>
             <div class="ro" id="roOverWrap"><div class="k">Pescados &gt; limite</div><div class="v" id="roOver">—</div></div>
           </div></div>
@@ -453,9 +457,19 @@ body.bigfont .chart .lbl{font-size:12px}
             <button class="btn" id="csv"><svg class="g" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3v10m0 0l-4-4m4 4l4-4M4 17h12"/></svg>CSV</button>
             <button class="btn" id="png"><svg class="g" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="12" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="M3 14l4-4 3 3 3-3 4 4"/></svg>PNG</button>
             <button class="btn" id="print"><svg class="g" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 9V3h8v6M6 14h8v3H6zM4 9h12v5H4z"/></svg>Imprimir</button>
+            <button class="btn" id="permalink" title="Copiar link que reproduz este cenário exato"><svg class="g" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 12a3 3 0 004.2 0l2.3-2.3a3 3 0 00-4.2-4.2l-1 1M12 8a3 3 0 00-4.2 0L5.5 10.3a3 3 0 004.2 4.2l1-1"/></svg>Link</button>
           </div>
         </div></div>
     </div>
+
+    <details class="card" id="dataTableWrap" hidden style="margin-top:16px">
+      <summary class="hd" style="cursor:pointer;list-style:none"><h2>Tabela de dados</h2><span class="pill">acessível · leitor de tela</span></summary>
+      <div class="bd" style="padding:0;overflow-x:auto">
+        <table class="tlog" id="dataTable" style="margin:0"><caption class="sr-only" id="dataCaption"></caption>
+          <thead><tr><th scope="col">Organismo</th><th scope="col">Nível trófico</th><th scope="col">Papel</th><th scope="col">Concentração</th><th scope="col">Acima do limite?</th></tr></thead>
+          <tbody></tbody></table>
+      </div>
+    </details>
 
     <div class="card" id="cmpCard" hidden style="margin-top:16px">
       <div class="hd"><h2>Comparador de cenários</h2><span class="pill">Aula 4</span></div>
@@ -475,7 +489,7 @@ body.bigfont .chart .lbl{font-size:12px}
     </div>
 
     <div class="statusbar">
-      <span><span class="dot"></span>modelo trófico-ecotoxicológico v5.0</span>
+      <span><span class="dot"></span>modelo trófico-ecotoxicológico v6.0</span>
       <span id="stPoll">poluente: mercúrio</span><span id="stInt">intensidade: 60%</span>
       <span id="stRun">última liberação: —</span>
       <span style="margin-left:auto">32 táxons · estuário/manguezal SC</span>
@@ -506,6 +520,8 @@ body.bigfont .chart .lbl{font-size:12px}
       <p>Os <b>produtores</b> (fitoplâncton, folhiço do mangue) absorvem o poluente direto da água. Cada consumidor herda a concentração das presas e soma o que filtra da água.</p>
       <h3>Mercúrio × microplástico</h3>
       <p>O <b>mercúrio</b> (metilmercúrio) tem fator de amplificação maior que 1: <i>biomagnifica</i> e cresce a cada elo, ficando máximo nos predadores de topo e no ser humano — é o que produz a inclinação positiva no gráfico de concentração por nível trófico. O <b>microplástico</b> tem fator menor que 1 e entra sobretudo pela filtragem: acumula mais nos <i>filtradores</i> (ostra, mexilhão), sem biomagnificar — a nuvem de pontos fica achatada.</p>
+      <h3>Fator de magnificação trófica (TMF)</h3>
+      <p>A leitura <b>Magnificação trófica</b> resume, num único número, se o poluente sobe a teia. Ela é a inclinação da reta de <b>log₁₀(concentração)</b> contra o <b>nível trófico</b>, convertida em fator por nível (TMF = 10<sup>inclinação</sup>) — a mesma métrica usada em estudos de campo. <b>TMF &gt; 1</b> indica biomagnificação (caso do mercúrio); <b>TMF ≈ 1 ou menor</b> indica que o poluente acumula sem biomagnificar (caso do microplástico, concentrado nos filtradores). O ser humano fica de fora do cálculo por ser um <i>endpoint</i> de consumo, não um elo trófico fixo.</p>
       <h3>Ancoragem nos dados</h3>
       <p>Os valores são <b>relativos e ilustrativos</b>, com fins didáticos — não são medições. Mas reproduzem padrões reais: a razão topo/base do mercúrio na ordem do estudo da Baía de Guanabara (~36×); ostras e mexilhões na faixa de 12–16 partículas por grama observada em bivalves do litoral; e a linha de 0,5 mg/kg da legislação brasileira para mercúrio em pescado não predador.</p>
       <div class="callout"><b>Uso em sala:</b> compare cenários (poluente, fonte, intensidade) e exporte os dados por organismo em CSV — produto previsto para a Aula 3 da Corrente de Aprendizagem.</div>
@@ -583,12 +599,31 @@ const tlc=s=>css(TLV[s.band]);
 const POLL={
  mercurio:{rotulo:'Mercúrio (metilmercúrio)',bcf:{fito:.9,detrito:.7,mangue_v:.2,mangue_p:.2,mangue_b:.2,marisma:.25,alga:.45},step:1.9,waterDirect:.35,scale:.42,unit:'mg/kg',anvisa:.5},
  microplastico:{rotulo:'Microplástico',bcf:{fito:.3,detrito:.6,mangue_v:.15,mangue_p:.15,mangue_b:.15,marisma:.2,alga:.35},step:.8,waterDirect:1,scale:13,unit:'part./g',anvisa:null},
+ /* [v6 · P2 — habilitar terceiro poluente]
+    Organoclorado lipofílico (ex.: PCB/DDT): biomagnifica MAIS que o mercúrio
+    (step alto), entrada quase toda pela dieta (waterDirect baixo).
+    Para ativar: (1) descomente o objeto abaixo; (2) adicione o botão em #poll;
+    (3) opcionalmente crie uma entrada em SRC. O TMF deve sair bem > 1.
+ organoclorado:{rotulo:'Organoclorado (PCB)',bcf:{fito:.6,detrito:.8,mangue_v:.2,mangue_p:.2,mangue_b:.2,marisma:.25,alga:.4},step:2.4,waterDirect:.1,scale:.06,unit:'µg/kg',anvisa:null},
+ */
 };
 function simulate(pk,intensity){const P=POLL[pk],C={};
  [...S].sort((a,b)=>a.band-b.band).forEach(s=>{
    if(!s.diet.length)C[s.id]=intensity*(P.bcf[s.id]??.5);
    else{const d=s.diet.reduce((a,p)=>a+(C[p]||0),0)/s.diet.length;C[s.id]=d*P.step+intensity*s.filter*P.waterDirect;}});
  const o={};S.forEach(s=>o[s.id]=Math.max(0,C[s.id]*P.scale));return o;}
+
+/* Fator de magnificação trófica (TMF) = 10^b, onde b é a inclinação de
+   log10(C) ~ nível trófico. Exclui o ser humano (endpoint de escolha) e
+   organismos com concentração nula. TMF>1 => biomagnifica. */
+function trophicMagnification(res){
+  const pts=S.filter(s=>res[s.id]>0&&!s.human).map(s=>({x:s.tl,y:Math.log10(res[s.id])}));
+  const n=pts.length;if(n<3)return null;
+  const sx=pts.reduce((a,p)=>a+p.x,0),sy=pts.reduce((a,p)=>a+p.y,0);
+  const sxy=pts.reduce((a,p)=>a+p.x*p.y,0),sxx=pts.reduce((a,p)=>a+p.x*p.x,0);
+  const den=n*sxx-sx*sx;if(Math.abs(den)<1e-9)return null;
+  return Math.pow(10,(n*sxy-sx*sy)/den);
+}
 
 const fmt=v=>v>=10?v.toFixed(0):v.toFixed(2);
 function contam(r){const a=[30,66,72],b=[156,31,18];const c=a.map((x,i)=>Math.round(x+(b[i]-x)*r));return`rgb(${c[0]},${c[1]},${c[2]})`;}
@@ -718,23 +753,42 @@ function runSim(){
   });
   document.getElementById('roCard').hidden=false;
   document.getElementById('chartsRow').hidden=false;
+  document.getElementById('dataTableWrap').hidden=false;
   document.getElementById('cmpCard').hidden=false;
   document.getElementById('unitPill').textContent=P.unit;
   document.getElementById('unitPill2').textContent=P.unit;
-  renderReadouts(res,P);drawBar(res,P);drawScatter(res,P);renderInsight(res,P);
+  renderReadouts(res,P);drawBar(res,P);drawScatter(res,P);renderInsight(res,P);fillDataTable(res,P);
   if(selId)renderFicha(selId);
+  encodeScenario();
   document.getElementById('stRun').textContent='última liberação: '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('scenarioPill').textContent='cenário '+document.getElementById('src').selectedOptions[0].text.split(' (')[0].toLowerCase();
 }
 function renderReadouts(res,P){
   const sorted=S.map(s=>({s,v:res[s.id]})).sort((a,b)=>b.v-a.v);
   document.getElementById('roTop').innerHTML=sorted[0].s.pop+'<br><span style="font-size:11px;color:var(--muted)">'+fmt(sorted[0].v)+' '+P.unit+'</span>';
-  const base=res['fito']||1e-6;
-  document.getElementById('roFbm').innerHTML=(sorted[0].v/base).toFixed(1)+'<small>×</small>';
+  const tmf=trophicMagnification(res);const fbmEl=document.getElementById('roFbm');
+  if(tmf==null){fbmEl.innerHTML='—';}
+  else{fbmEl.innerHTML=tmf.toFixed(1)+'<small>×/NT</small>';
+    fbmEl.closest('.ro').title=tmf>1.2?'Biomagnifica ao longo da teia (TMF > 1)'
+      :tmf<0.85?'Acumula, mas não biomagnifica (TMF < 1)':'Sem tendência trófica clara (TMF ≈ 1)';}
   document.getElementById('roHuman').innerHTML=fmt(res['humano'])+' <small>'+P.unit+'</small>';
   const w=document.getElementById('roOverWrap');
   if(P.anvisa){const o=S.filter(s=>s.edible&&res[s.id]>P.anvisa);document.getElementById('roOver').textContent=o.length+'/'+S.filter(s=>s.edible).length;w.classList.toggle('alert',o.length>0);}
   else{document.getElementById('roOver').textContent='—';w.classList.remove('alert');}
+}
+
+/* ===== Tabela de dados acessível ===== */
+function fillDataTable(res,P){
+  const tb=document.querySelector('#dataTable tbody');if(!tb)return;
+  const rows=S.map(s=>({s,v:res[s.id]})).sort((a,b)=>b.v-a.v);
+  const nOver=rows.filter(r=>P.anvisa&&r.s.edible&&r.v>P.anvisa).length;
+  document.getElementById('dataCaption').textContent=
+    `Concentração simulada de ${P.rotulo} por organismo, em ${P.unit}. `+
+    (P.anvisa?`${nOver} pescado(s) acima do limite de ${fmt(P.anvisa)} ${P.unit}.`:'Sem limite legal definido para este poluente.');
+  tb.innerHTML=rows.map(r=>{
+    const over=(P.anvisa&&r.s.edible&&r.v>P.anvisa);
+    return `<tr${over?' style="color:var(--warn);font-weight:600"':''}><td>${r.s.pop}</td><td>${r.s.tl}</td><td>${r.s.papel}</td><td style="font-family:var(--mono);text-align:right">${fmt(r.v)} ${P.unit}</td><td>${r.s.edible?(over?'Sim ⚠':'Não'):'—'}</td></tr>`;
+  }).join('');
 }
 
 /* ===== Gráfico de barras ===== */
@@ -766,13 +820,14 @@ function drawScatter(res,P){
   // anvisa
   if(P.anvisa){const y=yOf(P.anvisa);c.appendChild(E('line',{class:'anvisa',x1:L,y1:y,x2:L+plotW,y2:y}));
     const t=E('text',{class:'anvisa-t',x:L+plotW,y:y-3,'text-anchor':'end'});t.textContent='0,5';c.appendChild(t);}
-  // linha de tendência (regressão linear simples)
-  const pts=S.map(s=>({x:s.tl,y:res[s.id]}));const n=pts.length;
+  // linha de tendência: regressão sobre organismos ecológicos (exclui o humano)
+  const pts=S.filter(s=>!s.human).map(s=>({x:s.tl,y:res[s.id]}));const n=pts.length;
   const sx=pts.reduce((a,p)=>a+p.x,0),sy=pts.reduce((a,p)=>a+p.y,0),sxy=pts.reduce((a,p)=>a+p.x*p.y,0),sxx=pts.reduce((a,p)=>a+p.x*p.x,0);
   const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx),inter=(sy-slope*sx)/n;
   c.appendChild(E('line',{class:'trend',x1:xOf(1),y1:yOf(Math.max(0,inter+slope*1)),x2:xOf(5),y2:yOf(Math.max(0,inter+slope*5))}));
-  // pontos
-  S.forEach(s=>{const x=xOf(s.tl)+(Math.random()*10-5),y=yOf(res[s.id]),ratio=Math.min(1,res[s.id]/max);
+  // pontos (jitter determinístico por id — não "pula" entre rodadas)
+  const jit=id=>{let h=0;for(let i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return (h%11)-5;};
+  S.forEach(s=>{const x=xOf(s.tl)+jit(s.id),y=yOf(res[s.id]),ratio=Math.min(1,res[s.id]/max);
     c.appendChild(E('circle',{class:'pt',cx:x,cy:y,r:s.human?6:5,fill:s.human?css('--tl5'):contam(ratio)}));});
 }
 
@@ -858,6 +913,12 @@ document.getElementById('reset').addEventListener('click',resetSim);
 document.getElementById('csv').addEventListener('click',exportCSV);
 document.getElementById('png').addEventListener('click',exportPNG);
 document.getElementById('print').addEventListener('click',()=>window.print());
+document.getElementById('permalink').addEventListener('click',e=>{
+  if(!lastRes){runSim();}encodeScenario();const url=location.href;const btn=e.currentTarget;
+  const ok=()=>{const old=btn.innerHTML;btn.innerHTML='Link copiado ✓';setTimeout(()=>btn.innerHTML=old,1600);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(ok).catch(()=>prompt('Copie o link do cenário:',url));}
+  else{prompt('Copie o link do cenário:',url);}
+});
 document.getElementById('catFilter').addEventListener('click',e=>{if(e.target.dataset.f){
   document.querySelectorAll('#catFilter button').forEach(b=>b.setAttribute('aria-pressed',b===e.target));filterCat(e.target.dataset.f);}});
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
@@ -914,9 +975,29 @@ document.getElementById('cmpClear').addEventListener('click',()=>{CMP.A=CMP.B=nu
 [['Produtores','--tl1'],['Consumidores 1º','--tl2'],['Consumidores 2º','--tl3'],['Consumidores 3º','--tl4'],['Topo','--tl5']]
  .forEach(([t,v])=>{const i=document.createElement('i');i.innerHTML=`<span class="sw" style="background:${css(v)}"></span>${t}`;document.getElementById('legend').appendChild(i);});
 
+/* ===== Permalink de cenário (offline, via location.hash) ===== */
+let _hashLock=false;
+function encodeScenario(){
+  if(_hashLock)return;
+  const remedEl=document.getElementById('remed');
+  const p={po:currentPoll,in:document.getElementById('int').value,re:remedEl?+remedEl.value:0};
+  try{history.replaceState(null,'','#c='+btoa(JSON.stringify(p)));}catch(e){location.hash='c='+btoa(JSON.stringify(p));}
+}
+function applyScenarioFromHash(){
+  const m=/c=([^&]+)/.exec(location.hash);if(!m)return;
+  let p;try{p=JSON.parse(atob(m[1]));}catch(e){return;}
+  _hashLock=true;
+  const pb=document.querySelector(`#poll [data-poll="${p.po}"]`);if(pb)pb.click();
+  const i=document.getElementById('int');if(i&&p.in!=null){i.value=p.in;updInt();document.getElementById('src').value='custom';}
+  const r=document.getElementById('remed');if(r&&p.re!=null){r.value=p.re;r.dispatchEvent(new Event('input'));}
+  _hashLock=false;
+  go('sim');runSim();
+}
+
 /* init */
 buildSceneBackdrop(document.getElementById('heroScene'),{w:1000,h:470,surf:80,mud:410},false);
 drawSim();buildCatalog();updInt();
+window.addEventListener('load',applyScenarioFromHash);
 </script>
 <style>
 /* ===== v5 ===== */
@@ -960,6 +1041,25 @@ body.buildmode.reveal .flow{opacity:.28}
 .tlog th,.tlog td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}.tlog th{color:var(--muted)}
 .hint2{font-size:12px;color:var(--faint);margin-top:8px;line-height:1.5}
 .vlibras-note{font-size:12px;color:var(--muted);margin-top:8px}
+:root{--ok:#2F8D4E}
+/* ===== Roteiro de aula guiada ===== */
+.tourbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:70;width:min(680px,calc(100% - 24px));
+  background:rgba(8,42,49,.97);color:#eafaf8;border:1px solid #14505a;border-radius:14px;box-shadow:0 16px 40px rgba(6,30,34,.45);
+  padding:14px 16px;display:none}
+.tourbar.on{display:block}
+.tourbar .step{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#7FCFC6}
+.tourbar h4{font-size:15px;margin:4px 0 4px;font-weight:700}
+.tourbar p{font-size:13px;color:#CFE7E1;line-height:1.5;margin:0}
+.tourbar p b{color:#fff}
+.tourbar .row{display:flex;gap:8px;align-items:center;margin-top:12px}
+.tourbar .dots{display:flex;gap:5px;margin-right:auto}
+.tourbar .dots i{width:7px;height:7px;border-radius:50%;background:#2c5b62}
+.tourbar .dots i.on{background:var(--tide)}
+.tourbar button{border:1px solid #2c5b62;background:transparent;color:#eafaf8;font:inherit;font-size:13px;font-weight:650;border-radius:8px;padding:8px 14px;cursor:pointer}
+.tourbar button.primary{background:var(--tide);color:#05242a;border-color:var(--tide)}
+.tourbar button:hover{border-color:var(--tide)}
+.tourbar .x{position:absolute;top:10px;right:12px;border:0;background:transparent;color:#84B4B1;font-size:16px;padding:2px 6px}
+@media print{.tourbar{display:none!important}}
 </style>
 <script>
 "use strict";
@@ -983,6 +1083,50 @@ body.buildmode.reveal .flow{opacity:.28}
   `<button data-mode="quiz">${ic('<circle cx="10" cy="10" r="7.5"/><path d="M8 8a2 2 0 113 1.7c-.6.4-1 .8-1 1.6M10 14h.01"/>')}Quiz</button>`;
  secHead.after(modebar);
  let mode='explorar';
+
+ /* ---------- ROTEIRO DE AULA GUIADA ---------- */
+ const tourBtn=document.createElement('button');
+ tourBtn.innerHTML=ic('<path d="M4 4h9l3 3v9H4z"/><path d="M8 8h5M8 11h5"/>')+'Roteiro de aula';
+ tourBtn.style.cssText='margin-left:auto;border:1.5px solid var(--w3);background:var(--w3);color:#eafaf8;border-radius:10px;padding:10px 15px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px';
+ modebar.appendChild(tourBtn);
+
+ const setPoll=p=>{const b=document.querySelector(`#poll [data-poll="${p}"]`);if(b)b.click();};
+ const setInt=v=>{const i=document.getElementById('int');i.value=v;i.dispatchEvent(new Event('input'));};
+ const TOUR=[
+  {t:'Passo 1 · Liberar mercúrio',h:'Comece pelo metal pesado',
+   p:'Vamos liberar <b>mercúrio</b> em intensidade <b>alta</b> e observar até onde a contaminação chega. Clique em <b>Avançar</b> — o cenário já vem pronto.',
+   act:()=>{setMode('explorar');setPoll('mercurio');setInt(100);runSim();}},
+  {t:'Passo 2 · Ler o TMF',h:'O mercúrio biomagnifica',
+   p:'Olhe a leitura <b>Magnificação trófica (TMF)</b>: valor <b>maior que 1</b>. No gráfico de concentração × nível trófico, a reta <b>sobe</b> — cada elo acumula mais que o anterior. Fixe este cenário como <b>A</b>.',
+   act:()=>{if(!lastRes)runSim();pin('A');}},
+  {t:'Passo 3 · Trocar o poluente',h:'Agora o microplástico',
+   p:'Troque para <b>microplástico</b> na mesma intensidade e libere de novo. Repare para onde a contaminação vai desta vez.',
+   act:()=>{setPoll('microplastico');setInt(100);runSim();}},
+  {t:'Passo 4 · Comparar padrões',h:'Acumula, mas não biomagnifica',
+   p:'O <b>TMF cai para perto de 1</b> e quem lidera agora são os <b>filtradores</b> (ostra, mexilhão), não o predador de topo. Fixe como <b>B</b> e veja lado a lado no <b>Comparador de cenários</b>.',
+   act:()=>{if(!lastRes)runSim();pin('B');document.getElementById('cmpCard').scrollIntoView({behavior:'smooth',block:'center'});}},
+  {t:'Passo 5 · Da teia ao prato',h:'Segurança alimentar',
+   p:'Volte ao mercúrio e abra a <b>Tabela de dados</b>: quantos pescados passam do limite da <b>ANVISA (0,5 mg/kg)</b>? É a ponte entre ecologia e saúde pública — o fecho da aula.',
+   act:()=>{setPoll('mercurio');setInt(100);runSim();const d=document.getElementById('dataTableWrap');d.hidden=false;d.setAttribute('open','');d.scrollIntoView({behavior:'smooth',block:'center'});}},
+ ];
+ let ti=-1;
+ const tour=document.createElement('div');tour.className='tourbar';tour.setAttribute('role','dialog');tour.setAttribute('aria-label','Roteiro de aula guiada');
+ document.body.appendChild(tour);
+ function renderTour(){
+  const s=TOUR[ti];
+  tour.innerHTML=`<button class="x" id="tourX" aria-label="Fechar roteiro">✕</button>`+
+   `<div class="step">${s.t}</div><h4>${s.h}</h4><p>${s.p}</p>`+
+   `<div class="row"><div class="dots">${TOUR.map((_,k)=>`<i class="${k===ti?'on':''}"></i>`).join('')}</div>`+
+   `<button id="tourPrev" ${ti===0?'disabled style="opacity:.4"':''}>Voltar</button>`+
+   `<button class="primary" id="tourNext">${ti===TOUR.length-1?'Concluir':'Avançar'}</button></div>`;
+  document.getElementById('tourX').onclick=closeTour;
+  document.getElementById('tourPrev').onclick=()=>{if(ti>0){ti--;go('sim');TOUR[ti].act();renderTour();}};
+  document.getElementById('tourNext').onclick=()=>{if(ti<TOUR.length-1){ti++;go('sim');TOUR[ti].act();renderTour();}else{closeTour();}};
+ }
+ function openTour(){go('sim');ti=0;tour.classList.add('on');TOUR[0].act();renderTour();}
+ function closeTour(){tour.classList.remove('on');ti=-1;}
+ tourBtn.addEventListener('click',openTour);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&tour.classList.contains('on'))closeTour();});
 
  /* ---------- REMEDIAÇÃO + EXPOSIÇÃO (no card de Parâmetros) ---------- */
  let REMED=0;
@@ -1011,6 +1155,16 @@ body.buildmode.reveal .flow{opacity:.28}
      const v=sim.querySelector(`[data-val="${s.id}"]`);if(v){v.textContent=fmt(ct);v.style.opacity='1';}
      const over=(P.anvisa&&s.edible&&ct>P.anvisa);const bd=sim.querySelector(`[data-badge="${s.id}"]`);if(bd)bd.style.display=over?'':'none';});
  }
+ /* [v6 · P2 — cessar a fonte / depuração]
+    Mostra que, depois de parar a poluição, os produtores limpam rápido e os
+    predadores de topo continuam contaminados por muito mais tempo. Inverte a
+    ordem de K: topo com meia-vida MAIOR. Esboço:
+    function depurate(tn){ if(!lastRes)return; const KD={0:5,1:3.5,2:2.5,3:1.6,4:.9};
+      const max=Math.max(...Object.values(lastRes),1e-6),P=POLL[currentPoll];
+      S.forEach(s=>{const frac=Math.exp(-KD[s.band]*3*tn); const ct=lastRes[s.id]*frac;
+        const u=sim.querySelector(`.org[data-id="${s.id}"] use`); if(u)u.style.color=contam(Math.min(1,ct/max));
+        const v=sim.querySelector(`[data-val="${s.id}"]`); if(v)v.textContent=fmt(ct);}); }
+    Ligar a um segundo botão "Cessar a fonte" ao lado de "Reproduzir". */
  const tExp=document.getElementById('tExp'),tOut=document.getElementById('tOut');
  tExp.addEventListener('input',()=>{tOut.textContent=tExp.value+'%';playing=false;setPlayIcon();applyTime(+tExp.value/100);});
  let playing=false,rafId=null;
@@ -1069,9 +1223,9 @@ body.buildmode.reveal .flow{opacity:.28}
  const teacher=card('v5Teacher','Painel do professor (local)','sessão');
  teacher.querySelector('.bd').innerHTML=
   `<div class="drrow"><label>Turma / atividade</label><input type="text" id="turma" placeholder="ex.: 2º A — manhã"></div>`+
-  `<div class="miniact"><button class="btn primary" id="recReg" style="flex:1">Registrar resultado atual</button><button class="btn" id="recCSV">Exportar CSV</button></div>`+
+  `<div class="miniact"><button class="btn primary" id="recReg" style="flex:1">Registrar resultado atual</button><button class="btn" id="recCSV">CSV</button><button class="btn" id="recJSON">Exportar JSON</button><label class="btn" for="recImport" style="cursor:pointer">Importar</label><input type="file" id="recImport" accept="application/json" hidden><button class="btn" id="recWipe">Apagar</button></div>`+
   `<table class="tlog" id="recTable"><thead><tr><th>Hora</th><th>Turma</th><th>Atividade</th><th>Pontuação</th></tr></thead><tbody></tbody></table>`+
-  `<div class="hint2">Registra os resultados desta sessão neste aparelho. A consolidação entre vários dispositivos em tempo real exige um servidor — aqui você exporta o CSV de cada estação e junta depois.</div>`;
+  `<div class="hint2">Os registros ficam salvos <b>neste aparelho</b> (mesmo ao fechar o navegador). Exporte <b>JSON</b> de cada estação e <b>importe</b> para consolidar a turma — a junção em tempo real entre dispositivos exigiria um servidor.</div>`;
  dataCard.after(teacher);
 
  /* ACESSIBILIDADE: áudio + Libras */
@@ -1183,15 +1337,30 @@ body.buildmode.reveal .flow{opacity:.28}
  });
 
  // ---- PAINEL DO PROFESSOR ----
- let lastQuiz='—';const recs=[];
+ let lastQuiz='—';const REC_KEY='teiaSobRisco.recs';
+ let recs=[];
+ try{recs=JSON.parse(localStorage.getItem(REC_KEY)||'[]');if(!Array.isArray(recs))recs=[];}catch(e){recs=[];}
+ function persistRecs(){try{localStorage.setItem(REC_KEY,JSON.stringify(recs));}catch(e){/* file:// pode bloquear localStorage */}}
+ function renderRecs(){document.querySelector('#recTable tbody').innerHTML=
+   recs.map(r=>`<tr><td>${r.h}</td><td>${r.turma}</td><td>${r.atividade}</td><td>${r.pont}</td></tr>`).join('');}
+ renderRecs();
  document.getElementById('recReg').addEventListener('click',()=>{const turma=(document.getElementById('turma').value||'—');
    const atividade=mode==='quiz'?'Quiz':mode==='montar'?'Montar a teia':'Exploração';
    const pont=mode==='quiz'?lastQuiz:mode==='montar'?(found.size+'/'+allEdges.length):'—';
    recs.push({h:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),turma,atividade,pont});
-   document.querySelector('#recTable tbody').innerHTML=recs.map(r=>`<tr><td>${r.h}</td><td>${r.turma}</td><td>${r.atividade}</td><td>${r.pont}</td></tr>`).join('');});
+   persistRecs();renderRecs();});
+ function dlBlob(content,type,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href);}
  document.getElementById('recCSV').addEventListener('click',()=>{if(!recs.length)return;
-   let csv='Hora;Turma;Atividade;Pontuacao\n'+recs.map(r=>`${r.h};${r.turma};${r.atividade};${r.pont}`).join('\n');
-   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='relatorio_turma.csv';a.click();URL.revokeObjectURL(a.href);});
+   const csv='Hora;Turma;Atividade;Pontuacao\n'+recs.map(r=>`${r.h};${r.turma};${r.atividade};${r.pont}`).join('\n');
+   dlBlob('\ufeff'+csv,'text/csv;charset=utf-8','relatorio_turma.csv');});
+ document.getElementById('recJSON').addEventListener('click',()=>{if(!recs.length)return;
+   dlBlob(JSON.stringify(recs,null,2),'application/json','relatorio_turma.json');});
+ document.getElementById('recImport').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;
+   const rd=new FileReader();rd.onload=()=>{try{const arr=JSON.parse(rd.result);if(Array.isArray(arr)){
+     arr.forEach(r=>{if(r&&r.h&&r.turma!=null)recs.push(r);});persistRecs();renderRecs();}
+   }catch(err){alert('Arquivo JSON inválido.');}e.target.value='';};rd.readAsText(f);});
+ document.getElementById('recWipe').addEventListener('click',()=>{if(!recs.length)return;
+   if(confirm('Apagar todos os registros salvos neste aparelho?')){recs=[];persistRecs();renderRecs();}});
 
  // ---- ACESSIBILIDADE ----
  document.getElementById('aRead').addEventListener('click',()=>{if(!selId){speak('Selecione um organismo no estuário.');return;}
