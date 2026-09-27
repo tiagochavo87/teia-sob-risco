@@ -2,7 +2,7 @@
 
 **Laboratório trófico-ecotoxicológico de um estuário catarinense — da raiz do mangue ao seu prato.**
 
-![versão](https://img.shields.io/badge/versão-6.1-2BB3A3)
+![versão](https://img.shields.io/badge/versão-6.2-2BB3A3)
 ![offline](https://img.shields.io/badge/funciona-offline-155A63)
 ![sem dependências](https://img.shields.io/badge/dependências-nenhuma-0C3A44)
 ![licença](https://img.shields.io/badge/licença-REA%20(CC%20BY--SA)-E0902F)
@@ -25,7 +25,7 @@ O **Teia Sob Risco** é uma aplicação educativa interativa que reconstrói a t
 - **Fator de Magnificação Trófica (TMF):** métrica de campo (inclinação de `log10(C)` × nível trófico) que resume, num número, se o poluente sobe a teia. O gráfico tem uma opção de **escala log** que mostra a própria reta do TMF.
 - **Remediação da fonte** e **exposição ao longo do tempo** (animação da contaminação subindo a teia).
 - **Roteiro de aula guiada:** guia de 5 passos que configura o app automaticamente a cada etapa.
-- **Três modos:** _Explorar_ (livre), _Montar a teia_ (jogo de quem-come-quem) e _Quiz_ (5 perguntas geradas da própria simulação).
+- **Três modos:** _Explorar_ (livre), _Montar a teia_ (jogo de quem-come-quem, com pistas opcionais) e _Quiz_ (5 perguntas geradas da própria simulação).
 - **Comparador de cenários A/B** e **tabela de dados acessível** (leitor de tela).
 - **Exportações:** CSV, PNG, impressão e **link de cenário** (reproduz poluente + intensidade + remediação, offline).
 - **Painel do professor:** registra resultados no aparelho (localStorage), com data, turma e estação; no modo Explorar, guarda o cenário, o TMF e o organismo mais contaminado. Permite **exportar/importar JSON** para consolidar turmas (registros repetidos são ignorados).
@@ -87,7 +87,11 @@ Sequência sugerida (Corrente de Aprendizagem):
 | 3 | Tipos de poluente e destino | Comparador + exportar CSV |
 | 4 | Da teia ao prato: saúde pública | Limite ANVISA + Remediação + Quiz |
 
-## 🆕 Novidades da v6.1
+## 🆕 Novidades da v6.2
+
+- **Montar a teia com pistas:** as ligações ainda não descobertas aparecem como linhas tracejadas e apagadas; ao escolher um organismo (ou passar o mouse), as linhas dele ficam mais fortes. O botão **Pistas** liga e desliga esse apoio, e o painel do professor registra se o jogo foi feito com ou sem pistas.
+
+## Novidades da v6.1
 
 - **Montar a teia:** passar o mouse não revela mais as ligações; o jogo também funciona pelo teclado (Tab + Enter).
 - **Quiz:** depois de corrigir, as respostas ficam travadas; a nota registrada é a da primeira correção.

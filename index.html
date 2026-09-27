@@ -503,7 +503,7 @@ figure.scene-fig{min-width:0} /* deixa a cena rolar dentro do card, sem alargar 
     </div>
 
     <div class="statusbar">
-      <span><span class="dot"></span>modelo trófico-ecotoxicológico v6.1</span>
+      <span><span class="dot"></span>modelo trófico-ecotoxicológico v6.2</span>
       <span id="stPoll">poluente: mercúrio</span><span id="stInt">intensidade: 60%</span>
       <span id="stRun">última liberação: —</span>
       <span style="margin-left:auto">31 táxons + detrito · estuário/manguezal SC</span>
@@ -752,11 +752,14 @@ function showTip(s,e){if(!tipEl){tipEl=document.createElement('div');tipEl.class
   tipEl.innerHTML=`<b>${s.pop}</b><i>${s.sci.split(' · ')[0]}</i><span>NT ${tlf(s.tl)} · ${s.papel}</span>`;tipEl.style.opacity='1';moveTip(e);}
 function moveTip(e){if(!tipEl)return;const pad=14;tipEl.style.left=Math.min(e.clientX+pad,innerWidth-220)+'px';tipEl.style.top=(e.clientY+pad)+'px';}
 function hideTip(){if(tipEl)tipEl.style.opacity='0';}
-function hl(id){if(document.body.classList.contains('buildmode'))return; // no jogo, destacar entregaria as respostas
+function hl(id){const bc=document.body.classList;
+  if(bc.contains('buildmode')&&!bc.contains('hints'))return; // jogo sem pistas: destacar entregaria as respostas
   const rel=new Set([id]);byId[id].diet.forEach(p=>rel.add(p));S.forEach(s=>{if(s.diet.includes(id))rel.add(s.id);});
   sim.querySelectorAll('.org').forEach(n=>n.classList.toggle('dim',!rel.has(n.dataset.id)));
   sim.querySelectorAll('.flow').forEach(l=>l.classList.toggle('on',l.dataset.a===id||l.dataset.b===id));}
-function clearHl(){sim.querySelectorAll('.org').forEach(n=>n.classList.remove('dim'));sim.querySelectorAll('.flow').forEach(l=>l.classList.remove('on'));}
+let hlKeep=null; // jogo com pistas: o organismo escolhido mantém as linhas dele acesas
+function clearHl(){sim.querySelectorAll('.org').forEach(n=>n.classList.remove('dim'));sim.querySelectorAll('.flow').forEach(l=>l.classList.remove('on'));
+  if(hlKeep&&document.body.classList.contains('buildmode'))hl(hlKeep);}
 function select(id){sim.querySelectorAll('.org').forEach(n=>n.classList.toggle('sel',n.dataset.id===id&&selId!==id));
   if(selId===id){selId=null;clearHl();renderFicha(null);return;}selId=id;hl(id);renderFicha(id);}
 
@@ -1095,8 +1098,12 @@ svg.g{width:16px;height:16px;flex:none}
 .miniact .btn{flex:1;font-size:12.5px;padding:8px;min-width:90px}
 /* build mode */
 body.buildmode .flow{opacity:0}
-body.buildmode .flow.found{opacity:1;stroke:var(--ok);stroke-width:3}
-body.buildmode.reveal .flow{opacity:.28}
+/* pistas: todas as ligações possíveis, tracejadas e apagadas */
+body.buildmode.hints .flow:not(.found){opacity:.38;stroke:#DCEFEA;stroke-width:1.4;stroke-dasharray:4 5}
+/* organismo escolhido (ou sob o mouse): as pistas dele ficam mais fortes */
+body.buildmode.hints .flow.on:not(.found){opacity:.95;stroke:#fff;stroke-width:2}
+body.buildmode .flow.found{opacity:1;stroke:var(--ok);stroke-width:3;stroke-dasharray:none}
+body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-width:2.4;stroke-dasharray:none}
 .org.pick .halo{opacity:1;stroke:var(--haz1)}
 .buildbanner{position:absolute;left:12px;top:12px;background:rgba(8,42,49,.92);color:#eafaf8;border:1px solid #14505a;border-radius:9px;padding:8px 12px;font-size:12.5px;max-width:62%;z-index:5}
 .buildbanner b{color:#7FCFC6}
@@ -1283,8 +1290,8 @@ body.buildmode.reveal .flow{opacity:.28}
  const buildCard=card('v5Build','Montar a teia — descobertas','jogo');buildCard.hidden=true;
  buildCard.querySelector('.bd').innerHTML=
   `<div class="playrow"><div class="scorebig" id="buildScore">0</div><div style="color:var(--muted);font-size:13px">ligações de <b id="buildTotal">0</b> descobertas</div>
-   <button class="btn" id="buildReveal" style="margin-left:auto">Revelar restantes</button><button class="btn" id="buildReset">Recomeçar</button></div>
-   <div class="hint2">Clique em dois organismos para testar se um come o outro. Acertou? A ligação acende em verde.</div>`;
+   <button class="btn" id="buildHints" aria-pressed="true" style="margin-left:auto">Pistas: ligadas</button><button class="btn" id="buildReveal">Revelar restantes</button><button class="btn" id="buildReset">Recomeçar</button></div>
+   <div class="hint2">Clique em dois organismos para testar se um come o outro. Acertou? A ligação acende em verde. Com as <b>pistas</b> ligadas, as linhas tracejadas mostram onde há ligação; ao escolher um organismo, as linhas dele ficam mais fortes. Desligue as pistas para um desafio maior.</div>`;
  cmpCard.after(buildCard);
 
  /* QUIZ */
@@ -1327,8 +1334,9 @@ body.buildmode.reveal .flow{opacity:.28}
  // troca de modo
  function setMode(m){mode=m;modebar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.mode===m));
    document.body.classList.toggle('buildmode',m==='montar');
+   document.body.classList.toggle('hints',m==='montar'&&hintsOn);
    buildCard.hidden=m!=='montar';quizCard.hidden=m!=='quiz';
-   pickA=null;sim.querySelectorAll('.org').forEach(o=>o.classList.remove('pick'));
+   pickA=null;hlKeep=null;sim.querySelectorAll('.org').forEach(o=>o.classList.remove('pick'));
    removeBanner();
    if(m==='montar'){selId=null;sim.querySelectorAll('.org').forEach(o=>o.classList.remove('sel','dim'));
      sim.querySelectorAll('.flow').forEach(f=>f.classList.remove('on'));resetSim();startBuild();}
@@ -1337,17 +1345,25 @@ body.buildmode.reveal .flow{opacity:.28}
  modebar.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 
  // ---- MONTAR A TEIA ----
- let pickA=null,found=new Set();
+ let pickA=null,found=new Set(),hintsOn=true;
  const allEdges=[];S.forEach(s=>s.diet.forEach(p=>allEdges.push(p+'>'+s.id)));
+ const buildIntro=()=>hintsOn
+   ?'Modo montar a teia: as <b>linhas tracejadas</b> mostram ligações possíveis. Clique nos <b>dois organismos</b> de uma linha e descubra quem come quem.'
+   :'Modo montar a teia: clique em <b>dois organismos</b> para testar se um come o outro.';
  function startBuild(){found=new Set();document.body.classList.remove('reveal');
+   pickA=null;hlKeep=null;sim.querySelectorAll('.org').forEach(o=>o.classList.remove('pick'));clearHl();
    sim.querySelectorAll('.flow').forEach(f=>f.classList.remove('found'));
    document.getElementById('buildTotal').textContent=allEdges.length;document.getElementById('buildScore').textContent='0';
-   banner('Modo montar a teia: clique em <b>dois organismos</b> para testar se um come o outro.');}
+   banner(buildIntro());}
+ function setHints(on){hintsOn=on;document.body.classList.toggle('hints',on&&mode==='montar');
+   const b=document.getElementById('buildHints');b.setAttribute('aria-pressed',on);b.textContent=on?'Pistas: ligadas':'Pistas: desligadas';
+   hlKeep=on?pickA:null;clearHl();if(mode==='montar')banner(buildIntro());}
+ document.getElementById('buildHints').addEventListener('click',()=>setHints(!hintsOn));
  function buildPick(id){
    const g=sim.querySelector(`.org[data-id="${id}"]`);
-   if(!pickA){pickA=id;g.classList.add('pick');return;}
-   if(pickA===id){g.classList.remove('pick');pickA=null;return;}
-   const a=pickA,b=id;sim.querySelector(`.org[data-id="${a}"]`).classList.remove('pick');pickA=null;
+   if(!pickA){pickA=id;g.classList.add('pick');hlKeep=id;hl(id);return;}
+   if(pickA===id){g.classList.remove('pick');pickA=null;hlKeep=null;clearHl();return;}
+   const a=pickA,b=id;sim.querySelector(`.org[data-id="${a}"]`).classList.remove('pick');pickA=null;hlKeep=null;clearHl();
    let prey=null,pred=null;
    if(byId[a].diet.includes(b)){pred=a;prey=b;}else if(byId[b].diet.includes(a)){pred=b;prey=a;}
    if(prey){const key=prey+'>'+pred;const path=sim.querySelector(`.flow[data-a="${prey}"][data-b="${pred}"]`);
@@ -1448,7 +1464,7 @@ body.buildmode.reveal .flow{opacity:.28}
    return `${lastRun.poll==='mercurio'?'Mercúrio':'Microplástico'} ${lastRun.int}%${lastRun.re?' (remediação '+lastRun.re+'%)':''} · TMF ${tmf==null?'—':tmf.toFixed(1).replace('.',',')} · mais contaminado: ${top.pop}`;}
  document.getElementById('recReg').addEventListener('click',()=>{const turma=(document.getElementById('turma').value||'—'),est=(document.getElementById('estacao').value||'—');
    const atividade=mode==='quiz'?'Quiz':mode==='montar'?'Montar a teia':'Exploração';
-   const pont=mode==='quiz'?lastQuiz:mode==='montar'?(found.size+'/'+allEdges.length):exploreSummary();
+   const pont=mode==='quiz'?lastQuiz:mode==='montar'?(found.size+'/'+allEdges.length+(hintsOn?' (com pistas)':' (sem pistas)')):exploreSummary();
    const now=new Date();
    recs.push({id:now.getTime().toString(36)+Math.random().toString(36).slice(2,7),d:now.toLocaleDateString('pt-BR'),
      h:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),turma,est,atividade,pont});
