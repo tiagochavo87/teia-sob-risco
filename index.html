@@ -676,7 +676,7 @@ function buildSceneBackdrop(svg,vb,interactive){
   // superfície ondulada
   svg.appendChild(E('path',{d:`M0 ${surf} q 40 -8 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 V ${surf+8} H0 Z`,fill:'#Bfe0da',opacity:.5}));
   // raios de luz
-  const rays=E('g',{opacity:.10,stroke:'#fff','stroke-width':16});
+  const rays=E('g',{class:'rays',opacity:.10,stroke:'#fff','stroke-width':16});
   for(let i=0;i<6;i++)rays.appendChild(E('line',{x1:320+i*120,y1:surf,x2:240+i*120,y2:mud}));
   svg.appendChild(rays);
   // fundo lodoso
@@ -754,11 +754,13 @@ function moveTip(e){if(!tipEl)return;const pad=14;tipEl.style.left=Math.min(e.cl
 function hideTip(){if(tipEl)tipEl.style.opacity='0';}
 function hl(id){const bc=document.body.classList;
   if(bc.contains('buildmode')&&!bc.contains('hints'))return; // jogo sem pistas: destacar entregaria as respostas
+  bc.add('picking');
   const rel=new Set([id]);byId[id].diet.forEach(p=>rel.add(p));S.forEach(s=>{if(s.diet.includes(id))rel.add(s.id);});
   sim.querySelectorAll('.org').forEach(n=>n.classList.toggle('dim',!rel.has(n.dataset.id)));
   sim.querySelectorAll('.flow').forEach(l=>l.classList.toggle('on',l.dataset.a===id||l.dataset.b===id));}
 let hlKeep=null; // jogo com pistas: o organismo escolhido mantém as linhas dele acesas
-function clearHl(){sim.querySelectorAll('.org').forEach(n=>n.classList.remove('dim'));sim.querySelectorAll('.flow').forEach(l=>l.classList.remove('on'));
+function clearHl(){document.body.classList.remove('picking');
+  sim.querySelectorAll('.org').forEach(n=>n.classList.remove('dim'));sim.querySelectorAll('.flow').forEach(l=>l.classList.remove('on'));
   if(hlKeep&&document.body.classList.contains('buildmode'))hl(hlKeep);}
 function select(id){sim.querySelectorAll('.org').forEach(n=>n.classList.toggle('sel',n.dataset.id===id&&selId!==id));
   if(selId===id){selId=null;clearHl();renderFicha(null);return;}selId=id;hl(id);renderFicha(id);}
@@ -1099,9 +1101,12 @@ svg.g{width:16px;height:16px;flex:none}
 /* build mode */
 body.buildmode .flow{opacity:0}
 /* pistas: todas as ligações possíveis, tracejadas e apagadas */
-body.buildmode.hints .flow:not(.found){opacity:.38;stroke:#DCEFEA;stroke-width:1.4;stroke-dasharray:4 5}
-/* organismo escolhido (ou sob o mouse): as pistas dele ficam mais fortes */
-body.buildmode.hints .flow.on:not(.found){opacity:.95;stroke:#fff;stroke-width:2}
+body.buildmode.hints .flow:not(.found){opacity:.8;stroke:#FFD166;stroke-width:2.2;stroke-dasharray:7 6;stroke-linecap:butt}
+/* organismo escolhido (ou sob o mouse): as pistas dele ficam brancas e grossas; as outras recuam */
+body.buildmode.hints.picking .flow:not(.found):not(.on){opacity:.18}
+body.buildmode.hints .flow.on:not(.found){opacity:1;stroke:#fff;stroke-width:3.2}
+/* raios de luz somem no jogo, para não competir com as linhas */
+body.buildmode .rays{display:none}
 body.buildmode .flow.found{opacity:1;stroke:var(--ok);stroke-width:3;stroke-dasharray:none}
 body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-width:2.4;stroke-dasharray:none}
 .org.pick .halo{opacity:1;stroke:var(--haz1)}
