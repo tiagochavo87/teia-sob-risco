@@ -2,7 +2,7 @@
 
 **Laboratório trófico-ecotoxicológico de um estuário catarinense — da raiz do mangue ao seu prato.**
 
-![versão](https://img.shields.io/badge/versão-6.0-2BB3A3)
+![versão](https://img.shields.io/badge/versão-6.1-2BB3A3)
 ![offline](https://img.shields.io/badge/funciona-offline-155A63)
 ![sem dependências](https://img.shields.io/badge/dependências-nenhuma-0C3A44)
 ![licença](https://img.shields.io/badge/licença-REA%20(CC%20BY--SA)-E0902F)
@@ -22,13 +22,13 @@ O **Teia Sob Risco** é uma aplicação educativa interativa que reconstrói a t
 
 - **Simulador em corte** do estuário com 32 táxons reais (fauna e flora locais), com destaque de dieta ao passar o cursor e ficha por organismo.
 - **Dois poluentes contrastantes:** mercúrio (metilmercúrio), que **biomagnifica**, e microplástico, que **acumula sem biomagnificar**.
-- **Fator de Magnificação Trófica (TMF):** métrica de campo (inclinação de `log10(C)` × nível trófico) que resume, num número, se o poluente sobe a teia.
+- **Fator de Magnificação Trófica (TMF):** métrica de campo (inclinação de `log10(C)` × nível trófico) que resume, num número, se o poluente sobe a teia. O gráfico tem uma opção de **escala log** que mostra a própria reta do TMF.
 - **Remediação da fonte** e **exposição ao longo do tempo** (animação da contaminação subindo a teia).
 - **Roteiro de aula guiada:** guia de 5 passos que configura o app automaticamente a cada etapa.
 - **Três modos:** _Explorar_ (livre), _Montar a teia_ (jogo de quem-come-quem) e _Quiz_ (5 perguntas geradas da própria simulação).
 - **Comparador de cenários A/B** e **tabela de dados acessível** (leitor de tela).
 - **Exportações:** CSV, PNG, impressão e **link de cenário** (reproduz poluente + intensidade + remediação, offline).
-- **Painel do professor:** registra resultados no aparelho (localStorage) e permite **exportar/importar JSON** para consolidar turmas.
+- **Painel do professor:** registra resultados no aparelho (localStorage), com data, turma e estação; no modo Explorar, guarda o cenário, o TMF e o organismo mais contaminado. Permite **exportar/importar JSON** para consolidar turmas (registros repetidos são ignorados).
 - **Acessibilidade:** narração em áudio (TTS, offline), Libras via VLibras (requer internet), alto contraste, fonte ampliada e navegação por teclado.
 
 ## 🚀 Como usar
@@ -58,19 +58,21 @@ C(organismo) = média[ C(presas) ] × fator de amplificação + ( água × filtr
 
 Os **produtores** absorvem o poluente direto da água; cada consumidor herda a concentração das presas e soma o que filtra. O **mercúrio** tem fator > 1 (biomagnifica, máximo no topo); o **microplástico** tem fator < 1 e entra pela filtragem (máximo nos filtradores).
 
+No cálculo do TMF entram só os organismos ligados à teia: o ser humano (ponto de consumo) e os produtores que nenhum consumidor do modelo come (mangues, marisma e alface-do-mar) ficam de fora. Com isso, o TMF fica em torno de **1,6** para o mercúrio e **0,9** para o microplástico, em qualquer intensidade (o modelo é linear).
+
 > ⚠️ **Aviso importante:** os valores são **relativos e ilustrativos, com fins didáticos** — não são medições. Reproduzem *padrões* reais (biomagnificação do mercúrio, acúmulo em filtradores, a linha de 0,5 mg/kg da ANVISA), mas **não devem ser citados como dados de campo**.
 
 ## 📁 Estrutura do repositório
 
 ```
 teia-sob-risco/
-├── index.html          # a aplicação (arquivo único, offline)
-├── docs/
-│   └── Manual_do_Professor_Teia_Sob_Risco_v6.pdf
+├── index.html                                # a aplicação (arquivo único, offline)
+├── Manual_do_Professor_Teia_Sob_Risco_v6.pdf # manual do professor
+├── teia_icon.ico
 └── README.md
 ```
 
-> Ajuste os nomes conforme o seu repositório. O GitHub Pages serve o `index.html` da raiz (ou a pasta configurada em *Settings → Pages*).
+O GitHub Pages serve o `index.html` da raiz. O Manual se refere ao arquivo como `Teia_Sob_Risco_app_v6.html`: é o mesmo `index.html`, que pode ser renomeado à vontade para distribuir offline.
 
 ## 👩‍🏫 Para o professor
 
@@ -84,6 +86,19 @@ Sequência sugerida (Corrente de Aprendizagem):
 | 2 | Bioacumulação × biomagnificação | Roteiro guiado (mercúrio, TMF) |
 | 3 | Tipos de poluente e destino | Comparador + exportar CSV |
 | 4 | Da teia ao prato: saúde pública | Limite ANVISA + Remediação + Quiz |
+
+## 🆕 Novidades da v6.1
+
+- **Montar a teia:** passar o mouse não revela mais as ligações; o jogo também funciona pelo teclado (Tab + Enter).
+- **Quiz:** depois de corrigir, as respostas ficam travadas; a nota registrada é a da primeira correção.
+- **Roteiro de aula:** "Voltar" não bagunça mais o comparador; o passo 5 usa intensidade média (60%), em que os bivalves ficam abaixo do limite e os peixes, acima.
+- **Sincronia:** trocar cenário ou intensidade refaz a simulação; CSV, comparador e link usam sempre o cenário que está na tela.
+- **TMF:** exclui os produtores sem ligação com a teia; nova opção de escala log no gráfico.
+- **Exportações:** CSV abre com acentos no Excel e traz poluente, intensidade e remediação; o PNG mantém a linha da ANVISA.
+- **Comparador:** mesma unidade → escala comum (diferenças de intensidade aparecem).
+- **Celular:** a cena rola na horizontal, com rótulos legíveis; "Contraste" também realça os organismos.
+- **Link:** aberto do pen drive, oferece o endereço da versão online e a configuração para refazer à mão.
+- **Painel:** data, estação, resumo da exploração e importação sem duplicatas.
 
 ## ♿ Acessibilidade
 
