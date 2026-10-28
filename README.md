@@ -2,7 +2,7 @@
 
 **Laboratório trófico-ecotoxicológico de um estuário catarinense — da raiz do mangue ao seu prato.**
 
-![versão](https://img.shields.io/badge/versão-6.2-2BB3A3)
+![versão](https://img.shields.io/badge/versão-6.3-2BB3A3)
 ![offline](https://img.shields.io/badge/funciona-offline-155A63)
 ![sem dependências](https://img.shields.io/badge/dependências-nenhuma-0C3A44)
 ![licença](https://img.shields.io/badge/licença-REA%20(CC%20BY--SA)-E0902F)
@@ -20,14 +20,14 @@ O **Teia Sob Risco** é uma aplicação educativa interativa que reconstrói a t
 
 ## ✨ Recursos
 
-- **Simulador em corte** do estuário com 32 táxons reais (fauna e flora locais), com destaque de dieta ao passar o cursor e ficha por organismo.
+- **Simulador em corte** do estuário com 31 táxons reais (fauna e flora locais, mais o ser humano) e o folhiço/detrito, com destaque de dieta ao passar o cursor e ficha por organismo.
 - **Dois poluentes contrastantes:** mercúrio (metilmercúrio), que **biomagnifica**, e microplástico, que **acumula sem biomagnificar**.
 - **Fator de Magnificação Trófica (TMF):** métrica de campo (inclinação de `log10(C)` × nível trófico) que resume, num número, se o poluente sobe a teia. O gráfico tem uma opção de **escala log** que mostra a própria reta do TMF.
 - **Remediação da fonte** e **exposição ao longo do tempo** (animação da contaminação subindo a teia).
 - **Roteiro de aula guiada:** guia de 5 passos que configura o app automaticamente a cada etapa.
 - **Três modos:** _Explorar_ (livre), _Montar a teia_ (jogo de quem-come-quem, com pistas opcionais) e _Quiz_ (5 perguntas geradas da própria simulação).
 - **Comparador de cenários A/B** e **tabela de dados acessível** (leitor de tela).
-- **Exportações:** CSV, PNG, impressão e **link de cenário** (reproduz poluente + intensidade + remediação, offline).
+- **Exportações:** CSV, PNG, impressão e **link de cenário** (reproduz poluente + intensidade + remediação; aberto do pen drive, oferece o endereço da versão online e a configuração para refazer à mão).
 - **Painel do professor:** registra resultados no aparelho (localStorage), com data, turma e estação; no modo Explorar, guarda o cenário, o TMF e o organismo mais contaminado. Permite **exportar/importar JSON** para consolidar turmas (registros repetidos são ignorados).
 - **Acessibilidade:** narração em áudio (TTS, offline), Libras via VLibras (requer internet), alto contraste, fonte ampliada e navegação por teclado.
 
@@ -68,15 +68,18 @@ No cálculo do TMF entram só os organismos ligados à teia: o ser humano (ponto
 teia-sob-risco/
 ├── index.html                                # a aplicação (arquivo único, offline)
 ├── Manual_do_Professor_Teia_Sob_Risco_v6.pdf # manual do professor
+├── manual/gerar_manual.py                    # texto e diagramação do manual (gera o PDF)
 ├── teia_icon.ico
 └── README.md
 ```
 
-O GitHub Pages serve o `index.html` da raiz. O Manual se refere ao arquivo como `Teia_Sob_Risco_app_v6.html`: é o mesmo `index.html`, que pode ser renomeado à vontade para distribuir offline.
+O GitHub Pages serve o `index.html` da raiz. Para distribuir offline, o mesmo `index.html` pode ser renomeado à vontade (por exemplo, `Teia_Sob_Risco.html`).
 
 ## 👩‍🏫 Para o professor
 
 O **Manual do Professor** (PDF) cobre instalação, tour da interface, o TMF, o roteiro de aula passo a passo, um plano de 4 encontros alinhado à BNCC, FAQ e os limites do modelo.
+
+Para atualizar o manual, edite o texto em `manual/gerar_manual.py` e rode `python3 manual/gerar_manual.py` (requer `pip install reportlab`); o sumário recalcula as páginas sozinho.
 
 Sequência sugerida (Corrente de Aprendizagem):
 
@@ -87,7 +90,17 @@ Sequência sugerida (Corrente de Aprendizagem):
 | 3 | Tipos de poluente e destino | Comparador + exportar CSV |
 | 4 | Da teia ao prato: saúde pública | Limite ANVISA + Remediação + Quiz |
 
-## 🆕 Novidades da v6.2
+## 🆕 Novidades da v6.3
+
+- **Cena completa no Simulador:** o céu, o degradê da água e a pluma de poluição voltaram a aparecer. Os degradês da tela de Início e do Simulador tinham o mesmo nome, e o Simulador acabava usando os da tela de Início, que fica escondida.
+- **Dados reais:** os campos aceitam vírgula ou ponto (`0,12` = `0.12`). Antes, num navegador configurado em inglês, `0,12` virava `12`. Valor que não é número fica marcado e aparece um aviso.
+- **Celular:** nenhuma parte da página fica mais larga que a tela (cabeçalhos, botões dos gráficos, jogo e tabela do painel quebram linha ou rolam dentro do cartão); a barra do roteiro cabe inteira.
+- **Remediação em 100%:** as leituras e o texto explicam que a teia ficou limpa, em vez de apontar um "mais contaminado" com 0,00.
+- **Toque nos organismos:** cada organismo responde ao clique em toda a área do círculo de destaque (antes, o meio do camarão e do ser humano não respondia).
+- **Rótulos sem sobreposição:** ostra × alface-do-mar, caranguejo-uçá × chama-maré, mangue-vermelho × mangue-preto e os rótulos com fonte ampliada.
+- **Textos:** rodapé atualizado para o TCC 2; aba Modelo informa em que intensidade os bivalves ficam na faixa de 12–16 partículas/g; Manual do Professor revisto para a versão atual.
+
+## Novidades da v6.2
 
 - **Montar a teia com pistas:** as ligações ainda não descobertas aparecem como linhas tracejadas e apagadas; ao escolher um organismo (ou passar o mouse), as linhas dele ficam mais fortes. O botão **Pistas** liga e desliga esse apoio, e o painel do professor registra se o jogo foi feito com ou sem pistas.
 
