@@ -89,7 +89,8 @@ svg.scene{display:block;width:100%;height:auto}
 .org.dim{opacity:.26;transition:opacity .3s}
 .org:focus{outline:none}
 .org:focus .halo,.org.sel .halo{opacity:1}
-.halo{fill:none;stroke:var(--tide);stroke-width:2;opacity:0;transition:opacity .2s}
+/* preenchimento transparente: o círculo vira área de toque, então ícones vazados (camarão, ser humano) também respondem ao clique no meio */
+.halo{fill:transparent;stroke:var(--tide);stroke-width:2;opacity:0;transition:opacity .2s}
 .flow{fill:none;stroke:var(--haz1);stroke-width:2.4;stroke-linecap:round;opacity:0}
 .flow.on{opacity:.92}
 .plume{opacity:0;transition:opacity 1.2s}
@@ -231,12 +232,21 @@ body.hc #sim .org{filter:drop-shadow(0 0 1.3px #fff) drop-shadow(0 0 1.3px #fff)
 /* telas estreitas (celular): a cena ganha largura mínima e rola na horizontal */
 .scene-hint{display:none}
 figure.scene-fig{min-width:0} /* deixa a cena rolar dentro do card, sem alargar a página */
+.charts>.card{min-width:0} /* idem para os cartões dos gráficos */
+.playrow input[type=range]{min-width:0} /* o controle de tempo encolhe em vez de empurrar o cartão */
 @media(max-width:700px){
   .scene-host{overflow-x:auto;-webkit-overflow-scrolling:touch}
   #sim{min-width:900px}
   #sim .org .lab{font-size:13px}
   #sim .org .val{font-size:11px}
   .scene-hint{display:block;width:100%;font-size:11.5px;color:var(--muted)}
+  /* nada pode ficar mais largo que a tela: cabeçalhos e fileiras de botões quebram linha,
+     e a tabela do painel do professor rola dentro do próprio cartão */
+  .card>.hd{flex-wrap:wrap;row-gap:8px}
+  .opts{flex-wrap:wrap;margin-left:0}
+  .opts .pill{white-space:normal}
+  .actions,.playrow{flex-wrap:wrap}
+  #v5Teacher .bd{overflow-x:auto}
 }
 /* imprime só a aba aberta, sem botões */
 @media print{.appbar,nav.tabs,.actions,.cat-filter,.hero .cta,.opts,.cmp-actions,.modebar,.miniact,.statusbar{display:none!important}body{background:#fff}}
@@ -503,7 +513,7 @@ figure.scene-fig{min-width:0} /* deixa a cena rolar dentro do card, sem alargar 
     </div>
 
     <div class="statusbar">
-      <span><span class="dot"></span>modelo trófico-ecotoxicológico v6.2</span>
+      <span><span class="dot"></span>modelo trófico-ecotoxicológico v6.3</span>
       <span id="stPoll">poluente: mercúrio</span><span id="stInt">intensidade: 60%</span>
       <span id="stRun">última liberação: —</span>
       <span style="margin-left:auto">31 táxons + detrito · estuário/manguezal SC</span>
@@ -537,7 +547,7 @@ figure.scene-fig{min-width:0} /* deixa a cena rolar dentro do card, sem alargar 
       <h3>Fator de magnificação trófica (TMF)</h3>
       <p>A leitura <b>Magnificação trófica</b> resume, num único número, se o poluente sobe a teia. Ela é a inclinação da reta de <b>log₁₀(concentração)</b> contra o <b>nível trófico</b>, convertida em fator por nível (TMF = 10<sup>inclinação</sup>) — a mesma métrica usada em estudos de campo. <b>TMF &gt; 1</b> indica biomagnificação (caso do mercúrio, em torno de 1,6 por nível no modelo); <b>TMF ≈ 1 ou menor</b> indica que o poluente acumula sem biomagnificar (caso do microplástico, em torno de 0,9, concentrado nos filtradores). O ser humano fica de fora do cálculo por ser um <i>endpoint</i> de consumo, não um elo trófico fixo. Também ficam de fora os produtores que nenhum consumidor do modelo come (mangues, marisma e alface-do-mar): sem ligação com a teia, eles não dizem nada sobre a transferência entre elos. No gráfico de concentração × nível trófico, o botão <b>escala log</b> mostra exatamente a reta cuja inclinação dá o TMF.</p>
       <h3>Ancoragem nos dados</h3>
-      <p>Os valores são <b>relativos e ilustrativos</b>, com fins didáticos — não são medições. Mas reproduzem padrões reais: o mercúrio sobe a cada nível trófico, como no estudo da Baía de Guanabara; ostras e mexilhões na faixa de 12–16 partículas por grama observada em bivalves do litoral (intensidades altas); e a linha de 0,5 mg/kg da legislação brasileira (RDC 42/2013) para mercúrio em pescado não predador. Por simplicidade, o app aplica essa linha a todos os pescados; para peixes predadores, a norma admite 1,0 mg/kg. A <i>magnitude</i> é didática: no modelo, o boto-cinza fica cerca de 7 vezes acima do fitoplâncton, bem menos que os ~36× medidos na Baía de Guanabara, porque cada consumidor come uma mistura de presas de níveis diferentes, o que dilui o ganho a cada elo.</p>
+      <p>Os valores são <b>relativos e ilustrativos</b>, com fins didáticos — não são medições. Mas reproduzem padrões reais: o mercúrio sobe a cada nível trófico, como no estudo da Baía de Guanabara; ostras e mexilhões chegam à faixa de 12–16 partículas por grama observada em bivalves do litoral com intensidade entre 70% e 90%; e a linha de 0,5 mg/kg da legislação brasileira (RDC 42/2013) para mercúrio em pescado não predador. Por simplicidade, o app aplica essa linha a todos os pescados; para peixes predadores, a norma admite 1,0 mg/kg. A <i>magnitude</i> é didática: no modelo, o boto-cinza fica cerca de 7 vezes acima do fitoplâncton, bem menos que os ~36× medidos na Baía de Guanabara, porque cada consumidor come uma mistura de presas de níveis diferentes, o que dilui o ganho a cada elo.</p>
       <div class="callout"><b>Uso em sala:</b> compare cenários (poluente, fonte, intensidade) e exporte os dados por organismo em CSV — produto previsto para a Aula 3 da Corrente de Aprendizagem.</div>
       <h3>Referências</h3>
       <ul class="refs">
@@ -552,7 +562,7 @@ figure.scene-fig{min-width:0} /* deixa a cena rolar dentro do card, sem alargar 
 </main>
 
 <footer>
-  Teia Sob Risco · produto técnico-pedagógico da Corrente de Aprendizagem (TCC 1) — Pós-Graduação em Cultura Oceânica e Sustentabilidade na Educação Básica (UFSC/UAB).
+  Teia Sob Risco · produto técnico-pedagógico da Corrente de Aprendizagem (TCC 2) — Pós-Graduação em Cultura Oceânica e Sustentabilidade na Educação Básica (UFSC/UAB).
   Aplicação de arquivo único, sem servidor, funciona offline. Recurso educacional aberto para uso e adaptação por professores.
 </footer>
 
@@ -569,11 +579,11 @@ function useSym(sym,x,y,sz,color){const u=E('use',{x:x-sz/2,y:y-sz/2,width:sz,he
 const S=[
  // --- Produtores / flora ---
  {id:'fito',pop:'Fitoplâncton',sci:'Bacillariophyta',aut:'(diatomáceas)',ill:'i-diatom',tl:1,band:0,auto:true,sz:40,papel:'Produtor primário',filter:0,diet:[],nota:'Microalgas fotossintetizantes da coluna d’água; base da produção do estuário.'},
- {id:'mangue_v',pop:'Mangue-vermelho',sci:'Rhizophora mangle',aut:'L.',ill:'i-mangrove',tl:1,band:0,x:100,y:150,sz:118,papel:'Produtor (vegetação)',filter:0,diet:[],nota:'Mangue de raízes-escora aéreas, onde a ostra-do-mangue se fixa. Limite da maré.'},
- {id:'mangue_p',pop:'Mangue-preto',sci:'Avicennia schaueriana',aut:'Stapf & Leechm.',ill:'i-mangrove',tl:1,band:0,x:54,y:210,sz:78,papel:'Produtor (vegetação)',filter:0,diet:[],nota:'Reconhecível pelos pneumatóforos — raízes que sobem do lodo para respirar.'},
- {id:'mangue_b',pop:'Mangue-branco',sci:'Laguncularia racemosa',aut:'(L.) C.F.Gaertn.',ill:'i-mangrove',tl:1,band:0,x:205,y:165,sz:82,papel:'Produtor (vegetação)',filter:0,diet:[],nota:'Tem em Laguna/SC um dos limites sul de distribuição no Atlântico.'},
+ {id:'mangue_v',pop:'Mangue-vermelho',sci:'Rhizophora mangle',aut:'L.',ill:'i-mangrove',tl:1,band:0,x:94,y:150,sz:118,papel:'Produtor (vegetação)',filter:0,diet:[],nota:'Mangue de raízes-escora aéreas, onde a ostra-do-mangue se fixa. Limite da maré.'},
+ {id:'mangue_p',pop:'Mangue-preto',sci:'Avicennia schaueriana',aut:'Stapf & Leechm.',ill:'i-mangrove',tl:1,band:0,x:50,y:270,sz:78,papel:'Produtor (vegetação)',filter:0,diet:[],nota:'Reconhecível pelos pneumatóforos — raízes que sobem do lodo para respirar.'},
+ {id:'mangue_b',pop:'Mangue-branco',sci:'Laguncularia racemosa',aut:'(L.) C.F.Gaertn.',ill:'i-mangrove',tl:1,band:0,x:212,y:165,sz:82,papel:'Produtor (vegetação)',filter:0,diet:[],nota:'Tem em Laguna/SC um dos limites sul de distribuição no Atlântico.'},
  {id:'marisma',pop:'Marisma',sci:'Spartina alterniflora',aut:'Loisel.',ill:'i-grass',tl:1,band:0,x:262,y:135,sz:62,papel:'Produtor (gramínea)',filter:0,diet:[],nota:'Capim-do-brejo das planícies de maré; estabiliza o sedimento e alimenta a teia detritívora.'},
- {id:'alga',pop:'Alface-do-mar',sci:'Ulva lactuca',aut:'L.',ill:'i-alga',tl:1,band:0,x:185,y:410,sz:46,papel:'Produtor (macroalga)',filter:0,diet:[],nota:'Macroalga verde comum em costões e raízes; cresce com o excesso de nutrientes.'},
+ {id:'alga',pop:'Alface-do-mar',sci:'Ulva lactuca',aut:'L.',ill:'i-alga',tl:1,band:0,x:205,y:470,sz:46,papel:'Produtor (macroalga)',filter:0,diet:[],nota:'Macroalga verde comum em costões e raízes; cresce com o excesso de nutrientes.'},
  {id:'detrito',pop:'Folhiço / detrito',sci:'matéria orgânica',aut:'(serapilheira)',ill:'i-detritus',tl:1,band:0,x:500,y:688,sz:50,papel:'Base detritívora',filter:0,diet:[],nota:'Folhas e restos em decomposição. Principal via de energia num manguezal.'},
  // --- Consumidores primários ---
  {id:'zoo',pop:'Zooplâncton',sci:'Copepoda',aut:'(copépodes)',ill:'i-copepod',tl:2,band:1,auto:true,sz:38,papel:'Consumidor primário',filter:.2,diet:['fito'],nota:'Pequenos crustáceos que pastam o fitoplâncton; elo entre produtores e peixes.'},
@@ -581,8 +591,8 @@ const S=[
  {id:'mexilhao',pop:'Mexilhão',sci:'Perna perna',aut:'(Linnaeus, 1758)',ill:'i-mussel',tl:2,band:1,x:885,y:360,sz:44,papel:'Consumidor primário (filtrador)',filter:1,diet:['fito','detrito'],edible:true,nota:'Mexilhão cultivado em long-lines; SC é o maior produtor do Brasil. Filtra e retém contaminantes.'},
  {id:'vieira',pop:'Vieira',sci:'Nodipecten nodosus',aut:'(Linnaeus, 1758)',ill:'i-scallop',tl:2,band:1,x:950,y:412,sz:44,papel:'Consumidor primário (filtrador)',filter:.9,diet:['fito','detrito'],edible:true,nota:'Pectinídeo cultivado em Penha e Porto Belo; filtrador de água como ostra e mexilhão.'},
  {id:'berbigao',pop:'Berbigão',sci:'Anomalocardia brasiliana',aut:'(Gmelin, 1791)',ill:'i-clam',tl:2,band:1,x:655,y:690,sz:36,papel:'Consumidor primário (filtrador)',filter:.8,diet:['fito','detrito'],edible:true,nota:'Molusco de areia explorado por marisqueiras; base da RESEX do Pirajubaé, em Florianópolis.'},
- {id:'uca',pop:'Caranguejo-uçá',sci:'Ucides cordatus',aut:'(Linnaeus, 1763)',ill:'i-crab',tl:2,band:1,x:95,y:675,sz:50,papel:'Consumidor primário (detritívoro)',filter:.3,diet:['detrito'],edible:true,nota:'Caranguejo do mangue, recurso pesqueiro tradicional. Abundante no Manguezal do Itacorubi.'},
- {id:'chamare',pop:'Chama-maré',sci:'Leptuca uruguayensis',aut:'(Nobili, 1901)',ill:'i-fiddler',tl:2,band:1,x:165,y:682,sz:32,papel:'Consumidor primário (detritívoro)',filter:.2,diet:['detrito'],nota:'Caranguejo de uma garra grande; revolve o sedimento e come microalgas e detrito.'},
+ {id:'uca',pop:'Caranguejo-uçá',sci:'Ucides cordatus',aut:'(Linnaeus, 1763)',ill:'i-crab',tl:2,band:1,x:85,y:675,sz:50,papel:'Consumidor primário (detritívoro)',filter:.3,diet:['detrito'],edible:true,nota:'Caranguejo do mangue, recurso pesqueiro tradicional. Abundante no Manguezal do Itacorubi.'},
+ {id:'chamare',pop:'Chama-maré',sci:'Leptuca uruguayensis',aut:'(Nobili, 1901)',ill:'i-fiddler',tl:2,band:1,x:180,y:682,sz:32,papel:'Consumidor primário (detritívoro)',filter:.2,diet:['detrito'],nota:'Caranguejo de uma garra grande; revolve o sedimento e come microalgas e detrito.'},
  {id:'poliqueta',pop:'Poliqueta',sci:'Polychaeta',aut:'(anelídeos)',ill:'i-worm',tl:2,band:1,x:320,y:692,sz:30,papel:'Consumidor primário (depositívoro)',filter:.2,diet:['detrito'],nota:'Vermes do sedimento; alimento-chave de peixes de fundo e aves limícolas.'},
  {id:'camarao',pop:'Camarão-branco',sci:'Litopenaeus schmitti',aut:'(Burkenroad, 1936)',ill:'i-shrimp',tl:2.3,band:1,auto:true,sz:46,papel:'Consumidor primário (onívoro)',filter:.4,diet:['detrito','zoo'],edible:true,nota:'Camarão de importância econômica nas baías. Onívoro de fundo.'},
  // --- Consumidores secundários ---
@@ -595,7 +605,7 @@ const S=[
  {id:'bagre',pop:'Bagre',sci:'Genidens genidens',aut:'(Cuvier, 1829)',ill:'i-catfish',tl:3.3,band:3,auto:true,sz:50,papel:'Consumidor terciário (onívoro)',filter:.1,diet:['camarao','poliqueta','sardinha'],edible:true,nota:'Bagre estuarino de fundo; entra na dieta do biguá em Laguna/SC.'},
  {id:'robalo',pop:'Robalo-flecha',sci:'Centropomus undecimalis',aut:'(Bloch, 1792)',ill:'i-fish',tl:4,band:3,auto:true,sz:58,papel:'Consumidor terciário (piscívoro)',filter:.05,diet:['tainha','parati','sardinha','camarao'],edible:true,nota:'Predador apreciado na pesca; depende do manguezal como berçário.'},
  {id:'corvina',pop:'Corvina',sci:'Micropogonias furnieri',aut:'(Desmarest, 1823)',ill:'i-fish',tl:3.8,band:3,auto:true,sz:52,papel:'Consumidor terciário (bentófago)',filter:.05,diet:['camarao','mexilhao','uca','poliqueta'],edible:true,nota:'Peixe de fundo que come invertebrados bentônicos; um dos pescados mais comuns no Sul.'},
- {id:'linguado',pop:'Linguado',sci:'Paralichthys orbignyanus',aut:'(Valenciennes, 1839)',ill:'i-flatfish',tl:4,band:3,x:572,y:690,sz:52,papel:'Consumidor terciário (predador de fundo)',filter:.05,diet:['camarao','poliqueta','parati'],edible:true,nota:'Peixe achatado que embosca presas no fundo arenoso; pescado de alto valor.'},
+ {id:'linguado',pop:'Linguado',sci:'Paralichthys orbignyanus',aut:'(Valenciennes, 1839)',ill:'i-flatfish',tl:4,band:3,x:588,y:690,sz:52,papel:'Consumidor terciário (predador de fundo)',filter:.05,diet:['camarao','poliqueta','parati'],edible:true,nota:'Peixe achatado que embosca presas no fundo arenoso; pescado de alto valor.'},
  {id:'anchova',pop:'Anchova',sci:'Pomatomus saltatrix',aut:'(Linnaeus, 1766)',ill:'i-fish',tl:4,band:3,auto:true,sz:50,papel:'Consumidor terciário (piscívoro)',filter:.05,diet:['sardinha','parati','tainha'],edible:true,nota:'Predador veloz e voraz; alvo clássico da pesca de arremesso no litoral.'},
  // --- Predadores de topo ---
  {id:'boto',pop:'Boto-cinza',sci:'Sotalia guianensis',aut:'(Van Bénéden, 1864)',ill:'i-dolphin',tl:5,band:4,x:470,y:285,sz:92,papel:'Predador de topo',filter:0,diet:['robalo','corvina','tainha','parati','anchova','sardinha'],protegido:true,nota:'Golfinho costeiro com população residente na Baía Norte de Florianópolis. Sentinela da saúde do estuário.'},
@@ -647,6 +657,8 @@ function trophicMagnification(res){const f=tmfFit(res);return f?Math.pow(10,f.b)
 /* números no padrão brasileiro (vírgula decimal) */
 const fmt=v=>(v>=10?v.toFixed(0):v.toFixed(2)).replace('.',',');
 const tlf=t=>String(t).replace('.',',');
+/* teia sem contaminação (remediação de 100%): leituras e textos não podem apontar um "mais contaminado" */
+const semContaminacao=res=>Math.max(...Object.values(res))<=0;
 const ONLINE_URL='https://tiagochavo87.github.io/teia-sob-risco/';
 function contam(r){const a=[30,66,72],b=[156,31,18];const c=a.map((x,i)=>Math.round(x+(b[i]-x)*r));return`rgb(${c[0]},${c[1]},${c[2]})`;}
 
@@ -662,17 +674,21 @@ function layoutScene(){
 }
 function buildSceneBackdrop(svg,vb,interactive){
   svg.innerHTML='';
+  /* IDs dos degradês com prefixo da cena: a cena do Início e a do Simulador desenham o mesmo fundo,
+     e IDs repetidos fariam o Simulador usar os degradês da tela de Início, que fica escondida
+     (o céu, a água e a pluma sumiam). */
+  const gid=n=>svg.id+'-'+n,gurl=n=>`url(#${gid(n)})`;
   const defs=E('defs',{});
   defs.innerHTML=
-    '<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6EFE7"/><stop offset="1" stop-color="#C7DDD6"/></linearGradient>'+
-    '<linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FC3BD"/><stop offset="0.3" stop-color="#2F8D8E"/><stop offset="0.7" stop-color="#155A63"/><stop offset="1" stop-color="#0C3A44"/></linearGradient>'+
-    '<linearGradient id="plumeG" x1="0" y1="1" x2="0.3" y2="0"><stop offset="0" stop-color="#9C1F12" stop-opacity="0.55"/><stop offset="1" stop-color="#E0902F" stop-opacity="0"/></linearGradient>'+
-    '<radialGradient id="sun" cx="0.82" cy="0.1" r="0.5"><stop offset="0" stop-color="#fff" stop-opacity="0.6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>';
+    `<linearGradient id="${gid('sky')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6EFE7"/><stop offset="1" stop-color="#C7DDD6"/></linearGradient>`+
+    `<linearGradient id="${gid('water')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7FC3BD"/><stop offset="0.3" stop-color="#2F8D8E"/><stop offset="0.7" stop-color="#155A63"/><stop offset="1" stop-color="#0C3A44"/></linearGradient>`+
+    `<linearGradient id="${gid('plumeG')}" x1="0" y1="1" x2="0.3" y2="0"><stop offset="0" stop-color="#9C1F12" stop-opacity="0.55"/><stop offset="1" stop-color="#E0902F" stop-opacity="0"/></linearGradient>`+
+    `<radialGradient id="${gid('sun')}" cx="0.82" cy="0.1" r="0.5"><stop offset="0" stop-color="#fff" stop-opacity="0.6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`;
   svg.appendChild(defs);
   const W=vb.w,H=vb.h,surf=vb.surf,mud=vb.mud;
-  svg.appendChild(E('rect',{x:0,y:0,width:W,height:surf+6,fill:'url(#sky)'}));
-  svg.appendChild(E('rect',{x:0,y:0,width:W,height:H,fill:'url(#sun)'}));
-  svg.appendChild(E('rect',{x:0,y:surf,width:W,height:H-surf,fill:'url(#water)'}));
+  svg.appendChild(E('rect',{x:0,y:0,width:W,height:surf+6,fill:gurl('sky')}));
+  svg.appendChild(E('rect',{x:0,y:0,width:W,height:H,fill:gurl('sun')}));
+  svg.appendChild(E('rect',{x:0,y:surf,width:W,height:H-surf,fill:gurl('water')}));
   // superfície ondulada
   svg.appendChild(E('path',{d:`M0 ${surf} q 40 -8 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 t 80 0 V ${surf+8} H0 Z`,fill:'#Bfe0da',opacity:.5}));
   // raios de luz
@@ -703,11 +719,12 @@ function buildSceneBackdrop(svg,vb,interactive){
   svg.appendChild(E('path',{d:`M998 ${surf+14} h86 l-11 18 h-64 z`,fill:'#7a5634'}));
   // emissário (direita, descarga) — origem da pluma
   svg.appendChild(E('path',{d:`M${W} 210 h-50 a11 11 0 00-11 11 v13 a11 11 0 0011 11 H${W} Z`,fill:'#6b6f6e'}));
-  svg.appendChild(E('rect',{class:'plume',id:interactive?'plume':'plumeH',x:600,y:210,width:W-600,height:H-210,fill:'url(#plumeG)'}));
+  svg.appendChild(E('rect',{class:'plume',id:interactive?'plume':'plumeH',x:600,y:210,width:W-600,height:H-210,fill:gurl('plumeG')}));
   // rótulos de zona
   if(interactive){
     const z1=E('text',{x:14,y:surf-10,class:'',style:'font-family:var(--mono);font-size:10px;fill:#5b6e4f;letter-spacing:.1em'});z1.textContent='AR / SUPERFÍCIE';svg.appendChild(z1);
-    const z2=E('text',{x:14,y:mud+30,style:'font-family:var(--mono);font-size:10px;fill:#cdbfa6;letter-spacing:.1em'});z2.textContent='SEDIMENTO / MANGUEZAL';svg.appendChild(z2);
+    // na faixa de baixo do sedimento, abaixo dos rótulos dos caranguejos (antes ficava em cima do caranguejo-uçá)
+    const z2=E('text',{x:14,y:H-10,style:'font-family:var(--mono);font-size:10px;fill:#cdbfa6;letter-spacing:.1em'});z2.textContent='SEDIMENTO / MANGUEZAL';svg.appendChild(z2);
   }
 }
 
@@ -798,7 +815,9 @@ function runSim(){
 }
 function renderReadouts(res,P){
   const sorted=S.map(s=>({s,v:res[s.id]})).sort((a,b)=>b.v-a.v);
-  document.getElementById('roTop').innerHTML=sorted[0].s.pop+'<br><span style="font-size:11px;color:var(--muted)">'+fmt(sorted[0].v)+' '+P.unit+'</span>';
+  document.getElementById('roTop').innerHTML=semContaminacao(res)
+    ?'Nenhum<br><span style="font-size:11px;color:var(--muted)">teia sem poluente</span>'
+    :sorted[0].s.pop+'<br><span style="font-size:11px;color:var(--muted)">'+fmt(sorted[0].v)+' '+P.unit+'</span>';
   const tmf=trophicMagnification(res);const fbmEl=document.getElementById('roFbm');
   if(tmf==null){fbmEl.innerHTML='—';}
   else{fbmEl.innerHTML=tmf.toFixed(1).replace('.',',')+'<small>×/NT</small>';
@@ -889,9 +908,15 @@ function drawScatter(res,P){
 function renderInsight(res,P){
   const top=S.map(s=>({s,v:res[s.id]})).sort((a,b)=>b.v-a.v)[0];let t;
   const tmf=trophicMagnification(res),tmfTxt=tmf==null?'':` (TMF ${tmf.toFixed(1).replace('.',',')} ×/NT)`;
-  if(currentPoll==='mercurio'){const overs=S.filter(s=>s.edible&&res[s.id]>P.anvisa).map(s=>s.pop);
+  const comRemed=lastRun&&lastRun.re>0;
+  if(semContaminacao(res)){
+    // remediação de 100%: nada entra na água, então não há o que comparar entre os elos
+    t=`Com a <b>remediação em 100%</b>, o efluente é todo tratado e nenhum poluente entra na água: a teia fica limpa. Diminua a remediação para ver a contaminação voltar a subir a teia.`;
+    document.getElementById('insight').className='note';
+  }else if(currentPoll==='mercurio'){const overs=S.filter(s=>s.edible&&res[s.id]>P.anvisa).map(s=>s.pop);
     t=`O <b>${top.s.pop}</b> acumulou o máximo: o mercúrio <b>biomagnifica</b>${tmfTxt} e a nuvem de pontos sobe com o nível trófico. `;
-    t+=overs.length?`Entre os pescados, ${overs.join(', ')} passaram de 0,5 mg/kg.`:`Nenhum pescado passou de 0,5 mg/kg nesta intensidade — aumente a liberação.`;
+    t+=overs.length?`Entre os pescados, ${overs.join(', ')} passaram de 0,5 mg/kg.`
+      :`Nenhum pescado passou de 0,5 mg/kg nesta intensidade${comRemed?' com esta remediação':''} — aumente a liberação${comRemed?' ou reduza a remediação':''}.`;
     document.getElementById('insight').className='note haz';
   }else{t=`As maiores concentrações ficaram nos <b>filtradores</b> (ostra, mexilhão), não no topo: o microplástico <b>acumula, mas não biomagnifica</b>${tmfTxt} — a nuvem de pontos fica achatada.`;document.getElementById('insight').className='note';}
   document.getElementById('insight').innerHTML=t;
@@ -1127,6 +1152,7 @@ body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-wi
 /* dados reais */
 .drrow{display:grid;grid-template-columns:1.2fr .8fr;gap:8px;align-items:center;margin-bottom:8px}
 .drrow label{font-size:13px}.drrow input{width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;font:inherit;font-size:13px}
+.drrow input[aria-invalid="true"]{border-color:var(--warn);background:#fbecea}
 /* teacher log */
 .tlog{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
 .tlog th,.tlog td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}.tlog th{color:var(--muted)}
@@ -1311,7 +1337,9 @@ body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-wi
  const dKeys=['ostra','tainha','robalo','boto','humano'];
  dataCard.querySelector('.bd').innerHTML=
   `<div class="hint2" style="margin-top:0">Digite valores medidos (de artigos ou de coleta local) para comparar com a simulação. Unidade conforme o poluente ativo. <b>Atenção:</b> os valores simulados são ilustrativos, então compare o <b>padrão</b> (quem tem mais, quem tem menos, a ordem de grandeza), não os números exatos. Uma diferença não "reprova" o modelo nem os dados.</div>`+
-  `<div style="margin:12px 0">${dKeys.map(k=>`<div class="drrow"><label>${byId[k].pop}</label><input type="number" min="0" step="0.01" data-dr="${k}" placeholder="medido"></div>`).join('')}</div>`+
+  /* campo de texto (não "number"): em navegador configurado em inglês, o campo numérico descartava a vírgula e 0,12 virava 12 */
+  `<div style="margin:12px 0">${dKeys.map(k=>`<div class="drrow"><label for="dr-${k}">${byId[k].pop}</label><input type="text" inputmode="decimal" autocomplete="off" id="dr-${k}" data-dr="${k}" placeholder="medido (ex.: 0,12)" aria-describedby="dataMsg"></div>`).join('')}</div>`+
+  `<div class="hint2" id="dataMsg" role="status" style="margin:-4px 0 10px;color:var(--warn)"></div>`+
   `<div class="miniact"><button class="btn primary" id="dataCompare" style="flex:1">Comparar</button><button class="btn" id="dataClear">Limpar</button></div>`+
   `<svg class="chart" id="chartData" viewBox="0 0 620 230" hidden style="margin-top:12px"></svg>`;
  quizCard.after(dataCard);
@@ -1433,12 +1461,20 @@ body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-wi
  document.getElementById('quizNew').addEventListener('click',newQuiz);
 
  // ---- DADOS REAIS ----
- document.getElementById('dataClear').addEventListener('click',()=>{dataCard.querySelectorAll('[data-dr]').forEach(i=>i.value='');
-   document.getElementById('chartData').setAttribute('hidden','');});
+ // aceita vírgula ou ponto decimal (0,12 = 0.12 = ,12); vazio = null; qualquer outra coisa = NaN (avisa o aluno)
+ const parseMed=v=>{v=String(v||'').trim().replace(/\s/g,'');if(!v)return null;
+   return /^(\d+([.,]\d*)?|[.,]\d+)$/.test(v)?parseFloat(v.replace(',','.')):NaN;};
+ const dataMsg=document.getElementById('dataMsg');
+ document.getElementById('dataClear').addEventListener('click',()=>{dataCard.querySelectorAll('[data-dr]').forEach(i=>{i.value='';i.removeAttribute('aria-invalid');});
+   dataMsg.textContent='';document.getElementById('chartData').setAttribute('hidden','');});
  document.getElementById('dataCompare').addEventListener('click',()=>{
    if(!lastRes){document.getElementById('run').click();}
-   const rows=dKeys.map(k=>({s:byId[k],sim:lastRes?lastRes[k]:0,med:parseFloat((dataCard.querySelector(`[data-dr="${k}"]`).value||'').replace(',','.'))}))
-     .filter(r=>!isNaN(r.med));
+   const bad=[];
+   const rows=dKeys.map(k=>{const inp=dataCard.querySelector(`[data-dr="${k}"]`),med=parseMed(inp.value);
+       if(Number.isNaN(med)){bad.push(byId[k].pop);inp.setAttribute('aria-invalid','true');}else inp.removeAttribute('aria-invalid');
+       return {s:byId[k],sim:lastRes?lastRes[k]:0,med};})
+     .filter(r=>r.med!=null&&!Number.isNaN(r.med));
+   dataMsg.textContent=bad.length?`Não entendi o valor de ${bad.join(', ')}. Use só números, com vírgula ou ponto (ex.: 0,12).`:'';
    const c=document.getElementById('chartData');if(!rows.length){c.setAttribute('hidden','');return;}c.removeAttribute('hidden');
    const W=620,H=230,L=40,T=14,B=46,gap=24,P=POLL[runPoll()];c.innerHTML='';
    const max=Math.max(...rows.flatMap(r=>[r.sim,r.med]),1e-6),n=rows.length,plotW=W-L-14,plotH=H-T-B,cw=plotW/n;
@@ -1466,7 +1502,7 @@ body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-wi
  // resumo da exploração: cenário, TMF e organismo mais contaminado (a "folha de registro" da Aula 2)
  function exploreSummary(){if(!lastRes||!lastRun)return '—';
    const tmf=trophicMagnification(lastRes),top=S.slice().sort((a,b)=>lastRes[b.id]-lastRes[a.id])[0];
-   return `${lastRun.poll==='mercurio'?'Mercúrio':'Microplástico'} ${lastRun.int}%${lastRun.re?' (remediação '+lastRun.re+'%)':''} · TMF ${tmf==null?'—':tmf.toFixed(1).replace('.',',')} · mais contaminado: ${top.pop}`;}
+   return `${lastRun.poll==='mercurio'?'Mercúrio':'Microplástico'} ${lastRun.int}%${lastRun.re?' (remediação '+lastRun.re+'%)':''} · TMF ${tmf==null?'—':tmf.toFixed(1).replace('.',',')} · mais contaminado: ${semContaminacao(lastRes)?'nenhum (teia sem poluente)':top.pop}`;}
  document.getElementById('recReg').addEventListener('click',()=>{const turma=(document.getElementById('turma').value||'—'),est=(document.getElementById('estacao').value||'—');
    const atividade=mode==='quiz'?'Quiz':mode==='montar'?'Montar a teia':'Exploração';
    const pont=mode==='quiz'?lastQuiz:mode==='montar'?(found.size+'/'+allEdges.length+(hintsOn?' (com pistas)':' (sem pistas)')):exploreSummary();
