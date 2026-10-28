@@ -2,7 +2,7 @@
 
 **Laboratório trófico-ecotoxicológico de um estuário catarinense — da raiz do mangue ao seu prato.**
 
-![versão](https://img.shields.io/badge/versão-6.3-2BB3A3)
+![versão](https://img.shields.io/badge/versão-7.0-2BB3A3)
 ![offline](https://img.shields.io/badge/funciona-offline-155A63)
 ![sem dependências](https://img.shields.io/badge/dependências-nenhuma-0C3A44)
 ![licença](https://img.shields.io/badge/licença-REA%20(CC%20BY--SA)-E0902F)
@@ -16,6 +16,7 @@ O **Teia Sob Risco** é uma aplicação educativa interativa que reconstrói a t
 ## 🔗 Acesso
 
 - **Aplicação (online):** https://tiagochavo87.github.io/teia-sob-risco/
+- **Direto no modo 7º ano:** https://tiagochavo87.github.io/teia-sob-risco/?nivel=7
 - **Offline:** baixe o arquivo `.html` e abra em qualquer navegador — **não precisa de internet nem instalação.**
 
 ## ✨ Recursos
@@ -25,7 +26,8 @@ O **Teia Sob Risco** é uma aplicação educativa interativa que reconstrói a t
 - **Fator de Magnificação Trófica (TMF):** métrica de campo (inclinação de `log10(C)` × nível trófico) que resume, num número, se o poluente sobe a teia. O gráfico tem uma opção de **escala log** que mostra a própria reta do TMF.
 - **Remediação da fonte** e **exposição ao longo do tempo** (animação da contaminação subindo a teia).
 - **Roteiro de aula guiada:** guia de 5 passos que configura o app automaticamente a cada etapa.
-- **Três modos:** _Explorar_ (livre), _Montar a teia_ (jogo de quem-come-quem, com pistas opcionais) e _Quiz_ (5 perguntas geradas da própria simulação).
+- **Dois níveis:** _Ensino Médio_ (com o TMF) e _7º ano_ do Ensino Fundamental, com leituras e roteiro em linguagem simples, sem TMF nem escala log. O nível fica guardado no aparelho e pode vir no link (`?nivel=7`).
+- **Quatro modos:** _Explorar_ (livre), _Montar a teia_ (jogo de quem-come-quem, com pistas opcionais), _Quiz_ (5 perguntas geradas da própria simulação) e _Antes e depois_ (questionário de aprendizagem aplicado no início e no fim da sequência).
 - **Comparador de cenários A/B** e **tabela de dados acessível** (leitor de tela).
 - **Exportações:** CSV, PNG, impressão e **link de cenário** (reproduz poluente + intensidade + remediação; aberto do pen drive, oferece o endereço da versão online e a configuração para refazer à mão).
 - **Painel do professor:** registra resultados no aparelho (localStorage), com data, turma e estação; no modo Explorar, guarda o cenário, o TMF e o organismo mais contaminado. Permite **exportar/importar JSON** para consolidar turmas (registros repetidos são ignorados).
@@ -69,6 +71,7 @@ teia-sob-risco/
 ├── index.html                                # a aplicação (arquivo único, offline)
 ├── Manual_do_Professor_Teia_Sob_Risco_v6.pdf # manual do professor
 ├── manual/gerar_manual.py                    # texto e diagramação do manual (gera o PDF)
+├── avaliacao/criar_formulario_professores.gs # Google Apps Script: formulário anônimo dos professores + cálculo de IVC e SUS
 ├── teia_icon.ico
 └── README.md
 ```
@@ -90,7 +93,16 @@ Sequência sugerida (Corrente de Aprendizagem):
 | 3 | Tipos de poluente e destino | Comparador + exportar CSV |
 | 4 | Da teia ao prato: saúde pública | Limite ANVISA + Remediação + Quiz |
 
-## 🆕 Novidades da v6.3
+## 🆕 Novidades da v7.0
+
+- **Modo 7º ano:** seletor _Ensino Médio | 7º ano_ na barra de modos (ou o link com `?nivel=7`). No 7º ano, a leitura do TMF vira **Sobe a teia?** (Sim/Não, com uma comparação como "boto-cinza: 7× o fitoplâncton"), as unidades ganham explicação, o gráfico perde a escala log, o cartão Dados reais fica oculto e o **Roteiro de aula** tem 5 passos próprios, terminando na remediação da fonte.
+- **Questionário Antes e depois:** 10 perguntas de conhecimento e 6 frases de concordância, com o simulador escondido enquanto o aluno responde. O aluno usa um código sem nome; ao enviar o Depois, vê quantas acertou antes e depois e as respostas certas comentadas. Cada pergunta tem botão **Ouvir**. A **Área da professora** mostra o acerto por pergunta, exporta JSON/CSV, importa sem duplicar, imprime a versão em papel e apaga tudo. As respostas ficam só no aparelho.
+- **Painel do professor:** registra também o modo Antes e depois (contagem de respostas e médias).
+- **Atalhos:** as teclas 1, 2 e R ficam desligadas no jogo e no questionário, para não rodar a simulação por trás.
+- **Formulário dos professores:** `avaliacao/criar_formulario_professores.gs` cria, num Google Forms anônimo, a avaliação da plataforma por partes, a escala SUS e o julgamento dos itens do questionário; `calcularResultados` calcula o IVC por item, a avaliação por partes e a pontuação SUS.
+- **Manual do Professor:** nova seção sobre o modo 7º ano e o questionário, e perguntas frequentes novas.
+
+## Novidades da v6.3
 
 - **Cena completa no Simulador:** o céu, o degradê da água e a pluma de poluição voltaram a aparecer. Os degradês da tela de Início e do Simulador tinham o mesmo nome, e o Simulador acabava usando os da tela de Início, que fica escondida.
 - **Dados reais:** os campos aceitam vírgula ou ponto (`0,12` = `0.12`). Antes, num navegador configurado em inglês, `0,12` virava `12`. Valor que não é número fica marcado e aparece um aviso.

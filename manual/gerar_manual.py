@@ -16,7 +16,7 @@ from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT
 from reportlab.platypus import (BaseDocTemplate, PageTemplate, Frame, Paragraph, Spacer, Table,
                                 TableStyle, KeepTogether, PageBreak, NextPageTemplate, CondPageBreak)
 
-VERSAO = '6.3'
+VERSAO = '7.0'
 DATA = 'outubro de 2026'
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAIDA = os.path.join(RAIZ, 'Manual_do_Professor_Teia_Sob_Risco_v6.pdf')
@@ -178,7 +178,9 @@ def CONTEUDO():
                      ['Modelo', 'Documentação: a equação, a diferença mercúrio × microplástico, o TMF e as referências.']],
                     [.18, .82], primeira_negrito=True))
     s.append(H2('Dentro do Simulador'))
-    s += B(['<b>Estuário em corte:</b> cena ilustrada, com céu, coluna d’água, sedimento, maricultura e o emissário de '
+    s += B(['<b>Barra de modos:</b> Explorar, Montar a teia, Quiz e Antes e depois, o seletor de nível '
+            '<b>Ensino Médio | 7º ano</b> e o botão <b>Roteiro de aula</b>.',
+            '<b>Estuário em corte:</b> cena ilustrada, com céu, coluna d’água, sedimento, maricultura e o emissário de '
             'onde sai a pluma de poluição. Passe o dedo/mouse sobre um organismo para destacar quem ele come e quem o '
             'come; toque para abrir a ficha.',
             '<b>Parâmetros:</b> escolha o <b>poluente</b> (mercúrio ou microplástico), um <b>cenário/fonte</b> pronto e a '
@@ -186,15 +188,17 @@ def CONTEUDO():
             '<b>Remediação da fonte:</b> simula o tratamento do efluente — reduz a carga e recalcula a teia. Em 100%, '
             'nada entra na água e o app avisa que a teia ficou limpa.',
             '<b>Exposição ao longo do tempo:</b> anima a contaminação se acumulando (produtores primeiro, topo por último).',
-            '<b>Leituras:</b> mais contaminado, magnificação trófica (TMF), valor no ser humano e nº de pescados acima do limite.',
+            '<b>Leituras:</b> mais contaminado, magnificação trófica (TMF), valor no ser humano e nº de pescados acima do '
+            'limite. No modo 7º ano, a leitura do TMF vira <b>Sobe a teia?</b> (seção 7).',
             '<b>Gráficos:</b> concentração por organismo e concentração × nível trófico (com a reta de tendência e a '
             'opção <b>escala log</b>).',
             '<b>Abaixo dos gráficos:</b> tabela de dados, comparador de cenários, dados reais, painel do professor e '
-            'acessibilidade (seções 7 a 9).'])
+            'acessibilidade (seções 8 a 10).'])
     s.append(tabela(['Atalho', 'Ação'],
                     [['1 / 2', 'Alterna entre mercúrio e microplástico'],
                      ['R', 'Libera o poluente (roda a simulação)'],
-                     ['Botões da cena', 'Rótulos on/off · Alto contraste · Fonte ampliada (A+)']],
+                     ['Botões da cena', 'Rótulos on/off · Alto contraste · Fonte ampliada (A+)'],
+                     ['No jogo e no questionário', 'As teclas 1, 2 e R ficam desligadas, para não rodar a simulação por trás']],
                     [.25, .75], primeira_negrito=True))
 
     s += H1(4, 'O modelo científico e o TMF')
@@ -247,9 +251,9 @@ def CONTEUDO():
                                        'É o fecho, ligando ecologia e saúde pública.')]))
     s.append(caixa('Você pode sair do roteiro a qualquer momento (botão X ou tecla Esc) e continuar explorando manualmente. '
                    'Cada passo monta o cenário inteiro de que precisa (zera a remediação e ajusta poluente e intensidade), '
-                   'então <i>Voltar</i> funciona igual a <i>Avançar</i>.'))
+                   'então <i>Voltar</i> funciona igual a <i>Avançar</i>. No modo 7º ano, o botão abre outro roteiro, sem TMF (seção 7).'))
 
-    s += H1(6, 'Os três modos: Explorar, Montar a teia e Quiz')
+    s += H1(6, 'Os quatro modos: Explorar, Montar a teia, Quiz e Antes e depois')
     s.append(P('Logo abaixo do título do Simulador há uma barra de modos:'))
     s += B(['<b>Explorar</b> (padrão): libere poluentes, toque nos organismos, compare cenários. O modo livre de investigação.',
             '<b>Montar a teia:</b> jogo com <b>86 ligações</b>. O aluno clica em <b>dois organismos</b> (ou usa Tab + Enter) '
@@ -260,12 +264,61 @@ def CONTEUDO():
             '<b>Quiz:</b> cinco perguntas geradas a partir da própria simulação (quem acumula mais mercúrio, o que é '
             'produtor, o que a tainha come etc.). É preciso responder todas para corrigir; depois da correção as '
             'respostas ficam travadas, e a nota que vai para o painel é a da primeira correção. '
-            '<i>Novas perguntas</i> sorteia outro conjunto.'])
+            '<i>Novas perguntas</i> sorteia outro conjunto.',
+            '<b>Antes e depois:</b> o questionário de aprendizagem aplicado no início e no fim da sequência, com o '
+            'simulador escondido enquanto o aluno responde (seção 7).'])
     s.append(caixa('<b>Sugestão de dinâmica:</b> comece por <i>Montar a teia</i> (constrói o vocabulário de quem-come-quem), '
                    'passe ao <i>Explorar</i> com o roteiro guiado (introduz a contaminação) e feche com o <i>Quiz</i> como '
                    'avaliação rápida — registrando a pontuação no Painel do professor.'))
 
-    s += H1(7, 'Comparador, tabela de dados, dados reais e exportações')
+    s += H1(7, 'Versão para o 7º ano: modo 7º ano e questionário Antes e depois')
+    s.append(P('Na barra de modos, o seletor <b>Ensino Médio | 7º ano</b> troca a linguagem do simulador sem mudar o '
+               'modelo. Para abrir já no 7º ano, use o link com <font face="Courier">?nivel=7</font> '
+               '(<font face="Courier">tiagochavo87.github.io/teia-sob-risco/?nivel=7</font>); a escolha fica guardada no aparelho.'))
+    s.append(tabela(['No Ensino Médio', 'No 7º ano'],
+                    [['Leitura <b>Magnificação trófica</b> (TMF, ×/NT)',
+                      'Leitura <b>Sobe a teia?</b> (Sim ou Não), com uma comparação: boto-cinza 7× o fitoplâncton no mercúrio; '
+                      'ostra 3× o boto-cinza no microplástico'],
+                     ['Unidades sem explicação', 'Explicação curta de mg/kg e part./g abaixo das leituras'],
+                     ['Gráfico com <b>escala log</b> e reta do TMF', 'Sem escala log; eixo “nível na teia (1 = base, 5 = topo)”'],
+                     ['Roteiro com TMF e tabela de dados', 'Roteiro de 5 passos sem TMF, que termina na remediação da fonte'],
+                     ['Cartão Dados reais visível', 'Cartão Dados reais oculto (recurso do professor)']],
+                    [.42, .58]))
+    s.append(H2('Roteiro do 7º ano'))
+    s.append(roteiro([
+        ('Passo 1 — Liberar mercúrio', 'Mercúrio em intensidade alta: quanto mais vermelho o animal, mais mercúrio.'),
+        ('Passo 2 — Quem ficou com mais?', 'O boto-cinza, que nunca bebeu a água poluída: o mercúrio se soma a cada elo '
+                                           '(biomagnificação). O cenário é guardado como <b>A</b>.'),
+        ('Passo 3 — Trocar o poluente', 'Microplástico na mesma intensidade. Peça um palpite antes de olhar.'),
+        ('Passo 4 — Comparar', 'Os filtradores (ostra, mexilhão) lideram. O cenário é guardado como <b>B</b> e o '
+                               'comparador mostra A e B.'),
+        ('Passo 5 — Tratar a fonte', 'Mercúrio em intensidade alta com <b>80% do efluente tratado</b>: nenhum dos 15 '
+                                     'pescados passa do limite de segurança. A solução começa na fonte.')]))
+    s.append(H2('Questionário Antes e depois'))
+    s.append(P('O modo <b>Antes e depois</b> aplica o mesmo questionário no início e no fim da sequência: 10 perguntas de '
+               'conhecimento e 6 frases de concordância, mais 2 perguntas abertas só no Depois. Enquanto o aluno '
+               'responde, o simulador fica escondido.'))
+    s.append(passos([
+        'O aluno digita um código sem nome combinado com a professora (por exemplo, 3A) e toca em <b>Responder Antes</b>. '
+        'Cada pergunta tem um botão <b>Ouvir</b>, que lê o texto em voz alta.',
+        'Ao fim da sequência, o mesmo código responde o <b>Depois</b>. Ao enviar, o aluno vê quantas acertou antes e '
+        'depois e as respostas certas comentadas.',
+        'Na <b>Área da professora</b>, o resumo mostra a porcentagem de acerto de cada pergunta no Antes e no Depois. '
+        'Exporte o JSON de cada aparelho e importe num só para ver a turma inteira.',
+        'Sem um aparelho por aluno, use <b>Versão para imprimir</b>: o questionário sai em duas páginas.']))
+    s.append(Spacer(1, 4))
+    s.append(caixa('<b>Uso pedagógico:</b> as respostas ficam só no aparelho e servem à professora. Usar esses dados numa '
+                   'pesquisa ou num trabalho acadêmico exige aprovação de um Comitê de Ética em Pesquisa (Resolução CNS '
+                   'nº 510/2016), consentimento dos responsáveis e assentimento dos alunos. Apague as respostas ao terminar.', WARN))
+    s.append(H2('Sequência sugerida para o 7º ano'))
+    s.append(tabela(['Aula (50 min)', 'O que acontece'],
+                    [['1', 'Questionário Antes (10 min) · pergunta motivadora sobre o manguezal da cidade · Montar a teia em '
+                           'duplas, com pistas · registro de uma cadeia no caderno'],
+                     ['2', 'Retomada · roteiro do 7º ano, passos 1 a 5 · questionário Depois, com correção na hora · cada '
+                           'dupla escreve uma frase para explicar à família como o poluente chega ao peixe']],
+                    [.18, .82], primeira_negrito=True))
+
+    s += H1(8, 'Comparador, tabela de dados, dados reais e exportações')
     s.append(H2('Comparador de cenários'))
     s.append(P('Depois de rodar uma simulação, use <b>Fixar como cenário A</b> e <b>Fixar como cenário B</b> para congelar '
                'dois cenários e vê-los lado a lado nos organismos-chave. É o recurso ideal para contrastar mercúrio × '
@@ -297,7 +350,7 @@ def CONTEUDO():
                    'versão online, copie o link e envie pelo mural/WhatsApp da turma. Sem internet, dite a configuração que '
                    'o botão mostra (poluente, intensidade e remediação).'))
 
-    s += H1(8, 'Painel do professor: registrar e consolidar turmas')
+    s += H1(9, 'Painel do professor: registrar e consolidar turmas')
     s.append(P('O <b>Painel do professor</b> (no fim do Simulador) registra os resultados da sessão <b>neste aparelho</b>. Os '
                'registros ficam salvos mesmo se você fechar o navegador.'))
     s.append(passos([
@@ -315,7 +368,7 @@ def CONTEUDO():
     s.append(caixa('<b>Privacidade:</b> os dados nunca saem do aparelho por conta própria — só quando você exporta o arquivo. '
                    'Evite registrar nomes de alunos; prefira identificar por turma ou por número.', WARN))
 
-    s += H1(9, 'Acessibilidade e inclusão')
+    s += H1(10, 'Acessibilidade e inclusão')
     s += B(['<b>Narração em áudio (TTS):</b> o botão <i>Ouvir</i>, na ficha do organismo, e o <i>Narrar seleção</i>, no '
             'cartão Acessibilidade, leem a ficha em português; <i>Parar áudio</i> interrompe. Funciona offline (usa a voz '
             'do próprio aparelho).',
@@ -328,8 +381,9 @@ def CONTEUDO():
             '<b>Navegação por teclado:</b> é possível dar foco aos organismos com Tab e ativar com Enter/Espaço, inclusive '
             'no jogo <i>Montar a teia</i>.'])
 
-    s += H1(10, 'Plano de aula sugerido')
-    s.append(P('Sequência de quatro encontros, na lógica da Corrente de Aprendizagem. Ajuste ao seu contexto.'))
+    s += H1(11, 'Plano de aula sugerido')
+    s.append(P('Sequência de quatro encontros para o Ensino Médio, na lógica da Corrente de Aprendizagem. Ajuste ao seu '
+               'contexto. Para o 7º ano, veja a sequência de duas aulas na seção 7.'))
     s.append(tabela(['Aula', 'Foco', 'No app', 'Produto'],
                     [['1', 'Quem come quem: teia alimentar do estuário', 'Catálogo + modo <i>Montar a teia</i>',
                       'Teia reconstruída; vocabulário de níveis tróficos'],
@@ -346,13 +400,22 @@ def CONTEUDO():
             'Interpretação de gráficos e de dados quantitativos; noção de limite legal e risco.',
             'Princípio da Cultura Oceânica: “o oceano e o ser humano estão profundamente interligados”.'])
 
-    s += H1(11, 'Perguntas frequentes e solução de problemas')
+    s += H1(12, 'Perguntas frequentes e solução de problemas')
     s += [faq('O app não abre / abre em branco.',
               'Confirme que o arquivo tem a extensão <font face="Courier">.html</font> e abra-o com um navegador atual '
               '(Chrome, Firefox, Edge, Safari). Evite abrir dentro de apps de mensagem; salve primeiro no aparelho.'),
           faq('A cena não cabe na tela do celular.',
               'É de propósito: a cena mantém uma largura mínima para os nomes ficarem legíveis. Arraste-a para os lados. '
               'O restante da página se ajusta à largura da tela.'),
+          faq('Como abrir o simulador direto no 7º ano?',
+              'Use o seletor <b>7º ano</b> na barra de modos ou o link com <font face="Courier">?nivel=7</font>. A escolha '
+              'fica guardada no aparelho; o link com <font face="Courier">?nivel=em</font> volta ao Ensino Médio.'),
+          faq('As teclas 1, 2 e R não funcionam.',
+              'Elas ficam desligadas no jogo Montar a teia e no questionário Antes e depois, para não rodar a simulação '
+              'por trás nem entregar respostas. Volte ao modo Explorar.'),
+          faq('Onde ficam as respostas do Antes e depois?',
+              'Só no aparelho em que foram dadas. Exporte o JSON de cada aparelho antes de limpar o navegador; '
+              '<i>Apagar respostas</i> remove tudo.'),
           faq('Não sai som na narração.',
               'Verifique o volume e se o navegador tem voz em português instalada. Em alguns celulares a primeira narração '
               'só sai após um toque na tela. O botão “Parar áudio” interrompe.'),
@@ -378,7 +441,7 @@ def CONTEUDO():
               'Sim. É um Recurso Educacional Aberto: pode ser usado e adaptado por professores. Espécies, poluentes e '
               'textos ficam no próprio arquivo, nas listas de espécies e de poluentes do código.')]
 
-    s += H1(12, 'Limites do modelo e referências')
+    s += H1(13, 'Limites do modelo e referências')
     s.append(P('O Teia Sob Risco é um <b>modelo didático simplificado</b>. Ele assume um estado estacionário (a teia “já se '
                'equilibrou” com a fonte), usa a média das presas e trata a filtragem de forma linear. Ele não modela idade, '
                'tamanho, sazonalidade, migração, taxa de depuração real nem toxicocinética individual. Os valores são '
@@ -476,10 +539,12 @@ class Manual(BaseDocTemplate):
 def sumario(paginas):
     secoes = [(1, 'O que é o Teia Sob Risco'), (2, 'Antes de começar: abrir e projetar'), (3, 'A interface em um relance'),
               (4, 'O modelo científico e o TMF'), (5, 'Roteiro de aula guiada (passo a passo)'),
-              (6, 'Os três modos: Explorar, Montar a teia e Quiz'), (7, 'Comparador, tabela de dados, dados reais e exportações'),
-              (8, 'Painel do professor: registrar e consolidar turmas'), (9, 'Acessibilidade e inclusão'),
-              (10, 'Plano de aula sugerido (Corrente de Aprendizagem)'), (11, 'Perguntas frequentes e solução de problemas'),
-              (12, 'Limites do modelo e referências')]
+              (6, 'Os quatro modos: Explorar, Montar a teia, Quiz e Antes e depois'),
+              (7, 'Versão para o 7º ano: modo 7º ano e questionário Antes e depois'),
+              (8, 'Comparador, tabela de dados, dados reais e exportações'),
+              (9, 'Painel do professor: registrar e consolidar turmas'), (10, 'Acessibilidade e inclusão'),
+              (11, 'Plano de aula sugerido (Corrente de Aprendizagem)'), (12, 'Perguntas frequentes e solução de problemas'),
+              (13, 'Limites do modelo e referências')]
     dados = [[Paragraph(str(n), toc_n), Paragraph(t, toc_t), Paragraph(str(paginas.get(n, '00')), toc_p)] for n, t in secoes]
     tb = Table(dados, colWidths=[28, LARG - 60, 32])
     tb.setStyle(TableStyle([('LINEBELOW', (0, 0), (-1, -1), .5, LINE), ('TOPPADDING', (0, 0), (-1, -1), 5),
@@ -487,8 +552,7 @@ def sumario(paginas):
                             ('RIGHTPADDING', (0, 0), (-1, -1), 0)]))
     return [Paragraph('Sumário', h1), Spacer(1, 4), tb, Spacer(1, 14),
             caixa(f'<b>Dica rápida:</b> este manual descreve a versão {VERSAO} (o número aparece na barra de status, no fim do '
-                  'Simulador). Em versões anteriores, recursos como as <i>Pistas</i> do jogo, o campo <i>estação</i> do painel '
-                  'e as correções de exibição no celular podem não estar presentes.'),
+                  'Simulador). Em versões anteriores, o modo 7º ano e o questionário Antes e depois não existem.'),
             PageBreak()]
 
 

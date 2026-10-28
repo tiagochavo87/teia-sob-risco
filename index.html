@@ -460,10 +460,11 @@ figure.scene-fig{min-width:0} /* deixa a cena rolar dentro do card, sem alargar 
         <div class="card" id="roCard" hidden><div class="hd"><h2>Leituras</h2><span class="pill" id="unitPill"></span></div>
           <div class="bd" style="padding:0"><div class="readouts" style="border:0;border-radius:0">
             <div class="ro"><div class="k">Mais contaminado</div><div class="v" id="roTop" style="font-size:13px">—</div></div>
-            <div class="ro" title="Fator de magnificação trófica: inclinação de log10(C) por nível trófico (>1 biomagnifica)"><div class="k">Magnificação trófica</div><div class="v" id="roFbm">—<small>×/NT</small></div></div>
+            <div class="ro" title="Fator de magnificação trófica: inclinação de log10(C) por nível trófico (>1 biomagnifica)"><div class="k" id="roFbmK">Magnificação trófica</div><div class="v" id="roFbm">—<small>×/NT</small></div></div>
             <div class="ro"><div class="k">No ser humano</div><div class="v" id="roHuman">—</div></div>
             <div class="ro" id="roOverWrap"><div class="k">Pescados &gt; limite</div><div class="v" id="roOver">—</div></div>
           </div></div>
+          <div class="unitnote" id="unitNote"></div>
         </div>
 
         <div class="card"><div class="hd"><h2>Ficha do organismo</h2></div><div class="bd"><div id="ficha"><div class="empty">Toque em um organismo no estuário para ver sua ficha. Escolha o poluente e a intensidade, e libere a contaminação — ela sobe a teia em tempo real.</div></div></div></div>
@@ -513,7 +514,8 @@ figure.scene-fig{min-width:0} /* deixa a cena rolar dentro do card, sem alargar 
     </div>
 
     <div class="statusbar">
-      <span><span class="dot"></span>modelo trófico-ecotoxicológico v6.3</span>
+      <span><span class="dot"></span>modelo trófico-ecotoxicológico v7.0</span>
+      <span id="stNivel">nível: Ensino Médio</span>
       <span id="stPoll">poluente: mercúrio</span><span id="stInt">intensidade: 60%</span>
       <span id="stRun">última liberação: —</span>
       <span style="margin-left:auto">31 táxons + detrito · estuário/manguezal SC</span>
@@ -659,6 +661,12 @@ const fmt=v=>(v>=10?v.toFixed(0):v.toFixed(2)).replace('.',',');
 const tlf=t=>String(t).replace('.',',');
 /* teia sem contaminação (remediação de 100%): leituras e textos não podem apontar um "mais contaminado" */
 const semContaminacao=res=>Math.max(...Object.values(res))<=0;
+/* nível de ensino: Ensino Médio (padrão) ou 7º ano do Ensino Fundamental.
+   O 7º ano usa o mesmo modelo, com leituras e textos sem TMF nem escala log. */
+let N7=false;
+const NIVEL_KEY='teiaSobRisco.nivel';
+/* "cerca de 7×": arredonda a razão para o aluno (vírgula decimal abaixo de 3) */
+const vezes=r=>(r>=3?String(Math.round(r)):r.toFixed(1).replace('.',','))+'×';
 const ONLINE_URL='https://tiagochavo87.github.io/teia-sob-risco/';
 function contam(r){const a=[30,66,72],b=[156,31,18];const c=a.map((x,i)=>Math.round(x+(b[i]-x)*r));return`rgb(${c[0]},${c[1]},${c[2]})`;}
 
@@ -819,10 +827,20 @@ function renderReadouts(res,P){
     ?'Nenhum<br><span style="font-size:11px;color:var(--muted)">teia sem poluente</span>'
     :sorted[0].s.pop+'<br><span style="font-size:11px;color:var(--muted)">'+fmt(sorted[0].v)+' '+P.unit+'</span>';
   const tmf=trophicMagnification(res);const fbmEl=document.getElementById('roFbm');
+  document.getElementById('roFbmK').textContent=N7?'Sobe a teia?':'Magnificação trófica';
   if(tmf==null){fbmEl.innerHTML='—';}
+  else if(N7){
+    // 7º ano: em vez do TMF, sim/não e uma comparação direta entre dois organismos da cena
+    const sobe=tmf>1.2,top=sorted[0].s;
+    const ref=sobe?byId.fito:byId.boto,r=res[top.id]/res[ref.id];
+    fbmEl.innerHTML=(sobe?'Sim':'Não')+`<small style="display:block;font-size:11px;line-height:1.35;margin-top:4px">${top.pop}: ${vezes(r)} o ${ref.pop.toLowerCase()}</small>`;
+    fbmEl.closest('.ro').title=sobe?'O poluente aumenta a cada elo da teia (biomagnificação)':'O poluente se acumula em quem filtra a água, sem aumentar a cada elo';}
   else{fbmEl.innerHTML=tmf.toFixed(1).replace('.',',')+'<small>×/NT</small>';
     fbmEl.closest('.ro').title=tmf>1.2?'Biomagnifica ao longo da teia (TMF > 1)'
       :'Não biomagnifica: acumula sem subir a teia (TMF ≈ 1 ou menor)';}
+  document.getElementById('unitNote').textContent=!N7?'':P.unit==='mg/kg'
+    ?'mg/kg = miligramas de mercúrio em cada quilo do animal. Limite de segurança para pescado: 0,5 mg/kg.'
+    :'part./g = partículas de microplástico em cada grama do animal.';
   document.getElementById('roHuman').innerHTML=fmt(res['humano'])+' <small>'+P.unit+'</small>';
   const w=document.getElementById('roOverWrap');
   if(P.anvisa){const o=S.filter(s=>s.edible&&res[s.id]>P.anvisa);document.getElementById('roOver').textContent=o.length+'/'+S.filter(s=>s.edible).length;w.classList.toggle('alert',o.length>0);}
@@ -864,7 +882,8 @@ function drawScatter(res,P){
   const c=document.getElementById('chartScatter');const W=360,H=300,L=46,Rg=14,T=14,B=40;c.setAttribute('viewBox',`0 0 ${W} ${H}`);c.innerHTML='';
   const max=Math.max(...Object.values(res),P.anvisa||0,1e-6),plotW=W-L-Rg,plotH=H-T-B;
   const xOf=tl=>L+plotW*((tl-1)/4);let yOf;
-  if(scatterLog){
+  const useLog=scatterLog&&!N7; // o 7º ano não usa escala log
+  if(useLog){
     // eixo log: uma linha de grade por potência de 10
     const pos=Object.values(res).filter(v=>v>0);if(P.anvisa)pos.push(P.anvisa);
     const lo=Math.floor(Math.log10(Math.min(...pos,max))),hi=Math.max(lo+1,Math.ceil(Math.log10(max)));
@@ -877,14 +896,15 @@ function drawScatter(res,P){
   c.appendChild(E('line',{class:'ax',x1:L,y1:T,x2:L,y2:T+plotH}));
   c.appendChild(E('line',{class:'ax',x1:L,y1:T+plotH,x2:L+plotW,y2:T+plotH}));
   for(let t=1;t<=5;t++){const x=xOf(t);c.appendChild(E('line',{class:'ax',x1:x,y1:T+plotH,x2:x,y2:T+plotH+4}));
-    const tx=E('text',{class:'axt',x:x,y:T+plotH+16,'text-anchor':'middle'});tx.textContent='NT'+t;c.appendChild(tx);}
-  const yl=E('text',{class:'axt',x:8,y:T+plotH/2,transform:`rotate(-90 8 ${T+plotH/2})`,'text-anchor':'middle'});yl.textContent='concentração ('+P.unit+(scatterLog?', escala log':'')+')';c.appendChild(yl);
-  const xl=E('text',{class:'axt',x:L+plotW/2,y:H-6,'text-anchor':'middle'});xl.textContent='nível trófico';c.appendChild(xl);
+    const tx=E('text',{class:'axt',x:x,y:T+plotH+16,'text-anchor':'middle'});tx.textContent=N7?String(t):'NT'+t;c.appendChild(tx);}
+  const yl=E('text',{class:'axt',x:8,y:T+plotH/2,transform:`rotate(-90 8 ${T+plotH/2})`,'text-anchor':'middle'});yl.textContent='concentração ('+P.unit+(useLog?', escala log':'')+')';c.appendChild(yl);
+  // no 7º ano o rótulo é mais longo: desloca para a esquerda e deixa o canto direito para a legenda dos pontos vazados
+  const xl=E('text',{class:'axt',x:N7?L+plotW/2-34:L+plotW/2,y:H-6,'text-anchor':'middle'});xl.textContent=N7?'nível na teia (1 = base, 5 = topo)':'nível trófico';c.appendChild(xl);
   // anvisa
   if(P.anvisa){const y=yOf(P.anvisa);c.appendChild(E('line',{class:'anvisa',x1:L,y1:y,x2:L+plotW,y2:y}));
     const t=E('text',{class:'anvisa-t',x:L+plotW,y:y-3,'text-anchor':'end'});t.textContent='0,5';c.appendChild(t);}
   const clampY=y=>Math.min(T+plotH,Math.max(T,y));
-  if(scatterLog){
+  if(useLog){
     // em escala log, a reta é a própria regressão do TMF (inclinação b; TMF = 10^b)
     const f=tmfFit(res);
     if(f){c.appendChild(E('line',{class:'trend',x1:xOf(1),y1:clampY(yOf(Math.pow(10,f.a+f.b))),x2:xOf(5),y2:clampY(yOf(Math.pow(10,f.a+f.b*5)))}));
@@ -902,7 +922,7 @@ function drawScatter(res,P){
   S.forEach(s=>{const x=xOf(s.tl)+jit(s.id),y=yOf(res[s.id]),ratio=Math.min(1,res[s.id]/max),iso=!inWeb(s);
     c.appendChild(E('circle',{class:'pt',cx:x,cy:y,r:s.human?6:5,fill:s.human?css('--tl5'):iso?'#fff':contam(ratio),
       style:iso?'stroke:'+contam(ratio)+';stroke-width:1.5':''}));});
-  const iso=E('text',{class:'axt',x:W-Rg,y:H-6,'text-anchor':'end'});iso.textContent='○ fora do TMF';c.appendChild(iso);
+  const iso=E('text',{class:'axt',x:W-Rg,y:H-6,'text-anchor':'end'});iso.textContent=N7?'○ fora da reta':'○ fora do TMF';c.appendChild(iso);
 }
 
 function renderInsight(res,P){
@@ -913,6 +933,15 @@ function renderInsight(res,P){
     // remediação de 100%: nada entra na água, então não há o que comparar entre os elos
     t=`Com a <b>remediação em 100%</b>, o efluente é todo tratado e nenhum poluente entra na água: a teia fica limpa. Diminua a remediação para ver a contaminação voltar a subir a teia.`;
     document.getElementById('insight').className='note';
+  }else if(N7){
+    // 7º ano: frases curtas, sem TMF; nomeia o fenômeno e liga ao prato
+    if(currentPoll==='mercurio'){const overs=S.filter(s=>s.edible&&res[s.id]>P.anvisa).map(s=>s.pop);
+      t=`O <b>${top.s.pop}</b> ficou com mais mercúrio. A cada elo da teia, o mercúrio aumenta: quem come muitas presas contaminadas acumula mais. Isso se chama <b>biomagnificação</b>. `;
+      t+=overs.length?`Passaram do limite de segurança (0,5 mg/kg): ${overs.join(', ')}.`
+        :`Nenhum pescado passou do limite de segurança (0,5 mg/kg)${comRemed?': tratar a fonte funcionou':''}.`;
+      document.getElementById('insight').className='note haz';
+    }else{t=`Quem filtra a água, como a <b>ostra</b> e o <b>mexilhão</b>, ficou com mais microplástico. O microplástico <b>se acumula</b>, mas não aumenta a cada elo da teia: o boto-cinza, no topo, tem menos que os filtradores.`;
+      document.getElementById('insight').className='note';}
   }else if(currentPoll==='mercurio'){const overs=S.filter(s=>s.edible&&res[s.id]>P.anvisa).map(s=>s.pop);
     t=`O <b>${top.s.pop}</b> acumulou o máximo: o mercúrio <b>biomagnifica</b>${tmfTxt} e a nuvem de pontos sobe com o nível trófico. `;
     t+=overs.length?`Entre os pescados, ${overs.join(', ')} passaram de 0,5 mg/kg.`
@@ -1013,7 +1042,7 @@ document.getElementById('permalink').addEventListener('click',e=>{
   // aberto do pen drive (file://), o endereço local só existe neste aparelho: usa a versão online
   if(location.protocol==='file:'){
     const cfg=`${lastRun.poll==='mercurio'?'Mercúrio':'Microplástico'}, intensidade ${lastRun.int}%, remediação ${lastRun.re}%`;
-    prompt(`Link da versão online (o arquivo local só abre neste aparelho).\nSem internet, configure à mão: ${cfg}.`,ONLINE_URL+location.hash);return;}
+    prompt(`Link da versão online (o arquivo local só abre neste aparelho).\nSem internet, configure à mão: ${cfg}${N7?', modo 7º ano':''}.`,ONLINE_URL+location.search+location.hash);return;}
   const url=location.href;
   const ok=()=>{const old=btn.innerHTML;btn.innerHTML='Link copiado ✓';setTimeout(()=>btn.innerHTML=old,1600);};
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(ok).catch(()=>prompt('Copie o link do cenário:',url));}
@@ -1024,6 +1053,8 @@ document.getElementById('catFilter').addEventListener('click',e=>{if(e.target.da
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA')return;
   if(e.ctrlKey||e.metaKey||e.altKey)return; // não sequestra Ctrl+R etc.
   if(!document.getElementById('view-sim').classList.contains('on'))return;
+  // no jogo e no questionário os atalhos rodariam a simulação por trás e entregariam respostas
+  if(document.body.classList.contains('buildmode')||document.body.classList.contains('ppmode'))return;
   if(e.key==='1')document.querySelector('#poll [data-poll=mercurio]').click();
   if(e.key==='2')document.querySelector('#poll [data-poll=microplastico]').click();
   if(e.key.toLowerCase()==='r')runSim();});
@@ -1102,9 +1133,33 @@ function applyScenarioFromHash(){
   go('sim');runSim();
 }
 
+/* ===== Nível de ensino (Ensino Médio × 7º ano) ===== */
+function setNivel(n7,persist){
+  N7=!!n7;document.body.classList.toggle('n7',N7);
+  document.getElementById('stNivel').textContent='nível: '+(N7?'7º ano':'Ensino Médio');
+  if(N7&&scatterLog){scatterLog=false;const b=document.getElementById('optLog');if(b)b.setAttribute('aria-pressed','false');}
+  if(persist){
+    try{localStorage.setItem(NIVEL_KEY,N7?'7':'em');}catch(e){/* sem armazenamento: vale só nesta visita */}
+    // o endereço acompanha a escolha: o botão Link e o recarregar mantêm o nível
+    try{const u=new URL(location.href);if(N7)u.searchParams.set('nivel','7');else u.searchParams.delete('nivel');
+      history.replaceState(null,'',u.pathname+u.search+u.hash);}catch(e){}
+  }
+  if(lastRes){const P=POLL[runPoll()];renderReadouts(lastRes,P);drawScatter(lastRes,P);renderInsight(lastRes,P);}
+  document.dispatchEvent(new CustomEvent('teia:nivel',{detail:N7}));
+}
+window.setNivel=setNivel;
+/* ?nivel=7 (ou ?nivel=em) no link manda; sem ele, vale a última escolha neste aparelho */
+function nivelInicial(){
+  let q=null;try{q=new URLSearchParams(location.search).get('nivel');}catch(e){}
+  if(q==='7'||q==='em')return {n7:q==='7',doLink:true};
+  let v=null;try{v=localStorage.getItem(NIVEL_KEY);}catch(e){}
+  return {n7:v==='7',doLink:false};
+}
+
 /* init */
 buildSceneBackdrop(document.getElementById('heroScene'),{w:1000,h:470,surf:80,mud:410},false);
 drawSim();buildCatalog();updInt();
+{const ni=nivelInicial();setNivel(ni.n7,ni.doLink);}
 window.addEventListener('load',applyScenarioFromHash);
 </script>
 <style>
@@ -1197,14 +1252,23 @@ body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-wi
  modebar.innerHTML=
   `<button data-mode="explorar" aria-current="true">${ic('<circle cx="10" cy="10" r="7"/><path d="M10 7v6M7 10h6"/>')}Explorar</button>`+
   `<button data-mode="montar">${ic('<circle cx="5" cy="15" r="2"/><circle cx="15" cy="5" r="2"/><path d="M6.5 13.5l7-7"/>')}Montar a teia</button>`+
-  `<button data-mode="quiz">${ic('<circle cx="10" cy="10" r="7.5"/><path d="M8 8a2 2 0 113 1.7c-.6.4-1 .8-1 1.6M10 14h.01"/>')}Quiz</button>`;
+  `<button data-mode="quiz">${ic('<circle cx="10" cy="10" r="7.5"/><path d="M8 8a2 2 0 113 1.7c-.6.4-1 .8-1 1.6M10 14h.01"/>')}Quiz</button>`+
+  `<button data-mode="questionario">${ic('<rect x="4" y="3" width="12" height="15" rx="2"/><path d="M7 7h6M7 10h6M7 13h4"/>')}Antes e depois</button>`;
  secHead.after(modebar);
  let mode='explorar';
+
+ /* ---------- NÍVEL DE ENSINO (Ensino Médio × 7º ano) ---------- */
+ const lvl=document.createElement('div');lvl.className='lvl';lvl.setAttribute('role','group');lvl.setAttribute('aria-label','Nível de ensino');
+ lvl.innerHTML='<button type="button" data-lvl="em">Ensino Médio</button><button type="button" data-lvl="7">7º ano</button>';
+ modebar.appendChild(lvl);
+ const syncLvl=()=>lvl.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.lvl==='7')===N7)));
+ lvl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const n7=b.dataset.lvl==='7';if(n7!==N7)setNivel(n7,true);});
+ syncLvl();
 
  /* ---------- ROTEIRO DE AULA GUIADA ---------- */
  const tourBtn=document.createElement('button');
  tourBtn.innerHTML=ic('<path d="M4 4h9l3 3v9H4z"/><path d="M8 8h5M8 11h5"/>')+'Roteiro de aula';
- tourBtn.style.cssText='margin-left:auto;border:1.5px solid var(--w3);background:var(--w3);color:#eafaf8;border-radius:10px;padding:10px 15px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px';
+ tourBtn.style.cssText='border:1.5px solid var(--w3);background:var(--w3);color:#eafaf8;border-radius:10px;padding:10px 15px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px';
  modebar.appendChild(tourBtn);
 
  const setPoll=p=>{const b=document.querySelector(`#poll [data-poll="${p}"]`);if(b)b.click();};
@@ -1229,23 +1293,43 @@ body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-wi
    p:'De volta ao mercúrio, agora em intensidade <b>média (60%)</b>. Abra a <b>Tabela de dados</b>: quais pescados passam do limite da <b>ANVISA (0,5 mg/kg)</b>? Repare que os <b>bivalves</b> (ostra, mexilhão, vieira, berbigão) ficam abaixo e os <b>peixes</b>, acima: quanto mais alto na teia, mais mercúrio. É a ponte entre ecologia e saúde pública — o fecho da aula.',
    act:()=>{scen('mercurio',60);const d=document.getElementById('dataTableWrap');d.hidden=false;d.setAttribute('open','');d.scrollIntoView({behavior:'smooth',block:'center'});}},
  ];
- let ti=-1;
+ /* roteiro do 7º ano: a sequência da proposta pedagógica (aula 2), sem TMF; o passo 5 trata a fonte */
+ const TOUR7=[
+  {t:'Passo 1 · Liberar mercúrio',h:'Uma fábrica lança mercúrio',
+   p:'Vamos liberar <b>mercúrio</b> em intensidade <b>alta</b>. Observe as cores na cena: quanto mais vermelho, mais mercúrio no animal. Clique em <b>Avançar</b>.',
+   act:()=>{scen('mercurio',100);}},
+  {t:'Passo 2 · Quem ficou com mais?',h:'O topo da teia acumula mais',
+   p:'Veja a leitura <b>Mais contaminado</b>: é o <b>boto-cinza</b>, que nunca bebeu a água poluída. Ele come peixes que já têm mercúrio, e o mercúrio vai se somando a cada elo da teia. Isso se chama <b>biomagnificação</b>. Este cenário foi guardado como <b>A</b>.',
+   act:()=>{scen('mercurio',100);pin('A');}},
+  {t:'Passo 3 · Trocar o poluente',h:'Agora o microplástico',
+   p:'Agora o poluente é <b>microplástico</b>, na mesma intensidade. Antes de olhar: quem você acha que vai ficar com mais desta vez?',
+   act:()=>{scen('microplastico',100);}},
+  {t:'Passo 4 · Comparar',h:'Cada poluente tem seu caminho',
+   p:'Quem lidera agora são os <b>filtradores</b>, como a ostra e o mexilhão: eles filtram a água o dia todo. O microplástico se acumula, mas não aumenta a cada elo. Este cenário é o <b>B</b>: compare A e B no <b>Comparador de cenários</b>.',
+   act:()=>{scen('microplastico',100);pin('B');document.getElementById('cmpCard').scrollIntoView({behavior:'smooth',block:'center'});}},
+  {t:'Passo 5 · Tratar a fonte',h:'E se a cidade tratar o esgoto?',
+   p:'De volta ao mercúrio em intensidade alta, agora com <b>80% do efluente tratado</b> (remediação da fonte). Veja a leitura <b>Pescados acima do limite</b>: com a fonte tratada, a teia inteira fica menos contaminada. A solução começa na fonte.',
+   act:()=>{setMode('explorar');setRemed(80);setPoll('mercurio');setInt(100);runSim();document.getElementById('roCard').scrollIntoView({behavior:'smooth',block:'center'});}},
+ ];
+ let ti=-1,TT=TOUR; // TT = o roteiro aberto (Ensino Médio ou 7º ano)
  const tour=document.createElement('div');tour.className='tourbar';tour.setAttribute('role','dialog');tour.setAttribute('aria-label','Roteiro de aula guiada');
  document.body.appendChild(tour);
  function renderTour(){
-  const s=TOUR[ti];
+  const s=TT[ti];
   tour.innerHTML=`<button class="x" id="tourX" aria-label="Fechar roteiro">✕</button>`+
    `<div class="step">${s.t}</div><h4>${s.h}</h4><p>${s.p}</p>`+
-   `<div class="row"><div class="dots">${TOUR.map((_,k)=>`<i class="${k===ti?'on':''}"></i>`).join('')}</div>`+
+   `<div class="row"><div class="dots">${TT.map((_,k)=>`<i class="${k===ti?'on':''}"></i>`).join('')}</div>`+
    `<button id="tourPrev" ${ti===0?'disabled style="opacity:.4"':''}>Voltar</button>`+
-   `<button class="primary" id="tourNext">${ti===TOUR.length-1?'Concluir':'Avançar'}</button></div>`;
+   `<button class="primary" id="tourNext">${ti===TT.length-1?'Concluir':'Avançar'}</button></div>`;
   document.getElementById('tourX').onclick=closeTour;
-  document.getElementById('tourPrev').onclick=()=>{if(ti>0){ti--;go('sim');TOUR[ti].act();renderTour();}};
-  document.getElementById('tourNext').onclick=()=>{if(ti<TOUR.length-1){ti++;go('sim');TOUR[ti].act();renderTour();}else{closeTour();}};
+  document.getElementById('tourPrev').onclick=()=>{if(ti>0){ti--;go('sim');TT[ti].act();renderTour();}};
+  document.getElementById('tourNext').onclick=()=>{if(ti<TT.length-1){ti++;go('sim');TT[ti].act();renderTour();}else{closeTour();}};
  }
- function openTour(){go('sim');ti=0;tour.classList.add('on');TOUR[0].act();renderTour();}
+ function openTour(){go('sim');TT=N7?TOUR7:TOUR;ti=0;tour.classList.add('on');TT[0].act();renderTour();}
  function closeTour(){tour.classList.remove('on');ti=-1;}
  tourBtn.addEventListener('click',openTour);
+ // trocar o nível com o roteiro aberto fecha o roteiro (os textos são de outro nível)
+ document.addEventListener('teia:nivel',()=>{syncLvl();if(tour.classList.contains('on'))closeTour();});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&tour.classList.contains('on'))closeTour();});
 
  /* ---------- REMEDIAÇÃO + EXPOSIÇÃO (no card de Parâmetros) ---------- */
@@ -1365,7 +1449,8 @@ body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-wi
 
  /* ====================== LÓGICA ====================== */
  // troca de modo
- function setMode(m){mode=m;modebar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.mode===m));
+ function setMode(m){mode=m;modebar.querySelectorAll('button[data-mode]').forEach(b=>b.setAttribute('aria-current',b.dataset.mode===m));
+   document.body.classList.toggle('ppmode',m==='questionario');
    document.body.classList.toggle('buildmode',m==='montar');
    document.body.classList.toggle('hints',m==='montar'&&hintsOn);
    buildCard.hidden=m!=='montar';quizCard.hidden=m!=='quiz';
@@ -1374,8 +1459,10 @@ body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-wi
    if(m==='montar'){selId=null;sim.querySelectorAll('.org').forEach(o=>o.classList.remove('sel','dim'));
      sim.querySelectorAll('.flow').forEach(f=>f.classList.remove('on'));resetSim();startBuild();}
    if(m==='quiz'){newQuiz();}
+   document.dispatchEvent(new CustomEvent('teia:mode',{detail:m}));
  }
- modebar.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+ window.teiaSetMode=setMode;
+ modebar.querySelectorAll('button[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 
  // ---- MONTAR A TEIA ----
  let pickA=null,found=new Set(),hintsOn=true;
@@ -1504,8 +1591,9 @@ body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-wi
    const tmf=trophicMagnification(lastRes),top=S.slice().sort((a,b)=>lastRes[b.id]-lastRes[a.id])[0];
    return `${lastRun.poll==='mercurio'?'Mercúrio':'Microplástico'} ${lastRun.int}%${lastRun.re?' (remediação '+lastRun.re+'%)':''} · TMF ${tmf==null?'—':tmf.toFixed(1).replace('.',',')} · mais contaminado: ${semContaminacao(lastRes)?'nenhum (teia sem poluente)':top.pop}`;}
  document.getElementById('recReg').addEventListener('click',()=>{const turma=(document.getElementById('turma').value||'—'),est=(document.getElementById('estacao').value||'—');
-   const atividade=mode==='quiz'?'Quiz':mode==='montar'?'Montar a teia':'Exploração';
-   const pont=mode==='quiz'?lastQuiz:mode==='montar'?(found.size+'/'+allEdges.length+(hintsOn?' (com pistas)':' (sem pistas)')):exploreSummary();
+   const atividade=mode==='quiz'?'Quiz':mode==='montar'?'Montar a teia':mode==='questionario'?'Antes e depois':'Exploração';
+   const pont=mode==='quiz'?lastQuiz:mode==='montar'?(found.size+'/'+allEdges.length+(hintsOn?' (com pistas)':' (sem pistas)'))
+     :mode==='questionario'?(window.teiaPP?window.teiaPP.resumo():'—'):exploreSummary();
    const now=new Date();
    recs.push({id:now.getTime().toString(36)+Math.random().toString(36).slice(2,7),d:now.toLocaleDateString('pt-BR'),
      h:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),turma,est,atividade,pont});
@@ -1545,6 +1633,302 @@ body.buildmode.reveal .flow:not(.found){opacity:.55;stroke:var(--haz1);stroke-wi
    sc.onerror=()=>{note.textContent='Sem conexão: o intérprete de Libras (VLibras) precisa de internet. A narração em áudio funciona offline.';};
    document.body.appendChild(sc);});
  })();
+</script>
+<style>
+/* ===== v7 · nível 7º ano + questionário Antes e depois ===== */
+/* seletor de nível na barra de modos */
+.modebar .lvl{display:inline-flex;margin-left:auto;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.modebar .lvl button{border:0;border-radius:0;padding:10px 12px;font-size:13px}
+.modebar .lvl button+button{border-left:1.5px solid var(--line)}
+.modebar .lvl button[aria-pressed="true"]{background:var(--tide);color:#05242a}
+/* 7º ano: sem escala log e sem o cartão Dados reais (recurso do professor) */
+body.n7 #optLog,body.n7 #v5Data{display:none!important}
+.unitnote{font-size:11.5px;color:var(--muted);padding:8px 12px;border-top:1px solid var(--line);line-height:1.45}
+.unitnote:empty{display:none}
+/* modo questionário: o aluno responde sem ver o simulador */
+body.ppmode #view-sim .workspace,body.ppmode #chartsRow,body.ppmode #dataTableWrap,body.ppmode #cmpCard,
+body.ppmode #v5Data,body.ppmode #v5Build,body.ppmode #v5Quiz{display:none!important}
+#ppCard{margin-bottom:16px}
+#ppCard .bd{max-width:760px}
+.pp-intro{font-size:13.5px;color:#2a3431;margin:0 0 12px}
+.pp-cod{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px}
+.pp-cod input{font:inherit;font-size:15px;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;width:9em;text-transform:uppercase;font-family:var(--mono)}
+.pp-cod label{font-weight:700;font-size:13px}
+.pp-msg{font-size:13px;color:var(--warn);min-height:1.2em;margin:4px 0 8px}
+.pp-msg.ok{color:var(--w2)}
+.pp-bloco{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--w2);margin:18px 0 8px}
+fieldset.ppq{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px 8px;margin:0 0 12px;min-width:0}
+fieldset.ppq legend{font-weight:700;font-size:14px;padding:0 6px;line-height:1.4}
+fieldset.ppq.falta{border-color:var(--warn);background:#fbecea}
+.ppq .ppopt{display:flex;gap:9px;align-items:flex-start;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:13.5px;line-height:1.45}
+.ppq .ppopt:hover{background:var(--panel2)}
+.ppq .ppopt input{margin-top:3px;accent-color:var(--w2);flex:none}
+.ppq .ouvir{float:right;margin:-2px 0 4px 8px;border:1px solid var(--line);background:var(--panel2);border-radius:20px;padding:3px 10px;font:inherit;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer}
+.ppesc{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;clear:both}
+.ppesc .ppopt{flex-direction:column;align-items:center;text-align:center;border:1px solid var(--line);font-size:12.5px}
+.ppesc .ppopt input{margin:0}
+@media(max-width:520px){.ppesc{grid-template-columns:repeat(2,1fr)}}
+.ppq textarea{width:100%;min-height:70px;font:inherit;font-size:13.5px;padding:8px;border:1px solid var(--line);border-radius:8px;resize:vertical}
+.pp-placar{display:flex;gap:18px;flex-wrap:wrap;margin:6px 0 14px}
+.pp-placar div{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.pp-placar b{display:block;font-family:var(--mono);font-size:24px;color:var(--w2)}
+.pp-placar span{font-size:12px;color:var(--muted)}
+ol.ppfb{padding-left:20px;margin:0}
+ol.ppfb li{margin:0 0 12px;font-size:13.5px}
+ol.ppfb .ok{color:var(--ok);font-weight:700}
+ol.ppfb .no{color:var(--warn);font-weight:700}
+ol.ppfb .ret{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+details.pp-prof{margin-top:18px;border-top:1px dashed var(--line);padding-top:12px}
+details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--w2)}
+.pp-tab{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+.pp-tab th,.pp-tab td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
+.pp-tab td.n{font-family:var(--mono);text-align:right}
+.pp-tabwrap{overflow-x:auto}
+/* versão para imprimir: só o questionário vai para o papel */
+#ppPrint{display:none}
+@media print{
+  body.print-pp>*:not(#ppPrint){display:none!important}
+  body.print-pp #ppPrint{display:block!important;color:#000;font-size:11.5pt;line-height:1.4}
+  #ppPrint h1{font-size:15pt;margin:0 0 4pt}
+  #ppPrint .pi{margin:0 0 8pt}
+  #ppPrint .pq{break-inside:avoid;margin:0 0 9pt}
+  #ppPrint .pq p{margin:0 0 2pt;font-weight:700}
+  #ppPrint .pq div{margin-left:12pt}
+  #ppPrint table{border-collapse:collapse;width:100%;margin:4pt 0 9pt}
+  #ppPrint th,#ppPrint td{border:1px solid #777;padding:3pt 5pt;font-size:10pt}
+  #ppPrint .linhas{border-bottom:1px solid #777;height:16pt}
+}
+</style>
+<script>
+"use strict";
+/* ===== v7 · Questionário Antes e depois =====
+   Instrumento pedagógico da professora (ver Proposta pedagógica): o aluno responde com um código sem nome,
+   as respostas ficam só neste aparelho e o retorno aparece depois do envio do Depois. */
+(function(){
+ const PP_A=[
+  {q:'No manguezal, qual destes seres produz o próprio alimento usando a luz do Sol?',
+   o:['Caranguejo-uçá','Fitoplâncton','Tainha','Garça-branca-grande'],c:1,
+   r:'O fitoplâncton faz fotossíntese: é um produtor, a base da teia.'},
+  {q:'Qual frase mostra corretamente quem come quem?',
+   o:['O fitoplâncton come o zooplâncton, que come a sardinha, que come o boto-cinza.','O boto-cinza come o fitoplâncton, e a sardinha come o boto-cinza.','O zooplâncton come o fitoplâncton, a sardinha come o zooplâncton e o boto-cinza come a sardinha.','O zooplâncton come a sardinha, e o fitoplâncton come o boto-cinza.'],c:2,
+   r:'O alimento passa do fitoplâncton para o zooplâncton, depois para a sardinha e para o boto-cinza.'},
+  {q:'Uma fábrica lança mercúrio na água do estuário. Depois de algum tempo, em qual destes animais deve haver MAIS mercúrio no corpo?',
+   o:['Zooplâncton','Ostra','Tainha','Boto-cinza'],c:3,
+   r:'O mercúrio aumenta a cada elo da teia; o predador do topo fica com mais.'},
+  {q:'O boto-cinza não bebe a água poluída. Por que ele acaba com mais mercúrio que a sardinha?',
+   o:['Porque come muitos peixes que já têm mercúrio, e o mercúrio vai se acumulando no corpo dele.','Porque mergulha mais fundo, onde a água tem muito mais mercúrio.','Porque o mercúrio é atraído pelos animais maiores e mais pesados.','Porque vive mais perto da fábrica que lança o mercúrio.'],c:0,
+   r:'Cada refeição traz o mercúrio que já estava na presa. Isso se chama biomagnificação.'},
+  {q:'Agora o poluente é microplástico. Quais animais ficam com MAIS partículas no corpo?',
+   o:['Os predadores do topo da teia, como o boto-cinza e a toninha.','Os que filtram a água para se alimentar, como a ostra e o mexilhão.','As árvores do mangue, que ficam na beira da água.','As aves que mergulham para pescar, como o biguá.'],c:1,
+   r:'Quem filtra a água retém mais microplástico.'},
+  {q:'Qual frase explica a diferença entre o mercúrio e o microplástico na teia alimentar?',
+   o:['Os dois aumentam a cada elo da teia e ficam maiores no boto-cinza.','O microplástico aumenta a cada elo da teia; o mercúrio fica só na água.','Nenhum dos dois chega aos animais, porque ficam no fundo do estuário.','O mercúrio aumenta a cada elo da teia; o microplástico se concentra em quem filtra a água.'],c:3,
+   r:'O mercúrio biomagnifica; o microplástico se acumula nos filtradores, sem aumentar a cada elo.'},
+  {q:'Qual é o principal caminho pelo qual o mercúrio lançado no estuário chega até as pessoas?',
+   o:['Nadando na água poluída do estuário.','Respirando o ar perto do mar.','Comendo peixes e frutos do mar contaminados.','Ele não chega, porque o mar dilui tudo.'],c:2,
+   r:'O principal caminho é a alimentação: peixes e frutos do mar.'},
+  {q:'Qual medida diminui a contaminação de TODA a teia alimentar?',
+   o:['Tratar o esgoto e os resíduos das fábricas antes que cheguem à água.','Pescar só os peixes grandes, que são os mais contaminados.','Retirar as ostras e os mexilhões do manguezal.','Impedir que as aves comam os peixes do estuário.'],c:0,
+   r:'Tratar a fonte reduz o poluente que entra na água, e toda a teia fica menos contaminada.'},
+  {q:'Para que serve um simulador de computador numa aula de Ciências?',
+   o:['Para substituir as pesquisas feitas no ambiente real, que são caras.','Para representar, de forma simplificada, como algo funciona e testar ideias.','Para prever o que vai acontecer no futuro, com certeza.','Só para jogar, sem relação com a natureza.'],c:1,
+   r:'Um modelo simplifica a realidade para estudar e testar ideias; os números dele são ilustrativos.'},
+  {q:'Pesquisadores mediram o mercúrio em três seres vivos: alga = 1 unidade; peixe pequeno, que come a alga = 3 unidades; peixe grande, que come o peixe pequeno = 9 unidades. O que esses números sugerem?',
+   o:['O mercúrio diminui ao subir na teia alimentar.','Só o peixe grande tem mercúrio no corpo.','O mercúrio aumenta a cada nível da teia alimentar.','Não dá para concluir nada com esses números.'],c:2,
+   r:'1, 3, 9: o valor aumenta a cada nível da teia.'},
+ ];
+ const PP_B=['Tenho vontade de aprender mais sobre o mar e os manguezais.','O manguezal é importante para mim e para a minha cidade.',
+  'O que vai para o esgoto pode chegar à comida que comemos.','Eu consigo explicar para outra pessoa como um poluente chega até o peixe.',
+  'Pretendo evitar jogar plástico em lugares errados.','Pretendo conversar com minha família sobre a poluição no mar.'];
+ const ESC=['Discordo muito','Discordo','Concordo','Concordo muito'];
+ const PP_C=['O que você aprendeu nestas aulas que não sabia antes?','O que foi difícil de usar ou de entender no simulador?'];
+ const L='abcd';
+ window.teiaPPItens={A:PP_A,B:PP_B,C:PP_C,escala:ESC}; // usado nos testes e na versão impressa
+
+ /* ---------- armazenamento local ---------- */
+ const KEY='teiaSobRisco.pp';
+ let recs=[];
+ try{recs=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(recs))recs=[];}catch(e){recs=[];}
+ const salvar=()=>{try{localStorage.setItem(KEY,JSON.stringify(recs));}catch(e){/* sem armazenamento: vale só até fechar a aba */}};
+ const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ // código sem nome: só letras sem acento, números e hífen, até 10 caracteres
+ const normCod=v=>String(v||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Z0-9-]/g,'').slice(0,10);
+ const achar=(cod,fase)=>recs.find(r=>r.cod===cod&&r.fase===fase);
+ const nota=a=>a.reduce((s,x,i)=>s+(x===PP_A[i].c?1:0),0);
+ const fmt1=v=>v.toFixed(1).replace('.',',');
+
+ /* ---------- áudio: ler a pergunta em voz alta ---------- */
+ const tts='speechSynthesis' in window;
+ function falar(t){if(!tts)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='pt-BR';u.rate=.95;
+   const v=speechSynthesis.getVoices().find(v=>/pt-BR|pt_BR|Portug/i.test(v.lang+v.name));if(v)u.voice=v;speechSynthesis.speak(u);}
+
+ /* ---------- cartão ---------- */
+ const card=document.createElement('div');card.className='card';card.id='ppCard';card.hidden=true;
+ card.innerHTML='<div class="hd"><h2>Questionário Antes e depois</h2><span class="pill">avaliação</span></div><div class="bd" id="ppBody"></div>';
+ const modebar=document.querySelector('#view-sim .modebar');
+ (modebar||document.querySelector('#view-sim .sec-head')).after(card);
+ const body=document.getElementById('ppBody');
+ let codAtual='';
+
+ function inicio(msg,ok){
+  body.innerHTML=
+   `<p class="pp-intro">Responda sozinho. <b>Não escreva seu nome</b>: use o código combinado com a professora (por exemplo, 3A). Responda o <b>Antes</b> no começo da primeira aula e o <b>Depois</b> no fim da última.</p>`+
+   `<div class="pp-cod"><label for="ppCod">Seu código</label><input id="ppCod" maxlength="10" autocomplete="off" spellcheck="false" placeholder="ex.: 3A" value="${esc(codAtual)}">`+
+   `<button class="btn primary" type="button" id="ppAntes" style="flex:none">Responder Antes</button><button class="btn" type="button" id="ppDepois">Responder Depois</button></div>`+
+   `<div class="pp-msg${ok?' ok':''}" id="ppMsg" role="status">${msg||''}</div>`+
+   `<details class="pp-prof" id="ppProf"><summary>Área da professora</summary><div id="ppResumo"></div>`+
+   `<div class="miniact"><button class="btn" type="button" id="ppJSON">Exportar JSON</button><button class="btn" type="button" id="ppCSV">Exportar CSV</button>`+
+   `<label class="btn" for="ppImp" style="cursor:pointer">Importar</label><input type="file" id="ppImp" accept="application/json" hidden>`+
+   `<button class="btn" type="button" id="ppPrintBtn">Versão para imprimir</button><button class="btn" type="button" id="ppApagar">Apagar respostas</button></div>`+
+   `<div class="hint2">As respostas ficam <b>só neste aparelho</b>. Exporte de cada aparelho e importe num só para ver a turma inteira; apague tudo ao terminar.</div></details>`;
+  const inp=document.getElementById('ppCod');
+  inp.addEventListener('input',()=>{const p=inp.selectionStart,v=normCod(inp.value);if(v!==inp.value){inp.value=v;try{inp.setSelectionRange(p,p);}catch(e){}}});
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('ppAntes').click();}});
+  const comecar=fase=>{const cod=normCod(inp.value);
+    if(!cod){mostrar('Digite o seu código antes de começar.');inp.focus();return;}
+    codAtual=cod;formulario(fase);};
+  document.getElementById('ppAntes').onclick=()=>comecar('antes');
+  document.getElementById('ppDepois').onclick=()=>comecar('depois');
+  document.getElementById('ppProf').addEventListener('toggle',e=>{if(e.target.open)resumoTurma();});
+  document.getElementById('ppJSON').onclick=exportarJSON;
+  document.getElementById('ppCSV').onclick=exportarCSV;
+  document.getElementById('ppImp').addEventListener('change',importar);
+  document.getElementById('ppPrintBtn').onclick=imprimir;
+  document.getElementById('ppApagar').onclick=()=>{if(!recs.length)return;
+    if(confirm(`Apagar as ${recs.length} respostas guardadas neste aparelho?`)){recs=[];salvar();resumoTurma();}};
+ }
+ const mostrar=(t,ok)=>{const m=document.getElementById('ppMsg');if(m){m.textContent=t;m.className='pp-msg'+(ok?' ok':'');}};
+
+ function formulario(fase){
+  const depois=fase==='depois',ja=achar(codAtual,fase);
+  let h=`<p class="pp-intro"><b>${depois?'Depois':'Antes'}</b> · código <b>${esc(codAtual)}</b>. `+
+   (ja?`Este código já respondeu o ${depois?'Depois':'Antes'} neste aparelho; enviar de novo substitui a resposta anterior.`:'Marque uma resposta em cada pergunta.')+`</p>`;
+  h+=`<div class="pp-bloco">Parte 1 · O que você sabe</div>`;
+  PP_A.forEach((it,i)=>{
+   h+=`<fieldset class="ppq" id="ppfA${i}"><legend>${i+1}. ${esc(it.q)}</legend>`+
+    (tts?`<button type="button" class="ouvir" data-ouvir="A${i}" aria-label="Ouvir a pergunta ${i+1}">Ouvir</button>`:'')+
+    it.o.map((o,k)=>`<label class="ppopt"><input type="radio" name="ppA${i}" value="${k}"><span>${L[k]}) ${esc(o)}</span></label>`).join('')+`</fieldset>`;});
+  h+=`<div class="pp-bloco">Parte 2 · O que você pensa</div>`;
+  PP_B.forEach((t,i)=>{
+   h+=`<fieldset class="ppq" id="ppfB${i}"><legend>${PP_A.length+i+1}. ${esc(t)}</legend>`+
+    (tts?`<button type="button" class="ouvir" data-ouvir="B${i}" aria-label="Ouvir a frase ${PP_A.length+i+1}">Ouvir</button>`:'')+
+    `<div class="ppesc">${ESC.map((e,k)=>`<label class="ppopt"><input type="radio" name="ppB${i}" value="${k+1}"><span>${e}</span></label>`).join('')}</div></fieldset>`;});
+  if(depois){h+=`<div class="pp-bloco">Parte 3 · Conte para a professora (opcional)</div>`;
+   PP_C.forEach((t,i)=>{h+=`<fieldset class="ppq"><legend>${esc(t)}</legend><textarea id="ppC${i}" maxlength="400" aria-label="${esc(t)}"></textarea></fieldset>`;});}
+  h+=`<div class="pp-msg" id="ppMsg" role="status"></div>`+
+   `<div class="miniact"><button class="btn primary" type="button" id="ppEnviar">Enviar</button><button class="btn" type="button" id="ppCancelar">Cancelar</button></div>`;
+  body.innerHTML=h;
+  body.querySelectorAll('[data-ouvir]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.ouvir,i=+k.slice(1);
+    if(k[0]==='A'){const it=PP_A[i];falar(`${it.q} ${it.o.map((o,j)=>`${L[j]}: ${o}`).join('. ')}`);}
+    else falar(`${PP_B[i]} Discordo muito, discordo, concordo ou concordo muito?`);}));
+  body.querySelectorAll('fieldset.ppq input').forEach(r=>r.addEventListener('change',()=>r.closest('fieldset').classList.remove('falta')));
+  document.getElementById('ppCancelar').onclick=()=>{if(tts)speechSynthesis.cancel();inicio();};
+  document.getElementById('ppEnviar').onclick=()=>enviar(fase);
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+ }
+
+ function enviar(fase){
+  const val=n=>{const r=body.querySelector(`input[name="${n}"]:checked`);return r?+r.value:null;};
+  const a=PP_A.map((_,i)=>val('ppA'+i)),b=PP_B.map((_,i)=>val('ppB'+i));
+  const falta=[...a.map((v,i)=>v==null?'A'+i:null),...b.map((v,i)=>v==null?'B'+i:null)].filter(Boolean);
+  body.querySelectorAll('fieldset.ppq').forEach(f=>f.classList.remove('falta'));
+  if(falta.length){
+   falta.forEach(k=>document.getElementById('ppf'+k).classList.add('falta'));
+   const nums=falta.map(k=>k[0]==='A'?+k.slice(1)+1:PP_A.length+ +k.slice(1)+1);
+   mostrar(`Faltam ${falta.length} resposta${falta.length>1?'s':''}: pergunta${falta.length>1?'s':''} ${nums.join(', ')}.`);
+   document.getElementById('ppf'+falta[0]).scrollIntoView({behavior:'smooth',block:'center'});return;}
+  const now=new Date();
+  const rec={id:now.getTime().toString(36)+Math.random().toString(36).slice(2,7),cod:codAtual,fase,
+   d:now.toLocaleDateString('pt-BR'),h:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+   nivel:N7?'7':'em',a,b,c:fase==='depois'?PP_C.map((_,i)=>(document.getElementById('ppC'+i).value||'').trim()):[],nota:nota(a)};
+  recs=recs.filter(r=>!(r.cod===rec.cod&&r.fase===rec.fase));recs.push(rec);salvar();
+  if(tts)speechSynthesis.cancel();
+  fase==='antes'?fimAntes():retorno(rec);
+ }
+
+ function fimAntes(){
+  body.innerHTML=`<p class="pp-intro" style="font-size:15px"><b>Pronto!</b> Suas respostas do Antes foram guardadas. Agora é hora de explorar o estuário.</p>`+
+   `<div class="miniact"><button class="btn primary" type="button" id="ppSim">Ir para o simulador</button><button class="btn" type="button" id="ppProx">Próximo aluno</button></div>`;
+  document.getElementById('ppSim').onclick=()=>{codAtual='';if(window.teiaSetMode)window.teiaSetMode('explorar');window.scrollTo({top:0,behavior:'smooth'});};
+  document.getElementById('ppProx').onclick=()=>{codAtual='';inicio();};
+ }
+
+ function retorno(rec){
+  const antes=achar(rec.cod,'antes');
+  let h=`<p class="pp-intro" style="font-size:15px"><b>Pronto!</b> Veja como você foi, código <b>${esc(rec.cod)}</b>:</p><div class="pp-placar">`+
+   (antes?`<div><b>${antes.nota} de ${PP_A.length}</b><span>acertos no Antes</span></div>`:'')+
+   `<div><b>${rec.nota} de ${PP_A.length}</b><span>acertos no Depois</span></div></div><ol class="ppfb">`;
+  PP_A.forEach((it,i)=>{const m=rec.a[i],ok=m===it.c;
+   h+=`<li><span class="${ok?'ok':'no'}">${ok?'Acertou':'Errou'}</span> — ${esc(it.q)}`+
+    (ok?'':`<br>Sua resposta: ${L[m]}) ${esc(it.o[m])}<br>Resposta certa: <b>${L[it.c]}) ${esc(it.o[it.c])}</b>`)+
+    `<span class="ret">${esc(it.r)}</span></li>`;});
+  h+=`</ol><div class="miniact"><button class="btn primary" type="button" id="ppProx">Concluir</button></div>`;
+  body.innerHTML=h;
+  document.getElementById('ppProx').onclick=()=>{codAtual='';inicio();};
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+ }
+
+ /* ---------- resumo da turma (só para a professora, neste aparelho) ---------- */
+ function estat(){
+  const A=recs.filter(r=>r.fase==='antes'),D=recs.filter(r=>r.fase==='depois');
+  const media=g=>g.length?g.reduce((s,r)=>s+r.nota,0)/g.length:null;
+  const pctA=(g,i)=>g.length?Math.round(100*g.filter(r=>r.a[i]===PP_A[i].c).length/g.length):null;
+  const medB=(g,i)=>g.length?g.reduce((s,r)=>s+r.b[i],0)/g.length:null;
+  const pares=A.filter(r=>D.some(d=>d.cod===r.cod)).length;
+  return {A,D,mA:media(A),mD:media(D),pctA,medB,pares};
+ }
+ window.teiaPP={resumo(){const s=estat();if(!s.A.length&&!s.D.length)return 'nenhuma resposta';
+   return `${s.A.length} Antes · ${s.D.length} Depois`+(s.mA!=null&&s.mD!=null?` · média ${fmt1(s.mA)} → ${fmt1(s.mD)} de ${PP_A.length}`:'');}};
+ function resumoTurma(){
+  const el=document.getElementById('ppResumo');if(!el)return;const s=estat();
+  if(!s.A.length&&!s.D.length){el.innerHTML='<p class="hint2">Nenhuma resposta guardada neste aparelho.</p>';return;}
+  let h=`<p class="hint2" style="margin-top:8px">${s.A.length} resposta(s) Antes · ${s.D.length} Depois · ${s.pares} código(s) com as duas.`+
+   (s.mA!=null?` Média de acertos: Antes ${fmt1(s.mA)}`:'')+(s.mD!=null?` · Depois ${fmt1(s.mD)}`:'')+` (de ${PP_A.length}).</p>`;
+  h+=`<div class="pp-tabwrap"><table class="pp-tab"><thead><tr><th>Item</th><th>Antes</th><th>Depois</th></tr></thead><tbody>`;
+  PP_A.forEach((it,i)=>{const a=s.pctA(s.A,i),d=s.pctA(s.D,i);h+=`<tr><td>${i+1}. ${esc(it.q.length>60?it.q.slice(0,58)+'…':it.q)}</td><td class="n">${a==null?'—':a+'% de acerto'}</td><td class="n">${d==null?'—':d+'% de acerto'}</td></tr>`;});
+  PP_B.forEach((t,i)=>{const a=s.medB(s.A,i),d=s.medB(s.D,i);h+=`<tr><td>${PP_A.length+i+1}. ${esc(t)}</td><td class="n">${a==null?'—':'média '+fmt1(a)}</td><td class="n">${d==null?'—':'média '+fmt1(d)}</td></tr>`;});
+  h+=`</tbody></table></div><p class="hint2">Parte 2: média de 1 (discordo muito) a 4 (concordo muito).</p>`;
+  el.innerHTML=h;
+ }
+
+ /* ---------- exportar, importar, imprimir ---------- */
+ const baixar=(conteudo,tipo,nome)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([conteudo],{type:tipo}));a.download=nome;
+   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);};
+ function exportarJSON(){if(!recs.length)return mostrar('Nenhuma resposta para exportar.');
+   baixar(JSON.stringify(recs,null,2),'application/json','antes_e_depois.json');}
+ function exportarCSV(){if(!recs.length)return mostrar('Nenhuma resposta para exportar.');
+   const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+   const cab=['Codigo','Fase','Data','Hora','Nivel',...PP_A.map((_,i)=>'A'+(i+1)),'Acertos',...PP_B.map((_,i)=>'B'+(i+1)),'C1','C2'];
+   const linhas=recs.map(r=>[r.cod,r.fase,r.d,r.h,r.nivel==='7'?'7º ano':'Ensino Médio',...r.a.map(x=>L[x]),r.nota,...r.b,...(r.c.length?r.c:['',''])].map(q).join(';'));
+   baixar('﻿'+cab.join(';')+'\n'+linhas.join('\n'),'text/csv;charset=utf-8','antes_e_depois.csv');}
+ function importar(e){const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+   rd.onload=()=>{let add=0,dup=0;try{const arr=JSON.parse(rd.result);if(!Array.isArray(arr))throw 0;
+     const ids=new Set(recs.map(r=>r.id));
+     arr.forEach(r=>{const ok=r&&typeof r.id==='string'&&(r.fase==='antes'||r.fase==='depois')&&Array.isArray(r.a)&&r.a.length===PP_A.length&&Array.isArray(r.b)&&r.b.length===PP_B.length;
+       if(!ok)return;if(ids.has(r.id)){dup++;return;}
+       const a=r.a.map(x=>Number.isInteger(x)&&x>=0&&x<4?x:-1),b=r.b.map(x=>Number.isInteger(x)&&x>=1&&x<=4?x:0);
+       recs.push({id:r.id,cod:normCod(r.cod),fase:r.fase,d:String(r.d||''),h:String(r.h||''),nivel:r.nivel==='7'?'7':'em',a,b,
+         c:Array.isArray(r.c)?r.c.slice(0,2).map(x=>String(x).slice(0,400)):[],nota:nota(a)});ids.add(r.id);add++;});
+     salvar();mostrar(`${add} resposta(s) importada(s)`+(dup?`; ${dup} repetida(s) ignorada(s).`:'.'),true);resumoTurma();
+   }catch(err){mostrar('Arquivo JSON inválido.');}e.target.value='';};rd.readAsText(f);}
+ // folha impressa: o mesmo questionário, para turmas sem um aparelho por aluno
+ const folha=document.createElement('div');folha.id='ppPrint';folha.setAttribute('aria-hidden','true');
+ folha.innerHTML=`<h1>Teia Sob Risco · Questionário</h1><p class="pi">Código (sem nome): ____________ &nbsp;&nbsp; ( ) Antes &nbsp; ( ) Depois</p>`+
+  `<p class="pi"><b>Parte 1 · O que você sabe.</b> Marque uma alternativa em cada pergunta.</p>`+
+  PP_A.map((it,i)=>`<div class="pq"><p>${i+1}. ${esc(it.q)}</p>${it.o.map((o,k)=>`<div>( ) ${L[k]}) ${esc(o)}</div>`).join('')}</div>`).join('')+
+  `<p class="pi"><b>Parte 2 · O que você pensa.</b> Marque um X em cada linha.</p><table><thead><tr><th></th>${ESC.map(e=>`<th>${e}</th>`).join('')}</tr></thead><tbody>`+
+  PP_B.map((t,i)=>`<tr><td>${PP_A.length+i+1}. ${esc(t)}</td>${ESC.map(()=>'<td></td>').join('')}</tr>`).join('')+`</tbody></table>`+
+  `<p class="pi"><b>Parte 3 · Só no Depois (opcional).</b></p>`+PP_C.map(t=>`<div class="pq"><p>${esc(t)}</p><div class="linhas"></div><div class="linhas"></div></div>`).join('');
+ document.body.appendChild(folha);
+ function imprimir(){document.body.classList.add('print-pp');
+   const sai=()=>{document.body.classList.remove('print-pp');window.removeEventListener('afterprint',sai);};
+   window.addEventListener('afterprint',sai);window.print();setTimeout(sai,1500);}
+
+ /* ---------- liga ao modo da barra ---------- */
+ document.addEventListener('teia:mode',e=>{const on=e.detail==='questionario';card.hidden=!on;
+   if(on){codAtual='';inicio();card.scrollIntoView({behavior:'smooth',block:'start'});}
+   else if(tts&&body.querySelector('fieldset.ppq'))speechSynthesis.cancel();});
+})();
 </script>
 </body>
 </html>
