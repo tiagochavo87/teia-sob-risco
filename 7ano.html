@@ -46,6 +46,7 @@ nav.tabs button{background:transparent;border:0;color:#9DC2BE;font:inherit;font-
 nav.tabs button:hover{color:#fff;background:#0e454d}
 nav.tabs button[aria-current="true"]{color:#062227;background:var(--tide)}
 @media(max-width:680px){.brand .txt span{display:none}nav.tabs button{padding:8px 9px;font-size:12px}}
+@media(max-width:480px){.brand .txt{display:none}nav.tabs{margin-left:0;flex-wrap:wrap}nav.tabs button{padding:7px 7px;font-size:11.5px}}
 @media(max-width:560px){.brand .txt{display:none}}
 
 main{max-width:1320px;margin:0 auto;padding:0 22px 60px}
@@ -381,6 +382,7 @@ figure.scene-fig{min-width:0} /* deixa a cena rolar dentro do card, sem alargar 
     </div>
     <nav class="tabs" role="tablist">
       <button role="tab" data-view="home" aria-current="true">Início</button>
+      <button role="tab" data-view="quest">Questionário</button>
       <button role="tab" data-view="sim">Simulador</button>
       <button role="tab" data-view="cat">Catálogo</button>
       <button role="tab" data-view="doc">Modelo</button>
@@ -520,6 +522,13 @@ figure.scene-fig{min-width:0} /* deixa a cena rolar dentro do card, sem alargar 
       <span id="stRun">última liberação: —</span>
       <span style="margin-left:auto">31 táxons + detrito · estuário/manguezal SC</span>
     </div>
+  </section>
+
+  <!-- ===================== QUESTIONÁRIO ===================== -->
+  <section class="view" id="view-quest">
+    <div class="sec-head"><div><div class="eyebrow">Antes e depois</div><h2 class="serif">Questionário</h2>
+      <p>Responda o <b>Antes</b> no começo da primeira aula e o <b>Depois</b> no fim da última. Depois de enviar, o simulador fica liberado.</p></div></div>
+    <div id="questHost"></div>
   </section>
 
   <!-- ===================== CATÁLOGO ===================== -->
@@ -1764,24 +1773,25 @@ details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(
    const v=speechSynthesis.getVoices().find(v=>/pt-BR|pt_BR|Portug/i.test(v.lang+v.name));if(v)u.voice=v;speechSynthesis.speak(u);}
 
  /* ---------- cartão ---------- */
- const card=document.createElement('div');card.className='card';card.id='ppCard';card.hidden=true;
+ const card=document.createElement('div');card.className='card';card.id='ppCard';
  card.innerHTML='<div class="hd"><h2>Questionário Antes e depois</h2><span class="pill">avaliação</span></div><div class="bd" id="ppBody"></div>';
- const modebar=document.querySelector('#view-sim .modebar');
- (modebar||document.querySelector('#view-sim .sec-head')).after(card);
+ document.getElementById('questHost').appendChild(card);
  const body=document.getElementById('ppBody');
  let codAtual='';
 
  function inicio(msg,ok){
   body.innerHTML=
-   `<p class="pp-intro">Responda sozinho. <b>Não escreva seu nome</b>: use o código combinado com a professora (por exemplo, 3A). Responda o <b>Antes</b> no começo da primeira aula e o <b>Depois</b> no fim da última.</p>`+
-   `<div class="pp-cod"><label for="ppCod">Seu código</label><input id="ppCod" maxlength="10" autocomplete="off" spellcheck="false" placeholder="ex.: 3A" value="${esc(codAtual)}">`+
+   `<p class="pp-intro">Responda sozinho. <b>Não escreva seu nome.</b> Invente um código: um apelido e dois números (por exemplo, LUA27). <b>Anote o código no caderno</b>: você vai usar o mesmo no Depois.</p>`+
+   `<div class="pp-cod"><label for="ppCod">Seu código</label><input id="ppCod" maxlength="10" autocomplete="off" spellcheck="false" placeholder="ex.: LUA27" value="${esc(codAtual)}">`+
    `<button class="btn primary" type="button" id="ppAntes" style="flex:none">Responder Antes</button><button class="btn" type="button" id="ppDepois">Responder Depois</button></div>`+
    `<div class="pp-msg${ok?' ok':''}" id="ppMsg" role="status">${msg||''}</div>`+
+   `<div class="miniact"><button class="btn" type="button" id="ppIrSim">Já respondi: ir para o simulador</button></div>`+
    `<details class="pp-prof" id="ppProf"><summary>Área da professora</summary><div id="ppResumo"></div>`+
    `<div class="miniact"><button class="btn" type="button" id="ppJSON">Exportar JSON</button><button class="btn" type="button" id="ppCSV">Exportar CSV</button>`+
    `<label class="btn" for="ppImp" style="cursor:pointer">Importar</label><input type="file" id="ppImp" accept="application/json" hidden>`+
    `<button class="btn" type="button" id="ppPrintBtn">Versão para imprimir</button><button class="btn" type="button" id="ppApagar">Apagar respostas</button></div>`+
-   `<div class="hint2">As respostas ficam <b>só neste aparelho</b>. Exporte de cada aparelho e importe num só para ver a turma inteira; apague tudo ao terminar.</div></details>`;
+   `<div class="hint2" id="ppEnvio"></div>`+
+   `<div class="hint2">As respostas ficam guardadas neste aparelho e, quando há internet, também são enviadas para a planilha do professor. Exporte de cada aparelho e importe num só para ver a turma inteira aqui.</div></details>`;
   const inp=document.getElementById('ppCod');
   inp.addEventListener('input',()=>{const p=inp.selectionStart,v=normCod(inp.value);if(v!==inp.value){inp.value=v;try{inp.setSelectionRange(p,p);}catch(e){}}});
   inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('ppAntes').click();}});
@@ -1789,8 +1799,9 @@ details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(
     if(!cod){mostrar('Digite o seu código antes de começar.');inp.focus();return;}
     codAtual=cod;formulario(fase);};
   document.getElementById('ppAntes').onclick=()=>comecar('antes');
+  document.getElementById('ppIrSim').onclick=irSim;
   document.getElementById('ppDepois').onclick=()=>comecar('depois');
-  document.getElementById('ppProf').addEventListener('toggle',e=>{if(e.target.open)resumoTurma();});
+  document.getElementById('ppProf').addEventListener('toggle',e=>{if(e.target.open){resumoTurma();statusEnvio();}});
   document.getElementById('ppJSON').onclick=exportarJSON;
   document.getElementById('ppCSV').onclick=exportarCSV;
   document.getElementById('ppImp').addEventListener('change',importar);
@@ -1843,6 +1854,7 @@ details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(
    d:now.toLocaleDateString('pt-BR'),h:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
    nivel:N7?'7':'em',a,b,c:fase==='depois'?PP_C.map((_,i)=>(document.getElementById('ppC'+i).value||'').trim()):[],nota:nota(a)};
   recs=recs.filter(r=>!(r.cod===rec.cod&&r.fase===rec.fase));recs.push(rec);salvar();
+  enfileirar(rec);
   if(tts)speechSynthesis.cancel();
   fase==='antes'?fimAntes():retorno(rec);
  }
@@ -1850,7 +1862,7 @@ details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(
  function fimAntes(){
   body.innerHTML=`<p class="pp-intro" style="font-size:15px"><b>Pronto!</b> Suas respostas do Antes foram guardadas. Agora é hora de explorar o estuário.</p>`+
    `<div class="miniact"><button class="btn primary" type="button" id="ppSim">Ir para o simulador</button><button class="btn" type="button" id="ppProx">Próximo aluno</button></div>`;
-  document.getElementById('ppSim').onclick=()=>{codAtual='';if(window.teiaSetMode)window.teiaSetMode('explorar');window.scrollTo({top:0,behavior:'smooth'});};
+  document.getElementById('ppSim').onclick=()=>{codAtual='';irSim();};
   document.getElementById('ppProx').onclick=()=>{codAtual='';inicio();};
  }
 
@@ -1868,6 +1880,40 @@ details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(
   document.getElementById('ppProx').onclick=()=>{codAtual='';inicio();};
   card.scrollIntoView({behavior:'smooth',block:'start'});
  }
+
+ /* ---------- envio para a planilha do professor (Google Apps Script) ---------- */
+ // Endereço do app da web publicado com avaliacao/receber_respostas_questionario.gs. Vazio = não envia.
+ const PLANILHA_URL='';
+ const FILA='teiaSobRisco.fila';
+ let fila=[];try{fila=JSON.parse(localStorage.getItem(FILA)||'[]');if(!Array.isArray(fila))fila=[];}catch(e){fila=[];}
+ const salvarFila=()=>{try{localStorage.setItem(FILA,JSON.stringify(fila));}catch(e){}};
+ let enviando=false,ultimoEnvio='';
+ function enfileirar(rec){if(!PLANILHA_URL)return;fila=fila.filter(r=>r.id!==rec.id);fila.push(rec);salvarFila();enviarFila();}
+ async function enviarFila(){
+  if(!PLANILHA_URL||enviando||!fila.length)return;
+  if('onLine' in navigator&&!navigator.onLine){statusEnvio();return;}
+  enviando=true;
+  try{
+   while(fila.length){const r=fila[0];
+    // text/plain evita a pré-checagem CORS; a resposta é opaca, então "chegou" = a requisição não falhou na rede
+    await fetch(PLANILHA_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(r)});
+    fila.shift();salvarFila();ultimoEnvio=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+  }catch(e){/* sem rede: fica na fila e tenta de novo depois */}
+  enviando=false;statusEnvio();
+ }
+ function statusEnvio(){const el=document.getElementById('ppEnvio');if(!el)return;
+  el.innerHTML=!PLANILHA_URL?'Envio para a planilha: <b>desligado</b> nesta cópia.'
+   :fila.length?`Envio para a planilha: <b>${fila.length} resposta${fila.length>1?'s':''} aguardando internet</b>. Elas são enviadas sozinhas quando a conexão voltar; não apague as respostas deste aparelho antes disso.`
+   :`Envio para a planilha: <b>tudo enviado</b>${ultimoEnvio?' (último às '+ultimoEnvio+')':''}.`;}
+ window.addEventListener('online',enviarFila);
+ setInterval(enviarFila,60000);
+ setTimeout(enviarFila,1500);
+ window.teiaFila={get:()=>fila.slice(),enviar:enviarFila};
+
+ /* ---------- aba própria: abre primeiro; o simulador fica a um toque ---------- */
+ const SESS='teiaSobRisco.questVisto';
+ function irSim(){try{sessionStorage.setItem(SESS,'1');}catch(e){}
+  if(window.teiaSetMode)window.teiaSetMode('explorar');go('sim');}
 
  /* ---------- resumo da turma (só para a professora, neste aparelho) ---------- */
  function estat(){
@@ -1926,9 +1972,16 @@ details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(
    window.addEventListener('afterprint',sai);window.print();setTimeout(sai,1500);}
 
  /* ---------- liga ao modo da barra ---------- */
- document.addEventListener('teia:mode',e=>{const on=e.detail==='questionario';card.hidden=!on;
-   if(on){codAtual='';inicio();card.scrollIntoView({behavior:'smooth',block:'start'});}
-   else if(tts&&body.querySelector('fieldset.ppq'))speechSynthesis.cancel();});
+ document.addEventListener('teia:mode',e=>{if(e.detail!=='questionario')return;
+   setTimeout(()=>{if(window.teiaSetMode)window.teiaSetMode('explorar');codAtual='';inicio();go('quest');},0);});
+ // sair da aba no meio do formulário para a leitura em voz alta
+ document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.view!=='quest'&&tts)speechSynthesis.cancel();}));
+ // primeiro acesso da sessão: abre na aba do questionário (professores usam ?prof para pular)
+ inicio();
+ {let prof=false,visto=false;try{prof=new URLSearchParams(location.search).has('prof');}catch(e){}
+  try{visto=sessionStorage.getItem(SESS)==='1';}catch(e){}
+  const temCena=/[#&]c=/.test(location.hash);
+  if(!prof&&!visto&&!temCena)go('quest');}
 })();
 </script>
 </body>

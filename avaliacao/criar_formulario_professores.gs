@@ -11,7 +11,7 @@
  * O formulário não coleta e-mail, não exige login e não limita a uma resposta (o limite exigiria login).
  */
 
-const LINK_SIMULADOR = 'https://tiagochavo87.github.io/teia-sob-risco/7ano.html';
+const LINK_SIMULADOR = 'https://tiagochavo87.github.io/teia-sob-risco/7ano.html?prof';
 
 const PARTES = [
   ['Cena do estuário e fichas', 'Toque nos organismos e leia as fichas.'],
