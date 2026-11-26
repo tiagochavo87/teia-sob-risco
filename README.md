@@ -15,9 +15,9 @@ O **Teia Sob Risco** é uma aplicação educativa interativa que reconstrói a t
 
 ## 🔗 Acesso
 
-- **Aplicação (online):** https://tiagochavo87.github.io/teia-sob-risco/
-- **Direto no modo 7º ano:** https://tiagochavo87.github.io/teia-sob-risco/?nivel=7
-- **Offline:** baixe o arquivo `.html` e abra em qualquer navegador — **não precisa de internet nem instalação.**
+- **Versão original (Ensino Médio, v6.3):** https://tiagochavo87.github.io/teia-sob-risco/ — arquivo `index.html`
+- **Versão 7º ano (aula e validação com professores, v7.0):** https://tiagochavo87.github.io/teia-sob-risco/7ano.html — arquivo `7ano.html`
+- **Offline:** baixe o arquivo `.html` da versão desejada e abra em qualquer navegador — **não precisa de internet nem instalação.**
 
 ## ✨ Recursos
 
@@ -26,7 +26,7 @@ O **Teia Sob Risco** é uma aplicação educativa interativa que reconstrói a t
 - **Fator de Magnificação Trófica (TMF):** métrica de campo (inclinação de `log10(C)` × nível trófico) que resume, num número, se o poluente sobe a teia. O gráfico tem uma opção de **escala log** que mostra a própria reta do TMF.
 - **Remediação da fonte** e **exposição ao longo do tempo** (animação da contaminação subindo a teia).
 - **Roteiro de aula guiada:** guia de 5 passos que configura o app automaticamente a cada etapa.
-- **Dois níveis:** _Ensino Médio_ (com o TMF) e _7º ano_ do Ensino Fundamental, com leituras e roteiro em linguagem simples, sem TMF nem escala log. O nível fica guardado no aparelho e pode vir no link (`?nivel=7`).
+- **Duas versões em arquivos separados:** `index.html`, a original do _Ensino Médio_ (com o TMF), e `7ano.html`, para o _7º ano_ do Ensino Fundamental, com leituras e roteiro em linguagem simples, sem TMF nem escala log, e com o questionário Antes e depois.
 - **Quatro modos:** _Explorar_ (livre), _Montar a teia_ (jogo de quem-come-quem, com pistas opcionais), _Quiz_ (5 perguntas geradas da própria simulação) e _Antes e depois_ (questionário de aprendizagem aplicado no início e no fim da sequência).
 - **Comparador de cenários A/B** e **tabela de dados acessível** (leitor de tela).
 - **Exportações:** CSV, PNG, impressão e **link de cenário** (reproduz poluente + intensidade + remediação; aberto do pen drive, oferece o endereço da versão online e a configuração para refazer à mão).
@@ -95,7 +95,7 @@ Sequência sugerida (Corrente de Aprendizagem):
 
 ## 🆕 Novidades da v7.0
 
-- **Modo 7º ano:** seletor _Ensino Médio | 7º ano_ na barra de modos (ou o link com `?nivel=7`). No 7º ano, a leitura do TMF vira **Sobe a teia?** (Sim/Não, com uma comparação como "boto-cinza: 7× o fitoplâncton"), as unidades ganham explicação, o gráfico perde a escala log, o cartão Dados reais fica oculto e o **Roteiro de aula** tem 5 passos próprios, terminando na remediação da fonte.
+- **Versão 7º ano (`7ano.html`):** arquivo próprio, sempre no 7º ano. Nela, a leitura do TMF vira **Sobe a teia?** (Sim/Não, com uma comparação como "boto-cinza: 7× o fitoplâncton"), as unidades ganham explicação, o gráfico perde a escala log, o cartão Dados reais fica oculto e o **Roteiro de aula** tem 5 passos próprios, terminando na remediação da fonte.
 - **Questionário Antes e depois:** 10 perguntas de conhecimento e 6 frases de concordância, com o simulador escondido enquanto o aluno responde. O aluno usa um código sem nome; ao enviar o Depois, vê quantas acertou antes e depois e as respostas certas comentadas. Cada pergunta tem botão **Ouvir**. A **Área da professora** mostra o acerto por pergunta, exporta JSON/CSV, importa sem duplicar, imprime a versão em papel e apaga tudo. As respostas ficam só no aparelho.
 - **Painel do professor:** registra também o modo Antes e depois (contagem de respostas e médias).
 - **Atalhos:** as teclas 1, 2 e R ficam desligadas no jogo e no questionário, para não rodar a simulação por trás.

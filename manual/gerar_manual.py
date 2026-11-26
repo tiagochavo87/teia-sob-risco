@@ -178,8 +178,8 @@ def CONTEUDO():
                      ['Modelo', 'Documentação: a equação, a diferença mercúrio × microplástico, o TMF e as referências.']],
                     [.18, .82], primeira_negrito=True))
     s.append(H2('Dentro do Simulador'))
-    s += B(['<b>Barra de modos:</b> Explorar, Montar a teia, Quiz e Antes e depois, o seletor de nível '
-            '<b>Ensino Médio | 7º ano</b> e o botão <b>Roteiro de aula</b>.',
+    s += B(['<b>Barra de modos:</b> Explorar, Montar a teia, Quiz e o botão <b>Roteiro de aula</b>; na versão '
+            '7º ano (<font face="Courier">7ano.html</font>), também Antes e depois.',
             '<b>Estuário em corte:</b> cena ilustrada, com céu, coluna d’água, sedimento, maricultura e o emissário de '
             'onde sai a pluma de poluição. Passe o dedo/mouse sobre um organismo para destacar quem ele come e quem o '
             'come; toque para abrir a ficha.',
@@ -272,9 +272,9 @@ def CONTEUDO():
                    'avaliação rápida — registrando a pontuação no Painel do professor.'))
 
     s += H1(7, 'Versão para o 7º ano: modo 7º ano e questionário Antes e depois')
-    s.append(P('Na barra de modos, o seletor <b>Ensino Médio | 7º ano</b> troca a linguagem do simulador sem mudar o '
-               'modelo. Para abrir já no 7º ano, use o link com <font face="Courier">?nivel=7</font> '
-               '(<font face="Courier">tiagochavo87.github.io/teia-sob-risco/?nivel=7</font>); a escolha fica guardada no aparelho.'))
+    s.append(P('A versão para o 7º ano é um arquivo próprio, <font face="Courier">7ano.html</font> '
+               '(<font face="Courier">tiagochavo87.github.io/teia-sob-risco/7ano.html</font>), que usa o mesmo modelo com '
+               'linguagem adaptada. A versão original do Ensino Médio continua em <font face="Courier">index.html</font>.'))
     s.append(tabela(['No Ensino Médio', 'No 7º ano'],
                     [['Leitura <b>Magnificação trófica</b> (TMF, ×/NT)',
                       'Leitura <b>Sobe a teia?</b> (Sim ou Não), com uma comparação: boto-cinza 7× o fitoplâncton no mercúrio; '
@@ -407,9 +407,9 @@ def CONTEUDO():
           faq('A cena não cabe na tela do celular.',
               'É de propósito: a cena mantém uma largura mínima para os nomes ficarem legíveis. Arraste-a para os lados. '
               'O restante da página se ajusta à largura da tela.'),
-          faq('Como abrir o simulador direto no 7º ano?',
-              'Use o seletor <b>7º ano</b> na barra de modos ou o link com <font face="Courier">?nivel=7</font>. A escolha '
-              'fica guardada no aparelho; o link com <font face="Courier">?nivel=em</font> volta ao Ensino Médio.'),
+          faq('Como abrir o simulador no 7º ano?',
+              'Abra o arquivo <font face="Courier">7ano.html</font> (ou o link que termina em <font face="Courier">/7ano.html</font>). '
+              'O <font face="Courier">index.html</font> é a versão original do Ensino Médio.'),
           faq('As teclas 1, 2 e R não funcionam.',
               'Elas ficam desligadas no jogo Montar a teia e no questionário Antes e depois, para não rodar a simulação '
               'por trás nem entregar respostas. Volte ao modo Explorar.'),
