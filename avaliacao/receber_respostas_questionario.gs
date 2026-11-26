@@ -7,7 +7,8 @@
  *  2. Execute a função configurar() e autorize. Ela cria a planilha
  *     "Teia Sob Risco – Respostas do questionário" no seu Drive (abas Respostas e Resumo).
  *  3. Implantar → Nova implantação → App da Web; Executar como: Eu; Quem pode acessar: Qualquer pessoa.
- *  4. Copie o URL do app da web (termina em /exec) para PLANILHA_URL no 7ano.html.
+ *  4. Copie o URL do app da web (termina em /exec) e abra o simulador com ele no endereço:
+ *     .../7ano.html?planilha=URL_DO_APP  (sem o parâmetro, nada é enviado).
  *
  * O link só recebe respostas: quem abre o endereço não vê nenhum dado da planilha.
  */

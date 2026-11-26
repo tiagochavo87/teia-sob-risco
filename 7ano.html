@@ -1867,7 +1867,11 @@ details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(
 
  /* ---------- envio para a planilha do professor (Google Apps Script) ---------- */
  // Endereço do app da web publicado com avaliacao/receber_respostas_questionario.gs. Vazio = não envia.
- const PLANILHA_URL='https://script.google.com/macros/s/AKfycbwrIEWou17aBXUuDf5l5GgbuGEriWzDixk7VBtM7N6uV6IK7bY1NlIdIVGAqS_6cZtW/exec';
+ // Envio à planilha só quando o endereço pede: ?planilha (planilha do autor) ou ?planilha=<URL do seu app da Web>.
+// Sem o parâmetro, as respostas ficam apenas no aparelho (Área da professora).
+const PLANILHA_AUTOR='https://script.google.com/macros/s/AKfycbwrIEWou17aBXUuDf5l5GgbuGEriWzDixk7VBtM7N6uV6IK7bY1NlIdIVGAqS_6cZtW/exec';
+const PLANILHA_URL=(()=>{try{const q=new URLSearchParams(location.search);if(!q.has('planilha'))return '';const v=(q.get('planilha')||'').trim();
+  if(!v||v==='autor')return PLANILHA_AUTOR;return /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(v)?v:'';}catch(e){return '';}})();
  const FILA='teiaSobRisco.fila';
  let fila=[];try{fila=JSON.parse(localStorage.getItem(FILA)||'[]');if(!Array.isArray(fila))fila=[];}catch(e){fila=[];}
  const salvarFila=()=>{try{localStorage.setItem(FILA,JSON.stringify(fila));}catch(e){}};
@@ -1886,7 +1890,7 @@ details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(
   enviando=false;statusEnvio();
  }
  function statusEnvio(){const el=document.getElementById('ppEnvio');if(!el)return;
-  el.innerHTML=!PLANILHA_URL?'Envio para a planilha: <b>desligado</b> nesta cópia.'
+  el.innerHTML=!PLANILHA_URL?'Envio para a planilha: <b>desligado</b> neste endereço. Para ligar, abra o simulador com <b>?planilha=</b> seguido do URL do seu app da Web (veja o README).'
    :fila.length?`Envio para a planilha: <b>${fila.length} resposta${fila.length>1?'s':''} aguardando internet</b>. Elas são enviadas sozinhas quando a conexão voltar; não apague as respostas deste aparelho antes disso.`
    :`Envio para a planilha: <b>tudo enviado</b>${ultimoEnvio?' (último às '+ultimoEnvio+')':''}.`;}
  window.addEventListener('online',enviarFila);
