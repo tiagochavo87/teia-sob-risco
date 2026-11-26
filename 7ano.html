@@ -1883,7 +1883,7 @@ details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(
 
  /* ---------- envio para a planilha do professor (Google Apps Script) ---------- */
  // Endereço do app da web publicado com avaliacao/receber_respostas_questionario.gs. Vazio = não envia.
- const PLANILHA_URL='';
+ const PLANILHA_URL='https://script.google.com/macros/s/AKfycbwrIEWou17aBXUuDf5l5GgbuGEriWzDixk7VBtM7N6uV6IK7bY1NlIdIVGAqS_6cZtW/exec';
  const FILA='teiaSobRisco.fila';
  let fila=[];try{fila=JSON.parse(localStorage.getItem(FILA)||'[]');if(!Array.isArray(fila))fila=[];}catch(e){fila=[];}
  const salvarFila=()=>{try{localStorage.setItem(FILA,JSON.stringify(fila));}catch(e){}};
