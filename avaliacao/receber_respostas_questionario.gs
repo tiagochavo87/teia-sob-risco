@@ -43,24 +43,26 @@ function montarResumo_(ss) {
   const r = ss.insertSheet('Resumo');
   r.getRange('A1:E1').setValues([['Pergunta', 'Resposta certa', 'Acerto no Antes', 'Acerto no Depois', 'Diferença']])
     .setFontWeight('bold').setBackground('#d9e7e4');
-  // setFormula usa a sintaxe em inglês (vírgulas) em qualquer idioma da planilha; setValues não
+  // planilha em português usa ";" como separador de argumentos; em inglês, ","
+  const sep = /^en/.test(ss.getSpreadsheetLocale()) ? ',' : ';';
+  const f = x => x.replace(/,/g, sep);
   GABARITO.forEach((g, i) => {
     const col = colLetra_(9 + i); // A1 está na coluna I
     const lin = i + 2;
     r.getRange(lin, 1, 1, 2).setValues([['A' + (i + 1), g]]);
     r.getRange(lin, 3, 1, 3).setFormulas([[
-      `=IFERROR(COUNTIFS(Respostas!E:E,"Antes",Respostas!${col}:${col},B${lin})/COUNTIF(Respostas!E:E,"Antes"),"")`,
-      `=IFERROR(COUNTIFS(Respostas!E:E,"Depois",Respostas!${col}:${col},B${lin})/COUNTIF(Respostas!E:E,"Depois"),"")`,
-      `=IF(OR(C${lin}="",D${lin}=""),"",D${lin}-C${lin})`]]);
+      f(`=IFERROR(COUNTIFS(Respostas!E:E,"Antes",Respostas!${col}:${col},B${lin})/COUNTIF(Respostas!E:E,"Antes"),"")`),
+      f(`=IFERROR(COUNTIFS(Respostas!E:E,"Depois",Respostas!${col}:${col},B${lin})/COUNTIF(Respostas!E:E,"Depois"),"")`),
+      f(`=IF(OR(C${lin}="",D${lin}=""),"",D${lin}-C${lin})`)]]);
   });
   r.getRange('C2:E11').setNumberFormat('0%');
   r.getRange('A13:A15').setValues([['Respostas no Antes'], ['Respostas no Depois'], ['Média de acertos no Antes']]);
   r.getRange('A16').setValue('Média de acertos no Depois');
   r.getRange('B13:B16').setFormulas([
-    ['=COUNTIF(Respostas!E:E,"Antes")'],
-    ['=COUNTIF(Respostas!E:E,"Depois")'],
-    ['=IFERROR(AVERAGEIF(Respostas!E:E,"Antes",Respostas!H:H),"")'],
-    ['=IFERROR(AVERAGEIF(Respostas!E:E,"Depois",Respostas!H:H),"")']]);
+    [f('=COUNTIF(Respostas!E:E,"Antes")')],
+    [f('=COUNTIF(Respostas!E:E,"Depois")')],
+    [f('=IFERROR(AVERAGEIF(Respostas!E:E,"Antes",Respostas!H:H),"")')],
+    [f('=IFERROR(AVERAGEIF(Respostas!E:E,"Depois",Respostas!H:H),"")')]]);
   r.getRange('B15:B16').setNumberFormat('0.0');
   r.getRange('A13:A16').setFontWeight('bold');
   r.autoResizeColumns(1, 5);
