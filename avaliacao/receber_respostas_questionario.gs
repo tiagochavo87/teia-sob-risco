@@ -43,22 +43,44 @@ function montarResumo_(ss) {
   const r = ss.insertSheet('Resumo');
   r.getRange('A1:E1').setValues([['Pergunta', 'Resposta certa', 'Acerto no Antes', 'Acerto no Depois', 'Diferença']])
     .setFontWeight('bold').setBackground('#d9e7e4');
+  // setFormula usa a sintaxe em inglês (vírgulas) em qualquer idioma da planilha; setValues não
   GABARITO.forEach((g, i) => {
     const col = colLetra_(9 + i); // A1 está na coluna I
     const lin = i + 2;
-    r.getRange(lin, 1, 1, 5).setValues([[
-      'A' + (i + 1), g,
+    r.getRange(lin, 1, 1, 2).setValues([['A' + (i + 1), g]]);
+    r.getRange(lin, 3, 1, 3).setFormulas([[
       `=IFERROR(COUNTIFS(Respostas!E:E,"Antes",Respostas!${col}:${col},B${lin})/COUNTIF(Respostas!E:E,"Antes"),"")`,
       `=IFERROR(COUNTIFS(Respostas!E:E,"Depois",Respostas!${col}:${col},B${lin})/COUNTIF(Respostas!E:E,"Depois"),"")`,
       `=IF(OR(C${lin}="",D${lin}=""),"",D${lin}-C${lin})`]]);
   });
   r.getRange('C2:E11').setNumberFormat('0%');
-  r.getRange('A13:B15').setValues([
-    ['Respostas no Antes', '=COUNTIF(Respostas!E:E,"Antes")'],
-    ['Respostas no Depois', '=COUNTIF(Respostas!E:E,"Depois")'],
-    ['Média de acertos (Antes → Depois)', '=IFERROR(TEXT(AVERAGEIF(Respostas!E:E,"Antes",Respostas!H:H),"0.0")&" → "&TEXT(AVERAGEIF(Respostas!E:E,"Depois",Respostas!H:H),"0.0"),"")']]);
-  r.getRange('A13:A15').setFontWeight('bold');
+  r.getRange('A13:A15').setValues([['Respostas no Antes'], ['Respostas no Depois'], ['Média de acertos no Antes']]);
+  r.getRange('A16').setValue('Média de acertos no Depois');
+  r.getRange('B13:B16').setFormulas([
+    ['=COUNTIF(Respostas!E:E,"Antes")'],
+    ['=COUNTIF(Respostas!E:E,"Depois")'],
+    ['=IFERROR(AVERAGEIF(Respostas!E:E,"Antes",Respostas!H:H),"")'],
+    ['=IFERROR(AVERAGEIF(Respostas!E:E,"Depois",Respostas!H:H),"")']]);
+  r.getRange('B15:B16').setNumberFormat('0.0');
+  r.getRange('A13:A16').setFontWeight('bold');
   r.autoResizeColumns(1, 5);
+}
+
+/** Refaz a aba Resumo (use se ela for apagada ou mostrar erro). */
+function refazerResumo() {
+  const ss = planilha_().getParent();
+  const velha = ss.getSheetByName('Resumo');
+  if (velha) ss.deleteSheet(velha);
+  montarResumo_(ss);
+}
+
+/** Apaga as linhas de teste (código TESTE) da aba Respostas. */
+function limparTestes() {
+  const sh = planilha_();
+  const n = sh.getLastRow() - 1;
+  if (n < 1) return;
+  const cod = sh.getRange(2, 6, n, 1).getValues();
+  for (let i = n - 1; i >= 0; i--) if (cod[i][0] === 'TESTE') sh.deleteRow(i + 2);
 }
 
 function colLetra_(n) { let s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
