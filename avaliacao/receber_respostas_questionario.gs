@@ -13,11 +13,13 @@
  */
 
 const NOME_PLANILHA = 'Teia Sob Risco – Respostas do questionário';
-const GABARITO = ['b', 'c', 'd', 'a', 'b', 'd', 'c', 'a', 'b', 'c'];
+// versão curta do Apêndice A: Q1–Q5 conhecimento (3 alternativas) + Q6 atitude (1 a 4)
+const GABARITO = ['b', 'c', 'a', 'b', 'c'];
+const N_ATITUDE = 1;
 const L = 'abcd';
-const CAB = ['Recebido em', 'ID', 'Data', 'Hora', 'Fase', 'Código', 'Nível', 'Acertos (de 10)']
-  .concat(GABARITO.map((_, i) => 'A' + (i + 1)))
-  .concat([1, 2, 3, 4, 5, 6].map(i => 'B' + i + ' (1 a 4)'))
+const CAB = ['Recebido em', 'ID', 'Data', 'Hora', 'Fase', 'Código', 'Nível', 'Acertos (de ' + GABARITO.length + ')']
+  .concat(GABARITO.map((_, i) => 'Q' + (i + 1)))
+  .concat(Array.from({ length: N_ATITUDE }, (_, i) => 'Q' + (GABARITO.length + i + 1) + ' (1 a 4)'))
   .concat(['C1 (aprendeu)', 'C2 (dificuldade)']);
 
 /** Rode uma vez: cria a planilha e guarda o ID. Rodar de novo só mostra o link. */
@@ -47,9 +49,9 @@ function montarResumo_(ss) {
   const sep = /^en/.test(ss.getSpreadsheetLocale()) ? ',' : ';';
   const f = x => x.replace(/,/g, sep);
   GABARITO.forEach((g, i) => {
-    const col = colLetra_(9 + i); // A1 está na coluna I
+    const col = colLetra_(9 + i); // Q1 está na coluna I
     const lin = i + 2;
-    r.getRange(lin, 1, 1, 2).setValues([['A' + (i + 1), g]]);
+    r.getRange(lin, 1, 1, 2).setValues([['Q' + (i + 1), g]]);
     r.getRange(lin, 3, 1, 3).setFormulas([[
       f(`=IFERROR(COUNTIFS(Respostas!E:E,"Antes",Respostas!${col}:${col},B${lin})/COUNTIF(Respostas!E:E,"Antes"),"")`),
       f(`=IFERROR(COUNTIFS(Respostas!E:E,"Depois",Respostas!${col}:${col},B${lin})/COUNTIF(Respostas!E:E,"Depois"),"")`),
@@ -74,6 +76,15 @@ function refazerResumo() {
   const velha = ss.getSheetByName('Resumo');
   if (velha) ss.deleteSheet(velha);
   montarResumo_(ss);
+}
+
+/** Reescreve o cabeçalho da aba Respostas (depois de mudar o questionário) e refaz o Resumo. */
+function ajustarCabecalho() {
+  const sh = planilha_();
+  const ult = sh.getLastColumn();
+  if (ult > CAB.length) sh.getRange(1, CAB.length + 1, sh.getMaxRows(), ult - CAB.length).clearContent().clearFormat();
+  sh.getRange(1, 1, 1, CAB.length).setValues([CAB]).setFontWeight('bold').setBackground('#d9e7e4');
+  refazerResumo();
 }
 
 /** Apaga as linhas de teste (código TESTE) da aba Respostas. */
@@ -108,9 +119,9 @@ function doPost(e) {
   if (!r || typeof r.id !== 'string' || !/^[a-z0-9]{6,24}$/.test(r.id)) return saida_('erro: id');
   if (r.fase !== 'antes' && r.fase !== 'depois') return saida_('erro: fase');
   const a = Array.isArray(r.a) ? r.a : [], b = Array.isArray(r.b) ? r.b : [], c = Array.isArray(r.c) ? r.c : [];
-  const letras = GABARITO.map((_, i) => (Number.isInteger(a[i]) && a[i] >= 0 && a[i] < 4) ? L[a[i]] : '');
+  const letras = GABARITO.map((_, i) => (Number.isInteger(a[i]) && a[i] >= 0 && a[i] < 3) ? L[a[i]] : '');
   const acertos = letras.reduce((s, x, i) => s + (x === GABARITO[i] ? 1 : 0), 0); // recalculado aqui, não confia no aparelho
-  const escala = [0, 1, 2, 3, 4, 5].map(i => (Number.isInteger(b[i]) && b[i] >= 1 && b[i] <= 4) ? b[i] : '');
+  const escala = Array.from({ length: N_ATITUDE }, (_, i) => (Number.isInteger(b[i]) && b[i] >= 1 && b[i] <= 4) ? b[i] : '');
   const abertas = [0, 1].map(i => txt_(c[i], 400));
 
   const lock = LockService.getScriptLock();

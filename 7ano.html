@@ -1715,41 +1715,25 @@ details.pp-prof>summary{cursor:pointer;font-weight:700;font-size:13px;color:var(
    Instrumento pedagógico da professora (ver Proposta pedagógica): o aluno responde com um código sem nome,
    as respostas ficam só neste aparelho e o retorno aparece depois do envio do Depois. */
 (function(){
+ // versão curta (6 itens, ~5 min), igual ao Apêndice A da proposta: Q1–Q5 conhecimento (3 alternativas) + Q6 atitude
  const PP_A=[
-  {q:'No manguezal, qual destes seres produz o próprio alimento usando a luz do Sol?',
-   o:['Caranguejo-uçá','Fitoplâncton','Tainha','Garça-branca-grande'],c:1,
-   r:'O fitoplâncton faz fotossíntese: é um produtor, a base da teia.'},
-  {q:'Qual frase mostra corretamente quem come quem?',
-   o:['O fitoplâncton come o zooplâncton, que come a sardinha, que come o boto-cinza.','O boto-cinza come o fitoplâncton, e a sardinha come o boto-cinza.','O zooplâncton come o fitoplâncton, a sardinha come o zooplâncton e o boto-cinza come a sardinha.','O zooplâncton come a sardinha, e o fitoplâncton come o boto-cinza.'],c:2,
-   r:'O alimento passa do fitoplâncton para o zooplâncton, depois para a sardinha e para o boto-cinza.'},
-  {q:'Uma fábrica lança mercúrio na água do estuário. Depois de algum tempo, em qual destes animais deve haver MAIS mercúrio no corpo?',
-   o:['Zooplâncton','Ostra','Tainha','Boto-cinza'],c:3,
-   r:'O mercúrio aumenta a cada elo da teia; o predador do topo fica com mais.'},
-  {q:'O boto-cinza não bebe a água poluída. Por que ele acaba com mais mercúrio que a sardinha?',
-   o:['Porque come muitos peixes que já têm mercúrio, e o mercúrio vai se acumulando no corpo dele.','Porque mergulha mais fundo, onde a água tem muito mais mercúrio.','Porque o mercúrio é atraído pelos animais maiores e mais pesados.','Porque vive mais perto da fábrica que lança o mercúrio.'],c:0,
-   r:'Cada refeição traz o mercúrio que já estava na presa. Isso se chama biomagnificação.'},
-  {q:'Agora o poluente é microplástico. Quais animais ficam com MAIS partículas no corpo?',
-   o:['Os predadores do topo da teia, como o boto-cinza e a toninha.','Os que filtram a água para se alimentar, como a ostra e o mexilhão.','As árvores do mangue, que ficam na beira da água.','As aves que mergulham para pescar, como o biguá.'],c:1,
-   r:'Quem filtra a água retém mais microplástico.'},
-  {q:'Qual frase explica a diferença entre o mercúrio e o microplástico na teia alimentar?',
-   o:['Os dois aumentam a cada elo da teia e ficam maiores no boto-cinza.','O microplástico aumenta a cada elo da teia; o mercúrio fica só na água.','Nenhum dos dois chega aos animais, porque ficam no fundo do estuário.','O mercúrio aumenta a cada elo da teia; o microplástico se concentra em quem filtra a água.'],c:3,
-   r:'O mercúrio biomagnifica; o microplástico se acumula nos filtradores, sem aumentar a cada elo.'},
-  {q:'Qual é o principal caminho pelo qual o mercúrio lançado no estuário chega até as pessoas?',
-   o:['Nadando na água poluída do estuário.','Respirando o ar perto do mar.','Comendo peixes e frutos do mar contaminados.','Ele não chega, porque o mar dilui tudo.'],c:2,
-   r:'O principal caminho é a alimentação: peixes e frutos do mar.'},
-  {q:'Qual medida diminui a contaminação de TODA a teia alimentar?',
-   o:['Tratar o esgoto e os resíduos das fábricas antes que cheguem à água.','Pescar só os peixes grandes, que são os mais contaminados.','Retirar as ostras e os mexilhões do manguezal.','Impedir que as aves comam os peixes do estuário.'],c:0,
-   r:'Tratar a fonte reduz o poluente que entra na água, e toda a teia fica menos contaminada.'},
-  {q:'Para que serve um simulador de computador numa aula de Ciências?',
-   o:['Para substituir as pesquisas feitas no ambiente real, que são caras.','Para representar, de forma simplificada, como algo funciona e testar ideias.','Para prever o que vai acontecer no futuro, com certeza.','Só para jogar, sem relação com a natureza.'],c:1,
-   r:'Um modelo simplifica a realidade para estudar e testar ideias; os números dele são ilustrativos.'},
-  {q:'Pesquisadores mediram o mercúrio em três seres vivos: alga = 1 unidade; peixe pequeno, que come a alga = 3 unidades; peixe grande, que come o peixe pequeno = 9 unidades. O que esses números sugerem?',
-   o:['O mercúrio diminui ao subir na teia alimentar.','Só o peixe grande tem mercúrio no corpo.','O mercúrio aumenta a cada nível da teia alimentar.','Não dá para concluir nada com esses números.'],c:2,
-   r:'1, 3, 9: o valor aumenta a cada nível da teia.'},
+  {q:'No manguezal, um ser vivo serve de comida para outro. Leia a seta como "serve de comida para". Qual sequência está certa?',
+   o:['Boto-cinza → sardinha → zooplâncton → fitoplâncton','Fitoplâncton → zooplâncton → sardinha → boto-cinza','Sardinha → fitoplâncton → boto-cinza → zooplâncton'],c:1,
+   r:'O alimento começa no fitoplâncton e termina no boto-cinza, que está no topo da teia.'},
+  {q:'Uma fábrica jogou mercúrio na água do manguezal. O mercúrio passa de um animal para outro quando um come o outro. Quem vai ficar com MAIS mercúrio no corpo?',
+   o:['O zooplâncton, que é bem pequeno','A sardinha, que come o zooplâncton','O boto-cinza, que come muitas sardinhas'],c:2,
+   r:'Cada sardinha que o boto come já tem um pouco de mercúrio. Somando tudo, ele fica com mais. Isso se chama biomagnificação.'},
+  {q:'Agora a água tem microplástico: pedacinhos de plástico tão pequenos que quase não dá para ver. A ostra se alimenta filtrando a água. Quem fica com MAIS microplástico?',
+   o:['A ostra, que filtra muita água','O boto-cinza, que está no topo da teia','A garça, que voa sobre o manguezal'],c:0,
+   r:'Quem filtra a água segura os pedacinhos de plástico. Aqui, o topo da teia não é quem tem mais.'},
+  {q:'Como o mercúrio do manguezal pode chegar até as pessoas?',
+   o:['Quando respiramos o ar perto do mar','Quando comemos peixes e frutos do mar do lugar','Não chega, porque o mar dilui tudo'],c:1,
+   r:'O principal caminho é a comida: peixes e frutos do mar.'},
+  {q:'O que ajuda a diminuir o mercúrio em TODOS os animais do manguezal?',
+   o:['Pescar só os peixes grandes','Tirar as ostras do manguezal','Tratar o esgoto e a água das fábricas antes de chegarem ao mangue'],c:2,
+   r:'Quando se trata a fonte, entra menos poluente na água, e a teia inteira fica menos contaminada.'},
  ];
- const PP_B=['Tenho vontade de aprender mais sobre o mar e os manguezais.','O manguezal é importante para mim e para a minha cidade.',
-  'O que vai para o esgoto pode chegar à comida que comemos.','Eu consigo explicar para outra pessoa como um poluente chega até o peixe.',
-  'Pretendo evitar jogar plástico em lugares errados.','Pretendo conversar com minha família sobre a poluição no mar.'];
+ const PP_B=['O manguezal é importante para mim e para a minha cidade.'];
  const ESC=['Discordo muito','Discordo','Concordo','Concordo muito'];
  const PP_C=['O que você aprendeu nestas aulas que não sabia antes?','O que foi difícil de usar ou de entender no simulador?'];
  const L='abcd';
