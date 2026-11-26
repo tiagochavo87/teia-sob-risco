@@ -71,7 +71,9 @@ teia-sob-risco/
 ├── index.html                                # a aplicação (arquivo único, offline)
 ├── Manual_do_Professor_Teia_Sob_Risco_v6.pdf # manual do professor
 ├── manual/gerar_manual.py                    # texto e diagramação do manual (gera o PDF)
+├── 7ano.html                                 # versão 7º ano, com o questionário Antes e depois
 ├── avaliacao/criar_formulario_professores.gs # Google Apps Script: formulário anônimo dos professores + cálculo de IVC e SUS
+├── avaliacao/receber_respostas_questionario.gs # Google Apps Script: recebe as respostas do questionário numa planilha do professor
 ├── teia_icon.ico
 └── README.md
 ```
@@ -83,6 +85,17 @@ O GitHub Pages serve o `index.html` da raiz. Para distribuir offline, o mesmo `i
 O **Manual do Professor** (PDF) cobre instalação, tour da interface, o TMF, o roteiro de aula passo a passo, um plano de 4 encontros alinhado à BNCC, FAQ e os limites do modelo.
 
 Para atualizar o manual, edite o texto em `manual/gerar_manual.py` e rode `python3 manual/gerar_manual.py` (requer `pip install reportlab`); o sumário recalcula as páginas sozinho.
+
+### Respostas do questionário numa planilha sua (opcional)
+
+Sem nenhuma configuração, o `7ano.html` não envia nada: as respostas ficam no aparelho e aparecem na **Área da professora**. Para receber as respostas da turma numa planilha do seu Google Drive:
+
+1. Em [script.google.com](https://script.google.com), crie um projeto e cole `avaliacao/receber_respostas_questionario.gs`.
+2. Execute `configurar()` e autorize: a planilha *Teia Sob Risco – Respostas do questionário* é criada no seu Drive, com as abas Respostas e Resumo.
+3. **Implantar → Nova implantação → App da Web**, Executar como: *Eu*, Quem pode acessar: *Qualquer pessoa*. Copie o URL que termina em `/exec`.
+4. Passe aos alunos o simulador com esse URL no endereço: `https://tiagochavo87.github.io/teia-sob-risco/7ano.html?planilha=URL_DO_APP` (um encurtador como is.gd deixa o link curto).
+
+O app da Web só recebe respostas: quem abre o URL não vê nenhum dado. Os alunos usam um código inventado, sem nome. Sem internet, as respostas esperam no aparelho e são enviadas quando a conexão volta.
 
 Sequência sugerida (Corrente de Aprendizagem):
 
@@ -96,7 +109,7 @@ Sequência sugerida (Corrente de Aprendizagem):
 ## 🆕 Novidades da v7.0
 
 - **Versão 7º ano (`7ano.html`):** arquivo próprio, sempre no 7º ano. Nela, a leitura do TMF vira **Sobe a teia?** (Sim/Não, com uma comparação como "boto-cinza: 7× o fitoplâncton"), as unidades ganham explicação, o gráfico perde a escala log, o cartão Dados reais fica oculto e o **Roteiro de aula** tem 5 passos próprios, terminando na remediação da fonte.
-- **Questionário Antes e depois:** 10 perguntas de conhecimento e 6 frases de concordância, com o simulador escondido enquanto o aluno responde. O aluno usa um código sem nome; ao enviar o Depois, vê quantas acertou antes e depois e as respostas certas comentadas. Cada pergunta tem botão **Ouvir**. A **Área da professora** mostra o acerto por pergunta, exporta JSON/CSV, importa sem duplicar, imprime a versão em papel e apaga tudo. As respostas ficam só no aparelho.
+- **Questionário Antes e depois:** aba própria, aberta na primeira tela de cada sessão, com 5 perguntas de conhecimento (3 alternativas) e 1 frase de concordância, mais 2 perguntas abertas só no Depois. O aluno usa um código sem nome; ao enviar o Depois, vê quantas acertou antes e depois e as respostas certas comentadas. Cada pergunta tem botão **Ouvir**. A **Área da professora** mostra o acerto por pergunta, exporta JSON/CSV, importa sem duplicar, imprime a versão em papel e apaga tudo. Por padrão, as respostas ficam só no aparelho; o envio a uma planilha é opcional (veja abaixo).
 - **Painel do professor:** registra também o modo Antes e depois (contagem de respostas e médias).
 - **Atalhos:** as teclas 1, 2 e R ficam desligadas no jogo e no questionário, para não rodar a simulação por trás.
 - **Formulário dos professores:** `avaliacao/criar_formulario_professores.gs` cria, num Google Forms anônimo, a avaliação da plataforma por partes, a escala SUS e o julgamento dos itens do questionário; `calcularResultados` calcula o IVC por item, a avaliação por partes e a pontuação SUS.
